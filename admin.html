@@ -83,21 +83,24 @@
     <div class="bg-white p-4 rounded-2xl shadow-sm"><h3 class="font-extrabold text-sm mb-3">📋 सभी लाइव ऑर्डर्स</h3><div id="adminOrdersList" class="space-y-2 text-xs"></div></div>
   </div>
   <script>
-    const defaultProducts = [
-      { id: 1, name: "ताज़ा लाल टमाटर", price: 32, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "https://placeholder.com" },
-      { id: 2, name: "नया आलू", price: 28, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "https://placeholder.com" },
-      { id: 3, name: "प्याज़ (Onion)", price: 35, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "https://placeholder.com" },
-      { id: 4, name: "हरा धनिया", price: 15, weight: "100 g", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "https://placeholder.com" },
-      { id: 5, name: "केला (Banana)", price: 45, weight: "6 pcs", category: "🍎 ताज़े फल", inStock: true, img: "https://placeholder.com" },
-      { id: 6, name: "अमूल ताज़ा दूध", price: 27, weight: "500 ml", category: "🥛 डेयरी & किराना", inStock: true, img: "https://placeholder.com" }
+        const defaultProducts = [
+      { id: 1, name: "ताज़ा लाल टमाटर", price: 32, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
+      { id: 2, name: "नया आलू", price: 28, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
+      { id: 3, name: "प्याज़ (Onion)", price: 35, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
+      { id: 4, name: "हरा धनिया", price: 15, weight: "100 g", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
+      { id: 5, name: "केला (Banana)", price: 45, weight: "6 pcs", category: "🍎 ताज़े फल", tag: "मीठा", inStock: true, img: "https://unsplash.com" },
+      { id: 6, name: "अमूल ताज़ा दूध", price: 27, weight: "500 ml", category: "🥛 डेयरी & किराना", tag: "डेयरी", inStock: true, img: "https://unsplash.com" }
     ];
 
     const defaultConfig = {
-      brandName: "Jhatpat", brandColor: "#0c831f", locationText: "📍 डोंबिवली - कल्याण (421201)",
+      brandName: "Jhatpat", deliveryTag: "⚡ 10 MIN", brandColor: "#0c831f", locationText: "📍 डोंबिवली - कल्याण (421201)",
       allowedPincodes: "421201, 421202, 421203, 421301", whatsapp: "919999999999", upiId: "jhatpatstore@upi",
-      bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!", adminPass: "admin123", storeOpen: true, flashSale: false, rainSurge: false,
-      freeMin: 199, delCharge: 20, couponCode: "JHATPAT20", couponDiscount: 20
+      bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!", adminPass: "MOHIT@001", storeOpen: true, flashSale: false, rainSurge: false,
+      freeMin: 199, delCharge: 20, couponCode: "JHATPAT20", couponDiscount: 20,
+      tickerText: "⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और किराना डिलीवरी!",
+      categories: ["🥬 ताज़ी सब्ज़ियाँ", "🍎 ताज़े फल", "🥛 डेयरी & किराना"], customSections: []
     };
+    
 
     let config = JSON.parse(localStorage.getItem('jhatpat_self_config')) || { ...defaultConfig };
     let products = JSON.parse(localStorage.getItem('jhatpat_products')) || [...defaultProducts];
