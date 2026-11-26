@@ -4,120 +4,127 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jhatpat - 10 Min Mumbai Sabzi & Fruit Delivery</title>
-  <script src="https://tailwindcss.com"></script>
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #f8fafc; color: #1e293b; padding-bottom: 90px; }
-    #topBar { background: #0f172a; color: #facc15; text-align: center; font-size: 12px; font-weight: 700; padding: 8px; }
-    header { background: #fff; position: sticky; top: 0; z-index: 40; padding: 12px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    header > div { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    body { margin: 0; background: #f8fafc; color: #0f172a; padding-bottom: 90px; }
+    .hidden { display: none !important; }
+    #topBar { background: #0f172a; color: #facc15; text-align: center; font-size: 12px; font-weight: 800; padding: 8px; }
+    #closedAlert { background: #dc2626; color: #fff; text-align: center; font-size: 13px; font-weight: 900; padding: 10px; }
+    header { background: #fff; position: sticky; top: 0; z-index: 40; padding: 12px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    .head-row { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     #brandTitle { color: #15803d; font-size: 24px; font-weight: 900; margin: 0; display: inline; }
-    #searchInput { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f1f5f9; font-size: 14px; margin-top: 10px; }
+    .pill-min { background: #facc15; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 5px; vertical-align: middle; }
+    .head-btn { border: none; padding: 8px 12px; border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .btn-gray { background: #f1f5f9; color: #0f172a; }
+    .btn-green { background: #15803d; color: #fff; }
+    .search-row { max-width: 1000px; margin: 10px auto 0; display: flex; gap: 8px; }
+    #searchInput { flex: 1; padding: 10px 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f1f5f9; font-size: 13px; outline: none; }
     main { max-width: 1000px; margin: 14px auto; padding: 0 14px; }
-    main > div:first-child { background: linear-gradient(135deg, #15803d, #16a34a); color: #fff; padding: 18px; border-radius: 18px; margin-bottom: 14px; }
-    #categoryBar { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0 14px; }
-    .cat-btn { border: 1px solid #cbd5e1; background: #fff; color: #334155; padding: 8px 14px; border-radius: 99px; font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; }
-    .cat-btn.bg-green-700 { background: #15803d !important; color: #fff !important; border-color: #15803d; }
+    #heroBanner { background: linear-gradient(135deg, #15803d, #16a34a); color: #fff; padding: 18px; border-radius: 20px; margin-bottom: 14px; box-shadow: 0 6px 16px rgba(21,128,61,0.2); }
+    #heroBanner.theme-diwali { background: linear-gradient(135deg, #b45309, #ea580c); }
+    #heroBanner.theme-holi { background: linear-gradient(135deg, #be185d, #7e22ce); }
+    #heroBanner.theme-ganpati { background: linear-gradient(135deg, #c2410c, #dc2626); }
+    #categoryBar { display: flex; gap: 8px; overflow-x: auto; padding: 6px 0 14px; }
+    .cat-btn { border: 1px solid #cbd5e1; background: #fff; color: #334155; padding: 8px 14px; border-radius: 99px; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .cat-btn.active { background: #15803d; color: #fff; border-color: #15803d; }
     #productGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     @media (min-width: 640px) { #productGrid { grid-template-columns: repeat(4, 1fr); } }
-    #productGrid > div { background: #fff; border-radius: 16px; padding: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; }
-    #productGrid img { width: 100%; height: 115px; object-fit: cover; border-radius: 12px; display: block; }
-    #productGrid button { background: #fff; color: #15803d; border: 2px solid #15803d; font-weight: 800; padding: 5px 12px; border-radius: 8px; cursor: pointer; }
-    #waHelpBtn { position: fixed; bottom: 18px; right: 18px; background: #16a34a; color: #fff; text-decoration: none; font-weight: 700; font-size: 13px; padding: 10px 16px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 30; }
-    .hidden { display: none !important; }
-    #cartModal, #trackModal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
-    #cartModal > div, #trackModal > div { background: #fff; width: 100%; max-width: 420px; border-radius: 22px; padding: 18px; max-height: 88vh; overflow-y: auto; }
-    #cartModal input, #cartModal textarea, #cartModal select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; }
+    .p-card { background: #fff; border-radius: 16px; padding: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between; }
+    .p-thumb { width: 100%; height: 105px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f0fdf4; margin-bottom: 8px; }
+    .p-thumb.fruit { background: #fff1f2; }
+    .add-btn { background: #fff; color: #15803d; border: 2px solid #15803d; font-weight: 900; padding: 5px 14px; border-radius: 9px; cursor: pointer; font-size: 12px; }
+    .qty-box { display: flex; align-items: center; background: #15803d; color: #fff; border-radius: 9px; overflow: hidden; font-size: 12px; font-weight: 900; }
+    .qty-box button { background: #15803d; color: #fff; border: none; padding: 5px 9px; cursor: pointer; font-weight: 900; }
+    #waHelpBtn { position: fixed; bottom: 18px; right: 18px; background: #16a34a; color: #fff; text-decoration: none; font-weight: 800; font-size: 13px; padding: 11px 16px; border-radius: 99px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 30; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 14px; }
+    .modal-card { background: #fff; width: 100%; max-width: 420px; border-radius: 22px; padding: 18px; max-height: 88vh; overflow-y: auto; }
+    .modal-card input, .modal-card textarea, .modal-card select { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; }
   </style>
 </head>
+<body>
 
-<body class="bg-gray-50 text-gray-800 pb-24">
+  <div id="topBar">⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और फल डिलीवरी!</div>
+  <div id="closedAlert" class="hidden">🔴 दुकान अभी बंद है (STORE CLOSED) — कृपया खुलने के समय ऑर्डर करें।</div>
 
-  <div id="topBar" class="bg-slate-900 text-yellow-400 text-xs font-bold text-center py-2 px-3">
-    ⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और फल डिलीवरी!
-  </div>
-
-  <header class="bg-white sticky top-0 z-40 shadow-sm px-4 py-3">
-    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+  <header>
+    <div class="head-row">
       <div>
-        <div class="flex items-center gap-2">
-          <span class="bg-yellow-400 text-black text-[10px] font-black px-2 py-0.5 rounded">10 MIN</span>
-          <h1 id="brandTitle" class="text-2xl font-black text-green-700 tracking-tight">Jhatpat</h1>
-        </div>
-        <p class="text-xs text-gray-500 mt-0.5">📍 डोंबिवली - कल्याण (<span id="currentPin">421201</span>)</p>
+        <span class="pill-min">10 MIN</span>
+        <h1 id="brandTitle">Jhatpat</h1>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">📍 डोंबिवली - कल्याण (<span id="currentPin">421201</span>)</div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="openTrackModal()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1">📦 ऑर्डर ट्रैक</button>
-        <button onclick="openCart()" class="bg-green-700 hover:bg-green-800 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow">🛒 <span id="cartCount">0</span></button>
+      <div style="display:flex;gap:6px;">
+        <button onclick="openTrackModal()" class="head-btn btn-gray">📦 ट्रैक</button>
+        <button onclick="openCart()" class="head-btn btn-green">🛒 <span id="cartCount">0</span></button>
       </div>
     </div>
-    <div class="max-w-5xl mx-auto mt-3 flex gap-2">
-      <input type="text" id="searchInput" oninput="renderProducts()" placeholder="🔍 80+ सब्ज़ी और फल खोजें (कांदा, भेंडी, आंबा, केळी...)" class="w-full bg-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-green-600" />
-      <button onclick="changePincode()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold px-4 rounded-xl whitespace-nowrap">पिनकोड</button>
+    <div class="search-row">
+      <input type="text" id="searchInput" oninput="renderProducts()" placeholder="🔍 कांदा, बटाटा, टमाटर, आंबा, केळी, दूध खोजें..." />
+      <button onclick="changePincode()" class="head-btn btn-gray">पिनकोड</button>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 mt-4">
-    <div class="bg-gradient-to-r from-green-700 to-green-600 text-white rounded-2xl p-5 shadow-md">
-      <span class="bg-yellow-400 text-black text-[10px] font-black px-2.5 py-1 rounded-md uppercase">MEGA OFFER</span>
-      <h2 id="bannerTitle" class="text-lg sm:text-xl font-black mt-2 leading-snug">🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!</h2>
-      <p class="text-xs text-green-100 mt-1">कूपन कोड: <span id="couponDisplay" class="font-bold text-yellow-300">JHATPAT20</span> से तुरंत बचाएं</p>
+  <main>
+    <div id="heroBanner">
+      <span style="background:#facc15;color:#000;font-size:10px;font-weight:900;padding:3px 8px;border-radius:6px;">MEGA OFFER</span>
+      <h2 id="bannerTitle" style="font-size:18px;font-weight:900;margin:8px 0 4px;">🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!</h2>
+      <p style="font-size:12px;margin:0;opacity:0.95;">कूपन कोड: <b id="couponDisplay" style="color:#fde047;">JHATPAT20</b> से तुरंत बचाएं</p>
     </div>
 
-    <div id="categoryBar" class="flex gap-2 overflow-x-auto py-4 no-scrollbar">
-      <button onclick="setCategory('ALL', this)" class="cat-btn bg-green-700 text-white text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap">सभी सामान (80)</button>
-      <button onclick="setCategory('ताज़ी सब्ज़ियाँ', this)" class="cat-btn bg-white text-gray-700 border text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap">🥬 ताज़ी सब्ज़ियाँ (45)</button>
-      <button onclick="setCategory('पत्तेदार & तड़का', this)" class="cat-btn bg-white text-gray-700 border text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap">🌿 भाजी & तड़का (15)</button>
-      <button onclick="setCategory('ताज़े फल', this)" class="cat-btn bg-white text-gray-700 border text-xs font-bold px-4 py-2 rounded-full whitespace-nowrap">🍎 ताज़े फल (20)</button>
+    <div id="categoryBar">
+      <button onclick="setCategory('ALL', this)" class="cat-btn active">सभी सामान</button>
+      <button onclick="setCategory('ताज़ी सब्ज़ियाँ', this)" class="cat-btn">🥬 ताज़ी सब्ज़ियाँ</button>
+      <button onclick="setCategory('पत्तेदार & तड़का', this)" class="cat-btn">🌿 भाजी & तड़का</button>
+      <button onclick="setCategory('ताज़े फल', this)" class="cat-btn">🍎 ताज़े फल</button>
+      <button onclick="setCategory('डेयरी & किराना', this)" class="cat-btn">🥛 डेयरी & किराना</button>
     </div>
 
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-base font-black text-gray-900">मुंबई मंडी ताज़ा स्टॉक (<span id="itemCounter">80</span>)</h3>
-      <span id="syncStatus" class="text-[11px] text-green-600 font-semibold">● Live Store</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:15px;font-weight:900;">ताज़ा स्टॉक (<span id="itemCounter">80</span>)</h3>
+      <span style="font-size:11px;color:#16a34a;font-weight:700;">● Live Sync</span>
     </div>
-    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5"></div>
+
+    <div id="productGrid"></div>
   </main>
 
-  <a id="waHelpBtn" href="https://wa.me" target="_blank" class="fixed bottom-5 right-5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-4 py-3 rounded-full shadow-lg flex items-center gap-1.5 z-30">💬 मदद</a>
+  <a id="waHelpBtn" href="https://wa.me" target="_blank">💬 मदद</a>
 
-  <div id="cartModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b pb-3">
-        <h3 class="text-lg font-black">🛒 आपकी टोकरी (Cart)</h3>
-        <button onclick="closeCart()" class="text-gray-400 hover:text-black text-xl font-bold">✕</button>
+  <div id="cartModal" class="modal hidden">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+        <h3 style="margin:0;font-size:17px;font-weight:900;">🛒 आपकी टोकरी</h3>
+        <button onclick="closeCart()" style="border:none;background:none;font-size:20px;font-weight:900;cursor:pointer;">✕</button>
       </div>
-      <div id="cartItems" class="divide-y my-3 max-h-60 overflow-y-auto"></div>
-      <div class="flex gap-2 my-3">
-        <input type="text" id="couponInput" placeholder="कूपन कोड डालें (उदा. JHATPAT20)" class="w-full border rounded-xl px-3 py-2 text-xs uppercase" />
-        <button onclick="applyCoupon()" class="bg-slate-900 text-white text-xs font-bold px-4 rounded-xl">Apply</button>
+      <div id="cartItems" style="max-height:210px;overflow-y:auto;margin:10px 0;"></div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="couponInput" placeholder="कूपन कोड डालें" style="margin-top:0;text-transform:uppercase;" />
+        <button onclick="applyCoupon()" class="head-btn" style="background:#0f172a;color:#fff;">Apply</button>
       </div>
-      <p id="couponMsg" class="text-xs font-semibold mb-2"></p>
-      <div class="bg-gray-50 p-3.5 rounded-2xl text-xs space-y-1.5 mb-4">
-        <div class="flex justify-between"><span>सामान का कुल मूल्य:</span><span id="subTotal" class="font-bold">₹0</span></div>
-        <div class="flex justify-between"><span>डिलीवरी चार्ज:</span><span id="delFee" class="font-bold">₹20</span></div>
-        <div class="flex justify-between text-green-700"><span>कूपन छूट:</span><span id="discountAmt" class="font-bold">-₹0</span></div>
-        <div class="flex justify-between text-base font-black border-t pt-2 text-gray-900"><span>कुल भुगतान:</span><span id="grandTotal">₹0</span></div>
+      <p id="couponMsg" style="font-size:11px;font-weight:700;margin:6px 0;"></p>
+      <div style="background:#f8fafc;padding:12px;border-radius:14px;font-size:12px;margin:10px 0;">
+        <div style="display:flex;justify-content:space-between;"><span>सामान का मूल्य:</span><b id="subTotal">₹0</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;"><span>डिलीवरी चार्ज:</span><b id="delFee">₹20</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;color:#16a34a;"><span>कूपन छूट:</span><b id="discountAmt">-₹0</b></div>
+        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:15px;"><b>कुल बिल:</b><b id="grandTotal">₹0</b></div>
       </div>
-      <div class="space-y-2.5">
-        <input type="text" id="custName" placeholder="आपका पूरा नाम *" class="w-full border rounded-xl px-3.5 py-2.5 text-xs" />
-        <input type="tel" id="custPhone" placeholder="मोबाइल नंबर *" class="w-full border rounded-xl px-3.5 py-2.5 text-xs" />
-        <textarea id="custAddress" rows="2" placeholder="पूरा पता (बिल्डिंग, फ्लैट नं, लैंडमार्क) *" class="w-full border rounded-xl px-3.5 py-2.5 text-xs"></textarea>
-        <select id="payMode" class="w-full border rounded-xl px-3.5 py-2.5 text-xs bg-white">
-          <option value="Cash on Delivery (COD)">💵 Cash on Delivery (डिलीवरी पर कैश)</option>
-          <option value="UPI / QR Payment">📱 UPI / Online Payment</option>
-        </select>
-      </div>
-      <button onclick="placeOrder()" class="w-full mt-4 bg-green-700 hover:bg-green-800 text-white font-black py-3.5 rounded-2xl text-sm shadow-md">✅ WhatsApp पर ऑर्डर कन्फर्म करें</button>
+      <input type="text" id="custName" placeholder="आपका पूरा नाम *" />
+      <input type="tel" id="custPhone" placeholder="मोबाइल नंबर *" />
+      <textarea id="custAddress" rows="2" placeholder="पूरा पता (बिल्डिंग, फ्लैट नं, लैंडमार्क) *"></textarea>
+      <select id="payMode">
+        <option value="Cash on Delivery (COD)">💵 Cash on Delivery (डिलीवरी पर कैश)</option>
+        <option value="UPI / Online Payment">📱 UPI / Online Payment</option>
+      </select>
+      <button onclick="placeOrder()" class="head-btn btn-green" style="width:100%;padding:13px;margin-top:12px;font-size:14px;">✅ WhatsApp पर ऑर्डर कन्फर्म करें</button>
     </div>
   </div>
 
-  <div id="trackModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-5">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-black text-base">📦 अपना ऑर्डर ट्रैक करें</h3>
-        <button onclick="document.getElementById('trackModal').classList.add('hidden')" class="text-gray-400 font-bold">✕</button>
+  <div id="trackModal" class="modal hidden">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+        <h3 style="margin:0;font-size:16px;font-weight:900;">📦 लाइव ऑर्डर स्टेटस</h3>
+        <button onclick="document.getElementById('trackModal').classList.add('hidden')" style="border:none;background:none;font-size:18px;font-weight:900;">✕</button>
       </div>
-      <div id="trackResult" class="py-4 text-xs text-gray-600">कोई हालिया ऑर्डर नहीं मिला। ऑर्डर करने के बाद यहाँ लाइव स्टेटस दिखेगा।</div>
+      <div id="trackResult" style="padding:14px 0;font-size:13px;color:#475569;">कोई हालिया ऑर्डर नहीं मिला।</div>
     </div>
   </div>
   <script>
@@ -128,112 +135,23 @@
       whatsapp: "919999999999",
       allowedPincodes: "421201, 421202, 421203, 421301",
       bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!",
+      bannerTheme: "normal",
       freeMin: 199,
       delCharge: 20,
       couponCode: "JHATPAT20",
-      couponDiscount: 20
+      couponDiscount: 20,
+      storeOpen: true
     };
 
-    const rawCatalog = [
-      ["कांदा (प्याज़ / Onion)", 35, "1 kg", "ताज़ी सब्ज़ियाँ", "🧅"],
-      ["बटाटा (नया आलू / Potato)", 28, "1 kg", "ताज़ी सब्ज़ियाँ", "🥔"],
-      ["ताज़ा लाल टमाटर (Tomato)", 32, "1 kg", "ताज़ी सब्ज़ियाँ", "🍅"],
-      ["भेंडी (भिंडी / Lady Finger)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥬"],
-      ["गवार (ग्वार फली / Cluster Beans)", 30, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
-      ["वांगी (काटेरी बैंगन / Brinjal)", 24, "500 g", "ताज़ी सब्ज़ियाँ", "🍆"],
-      ["मोठा वांगा (भरता बैंगन)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🍆"],
-      ["फ्लॉवर (फूलगोभी / Cauliflower)", 35, "1 नग", "ताज़ी सब्ज़ियाँ", "🥦"],
-      ["कोबी (पत्तागोभी / Cabbage)", 25, "1 नग", "ताज़ी सब्ज़ियाँ", "🥬"],
-      ["तोंडली (कुंदरू / Tendli)", 22, "250 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["दुधी भोपळा (लौकी / Bottle Gourd)", 30, "1 नग", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["लाल भोपळा (कद्दू / Red Pumpkin)", 20, "500 g", "ताज़ी सब्ज़ियाँ", "🎃"],
-      ["कारली (करेला / Bitter Gourd)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["दोडका (तुरई / Ridge Gourd)", 26, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["घोसाळी (गिलकी / Sponge Gourd)", 24, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["पडवळ (चिचिंडा / Snake Gourd)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["शेवग्याच्या शेंगा (Drumstick)", 20, "250 g", "ताज़ी सब्ज़ियाँ", "🥢"],
-      ["शिमला मिरची (Capsicum)", 30, "500 g", "ताज़ी सब्ज़ियाँ", "🫑"],
-      ["गाजर (लाल गाजर / Carrot)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥕"],
-      ["काकडी (खीरा / Cucumber)", 22, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["बीट (चुकंदर / Beetroot)", 20, "500 g", "ताज़ी सब्ज़ियाँ", "🟣"],
-      ["मुळा (सफेद मूली / Radish)", 18, "500 g", "ताज़ी सब्ज़ियाँ", "🥕"],
-      ["फरसबी (फ्रेंच बीन्स / French Beans)", 32, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
-      ["घेवडा (वाल पापड़ी / Broad Beans)", 30, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
-      ["चवळीच्या शेंगा (लोबिया फली)", 25, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
-      ["हिरवा वाटाणा (हरा मटर / Green Peas)", 40, "500 g", "ताज़ी सब्ज़ियाँ", "🫛"],
-      ["सुरण (जिमीकंद / Yam)", 35, "500 g", "ताज़ी सब्ज़ियाँ", "🥔"],
-      ["रताळे (शकरकंद / Sweet Potato)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🍠"],
-      ["अरवी (घुइयां / Colocasia)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥔"],
-      ["कच्ची केळी (कच्चा केला / Raw Banana)", 25, "4 नग", "ताज़ी सब्ज़ियाँ", "🍌"],
-      ["कच्चा फणस (कटहल / Raw Jackfruit)", 35, "500 g", "ताज़ी सब्ज़ियाँ", "🍈"],
-      ["मक्याचे कणीस (भुट्टा / Sweet Corn)", 20, "2 नग", "ताज़ी सब्ज़ियाँ", "🌽"],
-      ["मशरूम (Button Mushroom)", 45, "200 g पैक", "ताज़ी सब्ज़ियाँ", "🍄"],
-      ["बेबी कॉर्न (Baby Corn)", 40, "200 g पैक", "ताज़ी सब्ज़ियाँ", "🌽"],
-      ["ब्रोकोली (Broccoli)", 50, "1 नग", "ताज़ी सब्ज़ियाँ", "🥦"],
-      ["लाल पिवळी शिमला मिरची (Bell Pepper)", 60, "250 g", "ताज़ी सब्ज़ियाँ", "🫑"],
-      ["कांदा पात (हरा प्याज़ / Spring Onion)", 15, "1 जुडी", "ताज़ी सब्ज़ियाँ", "🧅"],
-      ["लसूण पात (हरा लहसुन / Green Garlic)", 20, "1 जुडी", "ताज़ी सब्ज़ियाँ", "🧄"],
-      ["परवल (Parwal)", 28, "250 g", "ताज़ी सब्ज़ियाँ", "🥒"],
-      ["कंटोळी (ककोड़ा / Spiny Gourd)", 40, "250 g", "ताज़ी सब्ज़ियाँ", "🟢"],
-      ["कच्ची कैरी (कच्चा आम / Raw Mango)", 25, "250 g", "ताज़ी सब्ज़ियाँ", "🥭"],
-      ["आवळा (आंवला / Amla)", 20, "250 g", "ताज़ी सब्ज़ियाँ", "🟢"],
-      ["ओला नारळ (ताज़ा नारियल / Coconut)", 32, "1 नग", "ताज़ी सब्ज़ियाँ", "🥥"],
-      ["चेरी टमाटर (Cherry Tomato)", 45, "250 g", "ताज़ी सब्ज़ियाँ", "🍅"],
-      ["कोहळा (सफेद पेठा / Ash Gourd)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🍈"],
-      ["कोथिंबीर (हरा धनिया / Coriander)", 15, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["मेथी भाजी (Fresh Methi)", 20, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["पालक भाजी (Fresh Palak)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
-      ["शेपू भाजी (सोया साग / Dill Leaves)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["लाल माठ (लाल चौलाई / Red Amaranth)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
-      ["हिरवा माठ (हरी चौलाई / Green Amaranth)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
-      ["पुदिना (ताज़ा पुदीना / Mint)", 10, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["कढीपत्ता (कड़ी पत्ता / Curry Leaves)", 10, "1 पैक", "पत्तेदार & तड़का", "🍃"],
-      ["अळूची पाने (अरबी के पत्ते / Patra)", 20, "5 पत्ते", "पत्तेदार & तड़का", "🍃"],
-      ["अंबाडी भाजी (खट्टी भाजी / Sorrel)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["चवळी भाजी (लोबिया पत्ता)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
-      ["हिरवी मिरची (तीखी हरी मिर्च)", 15, "100 g", "पत्तेदार & तड़का", "🌶️"],
-      ["आलं (ताज़ा अदरक / Ginger)", 20, "100 g", "पत्तेदार & तड़का", "🫚"],
-      ["लसूण (लहसुन / Garlic)", 30, "100 g", "पत्तेदार & तड़का", "🧄"],
-      ["लिंबू (ताज़ा नींबू / Lemon)", 15, "4 नग", "पत्तेदार & तड़का", "🍋"],
-      ["केळी (ताज़ा केला / Robusta Banana)", 45, "1 दर्जन", "ताज़े फल", "🍌"],
-      ["वेलची केळी (इलायची केला / Yelakki)", 55, "1 दर्जन", "ताज़े फल", "🍌"],
-      ["सफरचंद (कश्मीरी सेब / Apple)", 120, "1 kg", "ताज़े फल", "🍎"],
-      ["डाळिंब (ताज़ा अनार / Pomegranate)", 110, "1 kg", "ताज़े फल", "🍎"],
-      ["चिकू (डहाणू चीकू / Sapota)", 50, "500 g", "ताज़े फल", "🥔"],
-      ["पपई (पपीता / Papaya)", 45, "1 नग (Approx 1kg)", "ताज़े फल", "🍈"],
-      ["कलिंगड (तरबूज / Watermelon)", 55, "1 नग (Approx 2kg)", "ताज़े फल", "🍉"],
-      ["खरबूज (Muskmelon)", 45, "1 नग", "ताज़े फल", "🍈"],
-      ["संत्री (नागपुर संतरा / Orange)", 60, "500 g", "ताज़े फल", "🍊"],
-      ["मोसंबी (Sweet Lime)", 55, "500 g", "ताज़े फल", "🍋"],
-      ["हिरवी द्राक्षे (हरे अंगूर / Green Grapes)", 50, "500 g", "ताज़े फल", "🍇"],
-      ["काळी द्राक्षे (काले अंगूर / Black Grapes)", 65, "500 g", "ताज़े फल", "🍇"],
-      ["पेरू (इलाहाबादी अमरूद / Guava)", 40, "500 g", "ताज़े फल", "🍐"],
-      ["अननस (अनानास / Pineapple)", 55, "1 नग", "ताज़े फल", "🍍"],
-      ["सिताफळ (शरीफा / Custard Apple)", 60, "500 g", "ताज़े फल", "🍏"],
-      ["हापूस आंबा (अल्फांसो आम / Mango)", 250, "6 नग", "ताज़े फल", "🥭"],
-      ["किवी (Fresh Kiwi)", 75, "3 नग पैक", "ताज़े फल", "🥝"],
-      ["ड्रॅगन फ्रूट (Dragon Fruit)", 70, "1 नग", "ताज़े फल", "🐉"],
-      ["स्ट्रॉबेरी (महाबलेश्वर Strawberry)", 65, "1 बॉक्स", "ताज़े फल", "🍓"],
-      ["नारळ पाणी (हरा नारियल पानी)", 45, "1 नग", "ताज़े फल", "🥥"]
+    const fallbackList = [
+      { id: 1001, name: "कांदा (प्याज़ / Onion)", price: 35, weight: "1 kg", category: "ताज़ी सब्ज़ियाँ", emoji: "🧅", inStock: true },
+      { id: 1002, name: "बटाटा (नया आलू / Potato)", price: 28, weight: "1 kg", category: "ताज़ी सब्ज़ियाँ", emoji: "🥔", inStock: true },
+      { id: 1003, name: "ताज़ा लाल टमाटर (Tomato)", price: 32, weight: "1 kg", category: "ताज़ी सब्ज़ियाँ", emoji: "🍅", inStock: true },
+      { id: 1004, name: "कोथिंबीर (हरा धनिया)", price: 15, weight: "1 जुडी", category: "पत्तेदार & तड़का", emoji: "🌿", inStock: true },
+      { id: 1005, name: "हापूस आंबा (Alphonso Mango)", price: 250, weight: "6 नग", category: "ताज़े फल", emoji: "🥭", inStock: true }
     ];
-    function makeCardImg(name, emoji, cat) {
-      const bg = cat === "ताज़े फल" ? "fff1f2" : (cat === "पत्तेदार & तड़का" ? "ecfdf5" : "f0fdf4");
-      const fg = cat === "ताज़े फल" ? "be123c" : "15803d";
-      const cleanName = String(name).split("(")[0].trim();
-     return `https://placehold.co/300x220/${bg}/${fg}?text=${encodeURIComponent(emoji + "\n" + cleanName)}`;
-    }
 
-    const defaultCatalogProducts = rawCatalog.map((item, idx) => ({
-      id: 1001 + idx,
-      name: item[0],
-      price: item[1],
-      weight: item[2],
-      category: item[3],
-      inStock: true,
-      image: makeCardImg(item[0], item[4], item[3])
-    }));
-
-    let products = [...defaultCatalogProducts];
+    let products = [...fallbackList];
     let cart = JSON.parse(localStorage.getItem("jhatpat_cart") || "[]");
     let activeCategory = "ALL";
     let appliedDiscount = 0;
@@ -244,91 +162,82 @@
         const data = await res.json();
         if (data) {
           if (data.settings) config = { ...config, ...data.settings };
-          let firebaseItems = [];
-          if (data.products) {
-            const pList = Array.isArray(data.products) ? data.products : Object.values(data.products);
-            firebaseItems = firebaseItems.concat(pList.filter(Boolean));
+          if (Array.isArray(data.master_products) && data.master_products.length > 0) {
+            products = data.master_products.filter(Boolean);
           }
-          if (data.custom_products) {
-            const cList = Array.isArray(data.custom_products) ? data.custom_products : Object.values(data.custom_products);
-            firebaseItems = firebaseItems.concat(cList.filter(Boolean));
-          }
-          if (firebaseItems.length > 0) products = [...firebaseItems, ...defaultCatalogProducts];
         }
-        applyConfigUI();
-        renderProducts();
-      } catch (e) {
-        applyConfigUI();
-        renderProducts();
-      }
+      } catch (e) {}
+      applyConfigUI();
+      renderProducts();
     }
 
     function applyConfigUI() {
-      if (config.brandName) document.getElementById("brandTitle").innerText = config.brandName;
-      if (config.bannerTitle) document.getElementById("bannerTitle").innerText = config.bannerTitle;
-      if (config.couponCode) document.getElementById("couponDisplay").innerText = config.couponCode;
-      if (config.whatsapp) document.getElementById("waHelpBtn").href = `https://wa.me{config.whatsapp}`;
+      document.getElementById("brandTitle").innerText = config.brandName || "Jhatpat";
+      document.getElementById("bannerTitle").innerText = config.bannerTitle || "";
+      document.getElementById("couponDisplay").innerText = config.couponCode || "JHATPAT20";
+      document.getElementById("waHelpBtn").href = `https://wa.me{config.whatsapp || "919999999999"}`;
+
+      const banner = document.getElementById("heroBanner");
+      banner.className = "";
+      if (config.bannerTheme && config.bannerTheme !== "normal") {
+        banner.classList.add("theme-" + config.bannerTheme);
+      }
+
+      const closedAlert = document.getElementById("closedAlert");
+      if (config.storeOpen === false) closedAlert.classList.remove("hidden");
+      else closedAlert.classList.add("hidden");
     }
 
     function setCategory(cat, btnEl) {
       activeCategory = cat;
-      document.querySelectorAll(".cat-btn").forEach(btn => {
-        btn.classList.remove("bg-green-700", "text-white");
-        btn.classList.add("bg-white", "text-gray-700", "border");
-      });
-      if (btnEl) {
-        btnEl.classList.remove("bg-white", "text-gray-700", "border");
-        btnEl.classList.add("bg-green-700", "text-white");
-      }
+      document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+      if (btnEl) btnEl.classList.add("active");
       renderProducts();
     }
 
     function renderProducts() {
       const grid = document.getElementById("productGrid");
-      const query = document.getElementById("searchInput").value.toLowerCase();
+      const q = document.getElementById("searchInput").value.toLowerCase();
       grid.innerHTML = "";
 
       const filtered = products.filter(p => {
         if (!p || !p.name) return false;
         const matchCat = activeCategory === "ALL" || p.category === activeCategory;
-        const matchSearch = p.name.toLowerCase().includes(query);
+        const matchSearch = p.name.toLowerCase().includes(q);
         return matchCat && matchSearch;
       });
 
       document.getElementById("itemCounter").innerText = filtered.length;
       if (filtered.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-xs text-gray-500 py-8">कोई सामान नहीं मिला।</p>`;
+        grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#64748b;padding:24px;">कोई सामान नहीं मिला।</p>`;
         return;
       }
 
       filtered.forEach(p => {
         const inStock = p.inStock !== false;
-        const fallback = makeCardImg(p.name, "🥬", p.category || "ताज़ी सब्ज़ियाँ");
-        const imgSrc = p.image || p.img || fallback;
+        const isFruit = p.category === "ताज़े फल";
         const inCart = cart.find(item => item.id == p.id);
 
         grid.innerHTML += `
-          <div class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div class="p-card">
             <div>
-              <div class="w-full h-28 bg-gray-100 rounded-xl overflow-hidden mb-2">
-                <img src="${imgSrc}" onerror="this.src='${fallback}'" alt="${p.name}" class="w-full h-full object-cover" />
+              <div class="p-thumb ${isFruit ? 'fruit' : ''}">
+                <span style="font-size:44px;line-height:1;">${p.emoji || "🥬"}</span>
               </div>
-              <span class="bg-yellow-100 text-yellow-800 text-[10px] font-extrabold px-2 py-0.5 rounded">⚡ 10 MIN</span>
-              <h4 class="font-bold text-xs sm:text-sm text-gray-900 mt-1.5 line-clamp-2">${p.name}</h4>
-              <p class="text-[11px] text-gray-400 mt-0.5">${p.weight || "1 unit"}</p>
+              <span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:900;padding:2px 6px;border-radius:5px;">⚡ 10 MIN</span>
+              <h4 style="font-weight:800;font-size:13px;margin:6px 0 2px;line-height:1.3;">${p.name}</h4>
+              <p style="font-size:11px;color:#64748b;margin:0;">${p.weight || "1 unit"}</p>
             </div>
-            <div class="flex items-center justify-between mt-3 pt-2 border-t border-gray-50">
-              <span class="font-black text-sm sm:text-base text-gray-900">₹${p.price}</span>
-              ${!inStock ? `<span class="text-[11px] font-bold text-red-500">Out of Stock</span>` :
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9;">
+              <span style="font-weight:900;font-size:15px;">₹${p.price}</span>
+              ${!inStock ? `<span style="font-size:11px;font-weight:800;color:#ef4444;">Out of Stock</span>` :
                 inCart ? `
-                  <div class="flex items-center bg-green-700 text-white rounded-lg overflow-hidden text-xs font-bold">
-                    <button onclick="updateQty('${p.id}', -1)" class="px-2.5 py-1">-</button>
-                    <span class="px-2">${inCart.qty}</span>
-                    <button onclick="updateQty('${p.id}', 1)" class="px-2.5 py-1">+</button>
+                  <div class="qty-box">
+                    <button onclick="updateQty('${p.id}', -1)">-</button>
+                    <span style="padding:0 7px;">${inCart.qty}</span>
+                    <button onclick="updateQty('${p.id}', 1)">+</button>
                   </div>
-                ` : `
-                  <button onclick="addToCart('${p.id}')" class="border-2 border-green-700 text-green-700 hover:bg-green-700 hover:text-white text-xs font-black px-3 py-1 rounded-lg transition">ADD</button>
-                `
+                ` : `<button class="add-btn" onclick="addToCart('${p.id}')">ADD</button>`
               }
             </div>
           </div>
@@ -338,6 +247,7 @@
     }
 
     function addToCart(id) {
+      if (config.storeOpen === false) return alert("🔴 दुकान अभी बंद है!");
       const prod = products.find(p => p.id == id);
       if (!prod) return;
       cart.push({ ...prod, qty: 1 });
@@ -361,8 +271,7 @@
     }
 
     function updateCartBadge() {
-      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-      document.getElementById("cartCount").innerText = totalItems;
+      document.getElementById("cartCount").innerText = cart.reduce((s, i) => s + i.qty, 0);
     }
 
     function openCart() {
@@ -377,37 +286,31 @@
     function renderCartModal() {
       const container = document.getElementById("cartItems");
       if (cart.length === 0) {
-        container.innerHTML = `<p class="text-xs text-gray-500 text-center py-6">आपकी टोकरी खाली है।</p>`;
+        container.innerHTML = `<p style="font-size:12px;color:#64748b;text-align:center;padding:18px 0;">आपकी टोकरी खाली है।</p>`;
         document.getElementById("subTotal").innerText = "₹0";
         document.getElementById("delFee").innerText = "₹0";
         document.getElementById("discountAmt").innerText = "-₹0";
         document.getElementById("grandTotal").innerText = "₹0";
         return;
       }
-
       let sub = 0;
       container.innerHTML = "";
       cart.forEach(item => {
         sub += item.price * item.qty;
         container.innerHTML += `
-          <div class="py-2.5 flex items-center justify-between text-xs">
-            <div>
-              <p class="font-bold text-gray-800">${item.name}</p>
-              <p class="text-gray-400">₹${item.price} x ${item.qty}</p>
-            </div>
-            <div class="flex items-center bg-green-700 text-white rounded-lg font-bold">
-              <button onclick="updateQty('${item.id}', -1)" class="px-2.5 py-1">-</button>
-              <span class="px-2">${item.qty}</span>
-              <button onclick="updateQty('${item.id}', 1)" class="px-2.5 py-1">+</button>
+          <div style="padding:8px 0;display:flex;align-items:center;justify-content:space-between;font-size:12px;border-bottom:1px solid #f1f5f9;">
+            <div><b>${item.name}</b><div style="color:#64748b;">₹${item.price} × ${item.qty}</div></div>
+            <div class="qty-box">
+              <button onclick="updateQty('${item.id}', -1)">-</button>
+              <span style="padding:0 7px;">${item.qty}</span>
+              <button onclick="updateQty('${item.id}', 1)">+</button>
             </div>
           </div>
         `;
       });
-
       const freeLimit = Number(config.freeMin) || 199;
       const delCharge = sub >= freeLimit ? 0 : (Number(config.delCharge) || 20);
       const grand = Math.max(0, sub + delCharge - appliedDiscount);
-
       document.getElementById("subTotal").innerText = `₹${sub}`;
       document.getElementById("delFee").innerText = delCharge === 0 ? "FREE" : `₹${delCharge}`;
       document.getElementById("discountAmt").innerText = `-₹${appliedDiscount}`;
@@ -416,53 +319,37 @@
 
     function applyCoupon() {
       const code = document.getElementById("couponInput").value.trim().toUpperCase();
-      const validCode = (config.couponCode || "JHATPAT20").toUpperCase();
+      const valid = (config.couponCode || "JHATPAT20").toUpperCase();
       const msg = document.getElementById("couponMsg");
-
-      if (code === validCode && cart.length > 0) {
+      if (code === valid && cart.length > 0) {
         appliedDiscount = Number(config.couponDiscount) || 20;
-        msg.innerText = `✅ कूपन लागू हो गया! ₹${appliedDiscount} की बचत।`;
-        msg.className = "text-xs font-semibold mb-2 text-green-600";
+        msg.innerText = `✅ कूपन लागू! ₹${appliedDiscount} की बचत।`;
+        msg.style.color = "#16a34a";
       } else {
         appliedDiscount = 0;
-        msg.innerText = "❌ अमान्य कूपन कोड या खाली टोकरी।";
-        msg.className = "text-xs font-semibold mb-2 text-red-500";
+        msg.innerText = "❌ अमान्य कूपन कोड।";
+        msg.style.color = "#ef4444";
       }
       renderCartModal();
     }
 
     async function placeOrder() {
+      if (config.storeOpen === false) return alert("🔴 दुकान अभी बंद है!");
       if (cart.length === 0) return alert("कृपया पहले सामान चुनें!");
       const name = document.getElementById("custName").value.trim();
       const phone = document.getElementById("custPhone").value.trim();
       const address = document.getElementById("custAddress").value.trim();
       const payMode = document.getElementById("payMode").value;
-
       if (!name || !phone || !address) return alert("कृपया नाम, मोबाइल नंबर और पता भरें!");
 
       const orderId = "JP" + Math.floor(100000 + Math.random() * 900000);
       const totalText = document.getElementById("grandTotal").innerText;
       const itemsText = cart.map(i => `• ${i.name} (${i.weight || ""}) x ${i.qty} = ₹${i.price * i.qty}`).join("\n");
-
-      const orderData = {
-        id: orderId,
-        customerName: name,
-        phone: phone,
-        address: address,
-        payment: payMode,
-        items: cart,
-        total: totalText,
-        status: "Order Placed",
-        time: new Date().toLocaleString()
-      };
+      const orderData = { id: orderId, customerName: name, phone, address, payment: payMode, items: cart, total: totalText, status: "Order Placed", time: new Date().toLocaleString() };
 
       localStorage.setItem("jhatpat_last_order", JSON.stringify(orderData));
-
       try {
-        await fetch(`${FIREBASE_URL}/orders/${orderId}.json`, {
-          method: "PUT",
-          body: JSON.stringify(orderData)
-        });
+        await fetch(`${FIREBASE_URL}/orders/${orderId}.json`, { method: "PUT", body: JSON.stringify(orderData) });
       } catch (e) {}
 
       const waMsg = `*नया ऑर्डर - ${config.brandName || "Jhatpat"}* 🛒\n\n*ऑर्डर ID:* ${orderId}\n*नाम:* ${name}\n*फ़ोन:* ${phone}\n*पता:* ${address}\n*पेमेंट:* ${payMode}\n\n*सामान:*\n${itemsText}\n\n*कुल बिल:* ${totalText}`;
@@ -472,28 +359,25 @@
       saveCart();
       closeCart();
       renderProducts();
-
       window.open(`https://wa.me{waNum}?text=${encodeURIComponent(waMsg)}`, "_blank");
     }
 
-    function openTrackModal() {
+    async function openTrackModal() {
       const last = JSON.parse(localStorage.getItem("jhatpat_last_order") || "null");
       const box = document.getElementById("trackResult");
       if (last) {
-        box.innerHTML = `
-          <div class="bg-green-50 p-3 rounded-xl border border-green-200 space-y-1">
-            <p class="font-black text-green-800">ऑर्डर ID: ${last.id}</p>
-            <p><b>स्टेटस:</b> ${last.status}</p>
-            <p><b>कुल राशि:</b> ${last.total}</p>
-            <p class="text-[11px] text-gray-500">${last.time}</p>
-          </div>
-        `;
+        try {
+          const res = await fetch(`${FIREBASE_URL}/orders/${last.id}.json`);
+          const live = await res.json();
+          if (live && live.status) last.status = live.status;
+        } catch (e) {}
+        box.innerHTML = `<div style="background:#f0fdf4;padding:12px;border-radius:12px;border:1px solid #bbf7d0;"><p style="font-weight:900;color:#166534;margin:0 0 6px;">ऑर्डर ID: ${last.id}</p><p style="margin:4px 0;"><b>लाइव स्टेटस:</b> ${last.status}</p><p style="margin:4px 0;"><b>कुल बिल:</b> ${last.total}</p></div>`;
       }
       document.getElementById("trackModal").classList.remove("hidden");
     }
 
     function changePincode() {
-      const pin = prompt("अपना पिनकोड डालें (उदा. 421201):", document.getElementById("currentPin").innerText);
+      const pin = prompt("अपना पिनकोड डालें (डोंबिवली-कल्याण):", document.getElementById("currentPin").innerText);
       if (pin) document.getElementById("currentPin").innerText = pin.trim();
     }
 
