@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat - Rider Delivery App</title>
+  <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-xl mx-auto">
+    <div class="bg-blue-700 text-white p-4 rounded-2xl shadow mb-4 flex justify-between items-center">
+      <div><h1 class="text-xl font-black">🛵 RIDER DELIVERY APP</h1><p class="text-xs">10-मिनट सुपरफास्ट डिलीवरी</p></div>
+      <button onclick="loadOrders()" class="bg-white text-blue-900 px-3 py-1.5 rounded-xl text-xs font-bold">🔄 Refresh</button>
+    </div>
+
+    <div id="loginBox" class="bg-white p-5 rounded-2xl shadow text-center">
+      <p class="text-xs text-gray-600 mb-2">राइडर PIN डालें (Default: <b>1234</b>)</p>
+      <input type="password" id="pin" placeholder="PIN" class="border rounded-xl px-3 py-2 text-sm text-center w-full mb-3" />
+      <button onclick="unlock()" class="w-full bg-blue-700 text-white py-2.5 rounded-xl font-extrabold text-sm">ड्यूटी शुरू करें</button>
+    </div>
+
+    <div id="appArea" class="hidden space-y-3"></div>
+  </div>
+
+  <script>
+    const FIREBASE_DB_URL = "";
+    let orders = [];
+    function getDbUrl() { return (FIREBASE_DB_URL || localStorage.getItem('jhatpat_firebase_url') || "").replace(/\/$/, ""); }
+
+    function unlock() {
+      if (document.getElementById('pin').value === '1234') {
+        document.getElementById('loginBox').classList.add('hidden');
+        document.getElementById('appArea').classList.remove('hidden');
+        loadOrders();
+        setInterval(loadOrders, 10000);
+      } else alert("❌ गलत PIN!");
+    }
+
+    async function loadOrders() {
+      const url = getDbUrl();
+      if (url) {
+        const res = await fetch(`${url}/selfMasterData/orders.json`);
+        orders = (await res.json()) || [];
+      } else {
+        orders = JSON.parse(localStorage.getItem('jhatpat_orders')) || [];
+      }
+      render();
+    }
+
+    async function setStatus(idx, st) {
+      orders[idx].status = st;
+      localStorage.setItem('jhatpat_orders', JSON.stringify(orders));
+      const url = getDbUrl();
+      if (url) await fetch(`${url}/selfMasterData/orders.json`, { method: 'PUT', body: JSON.stringify(orders) });
+      render();
+    }
+
+    function render() {
+      const area = document.getElementById('appArea');
+      area.innerHTML = orders.length === 0 ? "<p class='text-center text-gray-500'>कोई डिलीवरी नहीं है।</p>" : orders.map((o, i) => `
+        <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 space-y-2">
+          <div class="flex justify-between font-extrabold text-sm"><span>${o.id} - ${o.name}</span><span class="text-green-700">₹${o.total} (${o.mode})</span></div>
+          <p class="text-xs font-bold text-gray-800">📍 पता: ${o.address}</p>
+          <p class="text-xs text-gray-600">🛒 ${o.items}</p>
+          <div class="flex gap-2 pt-1">
+            <a href="tel:${o.phone}" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold">📞 कॉल करें</a>
+            <button onclick="setStatus(${i}, 'Out for Delivery 🛵')" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold">🛵 रास्ते में हूँ</button>
+            <button onclick="setStatus(${i}, 'Delivered ✅')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-bold">✅ डिलीवर हुआ</button>
+          </div>
+        </div>
+      `).join("");
+    }
+  </script>
+</body>
+</html>
