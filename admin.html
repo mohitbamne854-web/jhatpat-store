@@ -3,363 +3,589 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat - Owner Master Control App</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Jhatpat Super Admin - MOHIT</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 70px; }
+    .hidden { display: none !important; }
+    #loginBox { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #0f172a, #1e293b); }
+    .login-card { background: #fff; padding: 28px; border-radius: 22px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+    .login-card h2 { margin: 0 0 6px; color: #15803d; font-size: 26px; font-weight: 900; }
+    .login-card input { width: 100%; padding: 13px; margin: 14px 0; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 15px; text-align: center; font-weight: 700; }
+    .btn { background: #15803d; color: #fff; border: none; padding: 12px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; }
+    .btn-dark { background: #0f172a; }
+    .btn-red { background: #dc2626; }
+    .btn-purple { background: #6d28d9; }
+    .btn-sm { padding: 7px 11px; font-size: 12px; width: auto; border-radius: 8px; }
+    header { background: #0f172a; color: #fff; padding: 13px 16px; position: sticky; top: 0; z-index: 40; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 17px; font-weight: 900; color: #facc15; }
+    .wrap { max-width: 920px; margin: 14px auto; padding: 0 12px; }
+    .ai-box { background: linear-gradient(135deg, #4c1d95, #6d28d9); color: #fff; padding: 16px; border-radius: 18px; margin-bottom: 14px; box-shadow: 0 8px 20px rgba(109,40,217,0.2); }
+    .ai-box h3 { margin: 0 0 6px; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: space-between; }
+    .ai-input-row { display: flex; gap: 8px; margin-top: 8px; }
+    .ai-input-row input { flex: 1; padding: 11px 13px; border-radius: 12px; border: none; font-size: 13px; outline: none; }
+    .ai-input-row button { background: #facc15; color: #0f172a; border: none; padding: 0 16px; border-radius: 12px; font-weight: 900; font-size: 13px; cursor: pointer; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+    @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card { background: #fff; padding: 13px; border-radius: 14px; border: 1px solid #e2e8f0; }
+    .stat-card span { font-size: 11px; color: #64748b; font-weight: 700; }
+    .stat-card h3 { margin: 4px 0 0; font-size: 20px; font-weight: 900; }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; }
+    .tab-btn { background: #fff; border: 1px solid #cbd5e1; padding: 9px 13px; border-radius: 99px; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    .tab-btn.active { background: #15803d; color: #fff; border-color: #15803d; }
+    .card { background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 14px; }
+    .card h3 { margin: 0 0 10px; font-size: 15px; font-weight: 900; }
+    label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin: 10px 0 4px; }
+    input[type="text"], input[type="number"], select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; gap: 6px; }
+    .badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+  </style>
 </head>
-<body class="bg-gray-100 p-3 sm:p-5 pb-20">
+<body>
 
-  <div id="loginScreen" class="max-w-sm mx-auto mt-16 bg-white p-6 rounded-3xl shadow-lg text-center">
-    <span class="bg-yellow-400 text-black text-xs font-extrabold px-3 py-1 rounded-full">OWNER ONLY</span>
-    <h1 class="text-2xl font-black mt-3">👑 मालिक कंट्रोल रूम</h1>
-    <p class="text-xs text-gray-500 mt-1">पासवर्ड डालें (Default: <b>admin123</b>)</p>
-    <input type="password" id="adminPassInput" placeholder="पासवर्ड डालें" class="w-full border rounded-xl px-4 py-3 text-sm mt-4 text-center font-bold" />
-    <button onclick="loginAdmin()" class="w-full bg-gray-900 text-yellow-400 py-3 rounded-xl text-sm font-extrabold mt-3 shadow">कंट्रोल रूम खोलें ➔</button>
+  <div id="loginBox">
+    <div class="login-card">
+      <h2>⚡ Jhatpat Admin</h2>
+      <p style="font-size:12px;color:#64748b;margin:0;">Master Control Room</p>
+      <input type="password" id="adminPass" placeholder="पासवर्ड डालें" />
+      <button class="btn" onclick="checkLogin()">लॉगिन करें</button>
+    </div>
   </div>
-
-  <div id="dashboardScreen" class="hidden max-w-5xl mx-auto space-y-4">
-    <div class="flex flex-wrap justify-between items-center bg-gray-900 text-white p-4 rounded-2xl shadow-lg gap-2">
+  <div id="appBox" class="hidden">
+    <header>
       <div>
-        <h2 class="text-lg font-black text-yellow-400">👑 JHATPAT MASTER CONTROL</h2>
-        <p class="text-xs text-gray-300">यहीं से पूरी दुकान, रेट, फोटो और ऑर्डर चलाएं</p>
+        <h1>⚡ Jhatpat Control Room</h1>
+        <span id="storeStatusText" style="font-size:11px;color:#4ade80;">● दुकान चालू है (OPEN)</span>
       </div>
-      <div class="flex gap-2">
-        <a href="index.html" target="_blank" class="bg-blue-600 px-3 py-2 rounded-xl text-xs font-bold">🛒 दुकान देखें</a>
-        <button onclick="exportOrdersCSV()" class="bg-green-600 px-3 py-2 rounded-xl text-xs font-bold">📥 Excel हिसाब</button>
+      <div class="row">
+        <button class="btn btn-sm btn-purple" onclick="autoHealSystem(true)">🛡️ Auto-Fix</button>
+        <button id="toggleStoreBtn" class="btn btn-sm btn-red" onclick="toggleStore()">दुकान बंद</button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div class="ai-box">
+        <h3>
+          <span>🤖 Jhatpat Smart AI Assistant</span>
+          <span style="font-size:10px;background:#22c55e;color:#052e16;padding:2px 8px;border-radius:99px;">Auto-Heal ON ✓</span>
+        </h3>
+        <p style="font-size:11px;margin:0;opacity:0.9;">बस लिखें: "टमाटर 40 करो", "दिवाली बैनर लगाओ", "होली बैनर लगाओ", या "दुकान बंद करो"</p>
+        <div class="ai-input-row">
+          <input type="text" id="aiCommandInput" placeholder="यहाँ आदेश लिखें..." />
+          <button onclick="runAiCommand()">चलाएं ⚡</button>
+        </div>
+        <p id="aiReply" style="font-size:11px;margin:8px 0 0;color:#fde047;font-weight:700;"></p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><span>कुल ऑर्डर्स</span><h3 id="statOrders">0</h3></div>
+        <div class="stat-card"><span>कुल कमाई</span><h3 id="statSales">₹0</h3></div>
+        <div class="stat-card"><span>लाइव सामान</span><h3 id="statItems">80</h3></div>
+        <div class="stat-card"><span>पेंडिंग ऑर्डर</span><h3 id="statPending">0</h3></div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('ordersTab', this)">📦 लाइव ऑर्डर्स</button>
+        <button class="tab-btn" onclick="openTab('productsTab', this)">🥬 80+ रेट & Delete</button>
+        <button class="tab-btn" onclick="openTab('addTab', this)">➕ नया सामान (Auto-Photo)</button>
+        <button class="tab-btn" onclick="openTab('festivalTab', this)">🎉 त्योहार बैनर</button>
+        <button class="tab-btn" onclick="openTab('settingsTab', this)">⚙️ सेटिंग्स</button>
+      </div>
+
+      <div id="ordersTab" class="tab-panel">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+            <h3 style="margin:0;">📋 सभी लाइव ऑर्डर्स</h3>
+            <button class="btn btn-sm btn-dark" onclick="syncFromFirebase()">🔄 रिफ्रेश</button>
+          </div>
+          <div id="ordersList"><p style="font-size:12px;color:#64748b;">लोड हो रहा है...</p></div>
+        </div>
+      </div>
+
+      <div id="productsTab" class="tab-panel hidden">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:10px;">
+            <h3 style="margin:0;">🥬 1-Click रेट बदलें या हटाएं</h3>
+            <button class="btn btn-sm" onclick="saveProductsToCloud()">💾 सब लाइव सेव करें</button>
+          </div>
+          <input type="text" id="prodSearch" oninput="renderAdminProducts()" placeholder="🔍 कांदा, बटाटा, आंबा, केळी खोजें..." style="margin-bottom:10px;" />
+          <div id="adminProductList"></div>
+        </div>
+      </div>
+
+      <div id="addTab" class="tab-panel hidden">
+        <div class="card">
+          <h3>➕ सिर्फ़ नाम लिखें — फोटो अपने आप लग जाएगी ✨</h3>
+          <label>सामान का नाम लिखें *</label>
+          <input type="text" id="newName" oninput="previewAutoPhoto()" placeholder="उदा. दूध (Milk), ब्रेड, पनीर, आंबा, सफरचंद..." />
+          <div id="autoPhotoPreview" style="margin-top:8px;padding:10px;background:#f0fdf4;border:1px dashed #16a34a;border-radius:12px;font-size:13px;font-weight:800;color:#15803d;text-align:center;">
+            ✨ ऑटो-फोटो प्रीव्यू: नाम लिखते ही फोटो यहाँ दिखेगी
+          </div>
+          <div class="row">
+            <div style="flex:1;"><label>रेट (₹) *</label><input type="number" id="newPrice" placeholder="50" /></div>
+            <div style="flex:1;"><label>वज़न / मात्रा *</label><input type="text" id="newWeight" placeholder="500 ml / 1 kg" /></div>
+          </div>
+          <label>कैटेगरी</label>
+          <select id="newCat">
+            <option value="ताज़ी सब्ज़ियाँ">🥬 ताज़ी सब्ज़ियाँ</option>
+            <option value="पत्तेदार & तड़का">🌿 पत्तेदार & तड़का</option>
+            <option value="ताज़े फल">🍎 ताज़े फल</option>
+            <option value="डेयरी & किराना">🥛 डेयरी & किराना</option>
+          </select>
+          <button class="btn" style="margin-top:14px;" onclick="addNewProduct()">✅ 1-Click में जोड़ें और लाइव करें</button>
+        </div>
+      </div>
+
+      <div id="festivalTab" class="tab-panel hidden">
+        <div class="card">
+          <h3>🎉 त्योहार बैनर चुनें (1-Click Live)</h3>
+          <label>कौन सा त्योहार बैनर लगाना है?</label>
+          <select id="festSelect" onchange="applyFestivalPreset()">
+            <option value="normal">⚡ सामान्य डेली ऑफर (₹199 फ्री डिलीवरी)</option>
+            <option value="diwali">🪔 दिवाली महा-धमाका ऑफर</option>
+            <option value="ganpati">🌺 गणपति बप्पा स्पेशल ऑफर</option>
+            <option value="holi">🎨 होली रंगों भरा ऑफर</option>
+            <option value="navratri">🔱 नवरात्रि उपवास फल स्पेशल</option>
+            <option value="rakhi">🧵 रक्षाबंधन स्पेशल ऑफर</option>
+            <option value="sankranti">🪁 मकर संक्रांति तिल-गुड़ ऑफर</option>
+          </select>
+          <label>बैनर की मुख्य लाइन</label>
+          <input type="text" id="setBanner" value="🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!" />
+          <label>कूपन कोड</label>
+          <input type="text" id="setCoupon" value="JHATPAT20" />
+          <button class="btn" style="margin-top:14px;" onclick="saveSettingsToCloud()">🎉 बैनर तुरंत लाइव करें</button>
+        </div>
+      </div>
+
+      <div id="settingsTab" class="tab-panel hidden">
+        <div class="card">
+          <h3>⚙️ मास्टर दुकान सेटिंग्स</h3>
+          <label>ब्रांड नाम</label>
+          <input type="text" id="setBrand" value="Jhatpat" />
+          <label>आपका WhatsApp नंबर (91 के साथ) *</label>
+          <input type="text" id="setWa" placeholder="9198XXXXXXXX" />
+          <label>सर्विस एरिया पिनकोड (डोंबिवली-कल्याण)</label>
+          <input type="text" id="setPins" value="421201, 421202, 421203, 421301" />
+          <div class="row">
+            <div style="flex:1;"><label>फ्री डिलीवरी लिमिट (₹)</label><input type="number" id="setFreeMin" value="199" /></div>
+            <div style="flex:1;"><label>डिलीवरी चार्ज (₹)</label><input type="number" id="setDelCharge" value="20" /></div>
+          </div>
+          <label>कूपन छूट (₹)</label>
+          <input type="number" id="setDiscount" value="20" />
+          <button class="btn btn-dark" style="margin-top:16px;" onclick="saveSettingsToCloud()">💾 सभी सेटिंग्स सेव करें</button>
+        </div>
       </div>
     </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-green-600"><p class="text-[11px] text-gray-500 font-bold">कुल बिक्री</p><p class="text-xl font-black">₹<span id="statRevenue">0</span></p></div>
-      <div class="bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-yellow-500"><p class="text-[11px] text-gray-500 font-bold">शुद्ध मुनाफ़ा (25%)</p><p class="text-xl font-black text-green-700">₹<span id="statProfit">0</span></p></div>
-      <div class="bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-blue-600"><p class="text-[11px] text-gray-500 font-bold">कुल ऑर्डर्स</p><p class="text-xl font-black" id="statOrders">0</p></div>
-      <div class="bg-white p-3.5 rounded-2xl shadow-sm border-l-4 border-purple-600"><p class="text-[11px] text-gray-500 font-bold">राइडर COD कैश</p><p class="text-xl font-black text-purple-700">₹<span id="statCod">0</span></p></div>
-    </div>
-
-    <div class="bg-white p-4 rounded-2xl shadow-sm">
-      <h3 class="font-extrabold text-sm text-gray-900 mb-3">⚡ 1-क्लिक लाइव स्विच & सिस्टम डॉक्टर</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-        <button onclick="toggleSetting('storeOpen')" id="btnStoreOpen" class="p-2.5 rounded-xl font-bold text-xs text-white bg-green-600">🏪 दुकान: OPEN</button>
-        <button onclick="toggleSetting('flashSale')" id="btnFlashSale" class="p-2.5 rounded-xl font-bold text-xs bg-gray-200">🔥 Flash Sale: बंद</button>
-        <button onclick="toggleSetting('rainSurge')" id="btnRainSurge" class="p-2.5 rounded-xl font-bold text-xs bg-gray-200">🌧️ बारिश Surge: बंद</button>
-        <button onclick="startVoiceCommand()" class="p-2.5 rounded-xl font-bold text-xs text-white bg-indigo-600">🎙️ बोलकर रेट बदलें</button>
-        <button onclick="autoRepairSystem()" class="p-2.5 rounded-xl font-extrabold text-xs text-white bg-rose-600">🔧 Auto-Repair</button>
-      </div>
-      <p id="voiceStatus" class="text-xs text-indigo-700 font-bold mt-2 hidden"></p>
-    </div>
-
-    <div class="bg-white p-4 rounded-2xl shadow-sm">
-      <h3 class="font-extrabold text-sm text-gray-900 mb-3">🎨 दुकान की सेटिंग्स, WhatsApp, UPI और Firebase सिंक</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div><label class="font-bold">ऐप नाम:</label><input type="text" id="cfgBrandName" class="w-full border rounded-xl px-3 py-2 mt-1 font-bold" /></div>
-        <div><label class="font-bold">मुख्य रंग:</label><input type="color" id="cfgBrandColor" class="w-full h-9 border rounded-xl px-1 py-1 mt-1" /></div>
-        <div><label class="font-bold">लोकेशन:</label><input type="text" id="cfgLocationText" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">चालू पिनकोड:</label><input type="text" id="cfgAllowedPincodes" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">WhatsApp नंबर (91 सहित):</label><input type="text" id="cfgWhatsapp" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">आपका UPI ID:</label><input type="text" id="cfgUpiId" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div class="sm:col-span-2"><label class="font-bold">मुख्य बैनर हेडिंग:</label><input type="text" id="cfgBannerTitle" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">Admin पासवर्ड:</label><input type="text" id="cfgAdminPass" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">फ्री डिलीवरी लिमिट ₹:</label><input type="number" id="cfgFreeMin" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">डिलीवरी चार्ज ₹:</label><input type="number" id="cfgDelCharge" class="w-full border rounded-xl px-3 py-2 mt-1" /></div>
-        <div><label class="font-bold">कूपन कोड & छूट ₹:</label><div class="flex gap-1 mt-1"><input type="text" id="cfgCouponCode" class="w-2/3 border rounded-xl px-2 py-2 uppercase" /><input type="number" id="cfgCouponDiscount" class="w-1/3 border rounded-xl px-2 py-2" /></div></div>
-        <div class="sm:col-span-3"><label class="font-bold text-blue-700">🌐 Firebase Realtime Database URL:</label><input type="text" id="firebaseUrlInput" placeholder="https://firebaseio.com" class="w-full border border-blue-300 rounded-xl px-3 py-2 mt-1" /></div>
-      </div>
-      <button onclick="saveAllConfig()" class="mt-3 bg-gray-900 text-yellow-400 font-extrabold px-6 py-3 rounded-xl text-xs shadow">💾 सभी सेटिंग्स सेव करें</button>
-    </div>
-
-    <div class="bg-white p-4 rounded-2xl shadow-sm">
-      <h3 class="font-extrabold text-sm text-green-800 mb-3">➕ नया प्रोडक्ट / सब्ज़ी & फोटो जोड़ें</h3>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-        <input type="text" id="newProdName" placeholder="सब्ज़ी / सामान का नाम" class="border rounded-xl px-3 py-2" />
-        <input type="number" id="newProdPrice" placeholder="रेट ₹" class="border rounded-xl px-3 py-2" />
-        <input type="text" id="newProdWeight" placeholder="वजन (1 kg / 500 g)" class="border rounded-xl px-3 py-2" />
-        <select id="newProdCat" class="border rounded-xl px-3 py-2"><option>🥬 ताज़ी सब्ज़ियाँ</option><option>🍎 ताज़े फल</option><option>🥛 डेयरी & किराना</option></select>
-        <input type="text" id="newProdImgUrl" placeholder="फोटो लिंक (URL)" class="border rounded-xl px-3 py-2" />
-        <input type="file" id="newProdImgFile" accept="image/*" onchange="previewFile(event)" class="border rounded-xl p-1.5" />
-      </div>
-      <button onclick="addProduct()" class="w-full bg-green-700 text-white font-extrabold py-2.5 rounded-xl mt-3 text-xs shadow">✅ लिस्ट में जोड़ें</button>
-    </div>
-
-    <div class="bg-white p-4 rounded-2xl shadow-sm"><h3 class="font-extrabold text-sm mb-3">📦 सभी सामान के रेट बदलें या हटाएं</h3><div id="adminProductList" class="space-y-2"></div></div>
-    <div class="bg-white p-4 rounded-2xl shadow-sm"><h3 class="font-extrabold text-sm mb-3">📋 सभी लाइव ऑर्डर्स</h3><div id="adminOrdersList" class="space-y-2 text-xs"></div></div>
   </div>
   <script>
-        const defaultProducts = [
-      { id: 1, name: "ताज़ा लाल टमाटर", price: 32, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
-      { id: 2, name: "नया आलू", price: 28, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
-      { id: 3, name: "प्याज़ (Onion)", price: 35, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
-      { id: 4, name: "हरा धनिया", price: 15, weight: "100 g", category: "🥬 ताज़ी सब्ज़ियाँ", tag: "ताज़ा", inStock: true, img: "https://unsplash.com" },
-      { id: 5, name: "केला (Banana)", price: 45, weight: "6 pcs", category: "🍎 ताज़े फल", tag: "मीठा", inStock: true, img: "https://unsplash.com" },
-      { id: 6, name: "अमूल ताज़ा दूध", price: 27, weight: "500 ml", category: "🥛 डेयरी & किराना", tag: "डेयरी", inStock: true, img: "https://unsplash.com" }
+    const FIREBASE_URL = "https://firebaseio.com";
+    const ADMIN_PASSWORD = "MOHIT@001";
+
+    const rawCatalog = [
+      ["कांदा (प्याज़ / Onion)", 35, "1 kg", "ताज़ी सब्ज़ियाँ", "🧅"],
+      ["बटाटा (नया आलू / Potato)", 28, "1 kg", "ताज़ी सब्ज़ियाँ", "🥔"],
+      ["ताज़ा लाल टमाटर (Tomato)", 32, "1 kg", "ताज़ी सब्ज़ियाँ", "🍅"],
+      ["भेंडी (भिंडी / Lady Finger)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥬"],
+      ["गवार (ग्वार फली / Cluster Beans)", 30, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
+      ["वांगी (काटेरी बैंगन / Brinjal)", 24, "500 g", "ताज़ी सब्ज़ियाँ", "🍆"],
+      ["मोठा वांगा (भरता बैंगन)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🍆"],
+      ["फ्लॉवर (फूलगोभी / Cauliflower)", 35, "1 नग", "ताज़ी सब्ज़ियाँ", "🥦"],
+      ["कोबी (पत्तागोभी / Cabbage)", 25, "1 नग", "ताज़ी सब्ज़ियाँ", "🥬"],
+      ["तोंडली (कुंदरू / Tendli)", 22, "250 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["दुधी भोपळा (लौकी / Bottle Gourd)", 30, "1 नग", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["लाल भोपळा (कद्दू / Red Pumpkin)", 20, "500 g", "ताज़ी सब्ज़ियाँ", "🎃"],
+      ["कारली (करेला / Bitter Gourd)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["दोडका (तुरई / Ridge Gourd)", 26, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["घोसाळी (गिलकी / Sponge Gourd)", 24, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["पडवळ (चिचिंडा / Snake Gourd)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["शेवग्याच्या शेंगा (Drumstick)", 20, "250 g", "ताज़ी सब्ज़ियाँ", "🥢"],
+      ["शिमला मिरची (Capsicum)", 30, "500 g", "ताज़ी सब्ज़ियाँ", "🫑"],
+      ["गाजर (लाल गाजर / Carrot)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥕"],
+      ["काकडी (खीरा / Cucumber)", 22, "500 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["बीट (चुकंदर / Beetroot)", 20, "500 g", "ताज़ी सब्ज़ियाँ", "🟣"],
+      ["मुळा (सफेद मूली / Radish)", 18, "500 g", "ताज़ी सब्ज़ियाँ", "🥕"],
+      ["फरसबी (फ्रेंच बीन्स / French Beans)", 32, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
+      ["घेवडा (वाल पापड़ी / Broad Beans)", 30, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
+      ["चवळीच्या शेंगा (लोबिया फली)", 25, "250 g", "ताज़ी सब्ज़ियाँ", "🫛"],
+      ["हिरवा वाटाणा (हरा मटर / Green Peas)", 40, "500 g", "ताज़ी सब्ज़ियाँ", "🫛"],
+      ["सुरण (जिमीकंद / Yam)", 35, "500 g", "ताज़ी सब्ज़ियाँ", "🥔"],
+      ["रताळे (शकरकंद / Sweet Potato)", 28, "500 g", "ताज़ी सब्ज़ियाँ", "🍠"],
+      ["अरवी (घुइयां / Colocasia)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🥔"],
+      ["कच्ची केळी (कच्चा केला / Raw Banana)", 25, "4 नग", "ताज़ी सब्ज़ियाँ", "🍌"],
+      ["कच्चा फणस (कटहल / Raw Jackfruit)", 35, "500 g", "ताज़ी सब्ज़ियाँ", "🍈"],
+      ["मक्याचे कणीस (भुट्टा / Sweet Corn)", 20, "2 नग", "ताज़ी सब्ज़ियाँ", "🌽"],
+      ["मशरूम (Button Mushroom)", 45, "200 g पैक", "ताज़ी सब्ज़ियाँ", "🍄"],
+      ["बेबी कॉर्न (Baby Corn)", 40, "200 g पैक", "ताज़ी सब्ज़ियाँ", "🌽"],
+      ["ब्रोकोली (Broccoli)", 50, "1 नग", "ताज़ी सब्ज़ियाँ", "🥦"],
+      ["लाल पिवळी शिमला मिरची (Bell Pepper)", 60, "250 g", "ताज़ी सब्ज़ियाँ", "🫑"],
+      ["कांदा पात (हरा प्याज़ / Spring Onion)", 15, "1 जुडी", "ताज़ी सब्ज़ियाँ", "🧅"],
+      ["लसूण पात (हरा लहसुन / Green Garlic)", 20, "1 जुडी", "ताज़ी सब्ज़ियाँ", "🧄"],
+      ["परवल (Parwal)", 28, "250 g", "ताज़ी सब्ज़ियाँ", "🥒"],
+      ["कंटोळी (ककोड़ा / Spiny Gourd)", 40, "250 g", "ताज़ी सब्ज़ियाँ", "🟢"],
+      ["कच्ची कैरी (कच्चा आम / Raw Mango)", 25, "250 g", "ताज़ी सब्ज़ियाँ", "🥭"],
+      ["आवळा (आंवला / Amla)", 20, "250 g", "ताज़ी सब्ज़ियाँ", "🟢"],
+      ["ओला नारळ (ताज़ा नारियल / Coconut)", 32, "1 नग", "ताज़ी सब्ज़ियाँ", "🥥"],
+      ["चेरी टमाटर (Cherry Tomato)", 45, "250 g", "ताज़ी सब्ज़ियाँ", "🍅"],
+      ["कोहळा (सफेद पेठा / Ash Gourd)", 25, "500 g", "ताज़ी सब्ज़ियाँ", "🍈"],
+      ["कोथिंबीर (हरा धनिया / Coriander)", 15, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["मेथी भाजी (Fresh Methi)", 20, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["पालक भाजी (Fresh Palak)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
+      ["शेपू भाजी (सोया साग / Dill Leaves)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["लाल माठ (लाल चौलाई / Red Amaranth)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
+      ["हिरवा माठ (हरी चौलाई / Green Amaranth)", 18, "1 जुडी", "पत्तेदार & तड़का", "🥬"],
+      ["पुदिना (ताज़ा पुदीना / Mint)", 10, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["कढीपत्ता (कड़ी पत्ता / Curry Leaves)", 10, "1 पैक", "पत्तेदार & तड़का", "🍃"],
+      ["अळूची पाने (अरबी के पत्ते / Patra)", 20, "5 पत्ते", "पत्तेदार & तड़का", "🍃"],
+      ["अंबाडी भाजी (खट्टी भाजी / Sorrel)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["चवळी भाजी (लोबिया पत्ता)", 18, "1 जुडी", "पत्तेदार & तड़का", "🌿"],
+      ["हिरवी मिरची (तीखी हरी मिर्च)", 15, "100 g", "पत्तेदार & तड़का", "🌶️"],
+      ["आलं (ताज़ा अदरक / Ginger)", 20, "100 g", "पत्तेदार & तड़का", "🫚"],
+      ["लसूण (लहसुन / Garlic)", 30, "100 g", "पत्तेदार & तड़का", "🧄"],
+      ["लिंबू (ताज़ा नींबू / Lemon)", 15, "4 नग", "पत्तेदार & तड़का", "🍋"],
+      ["केळी (ताज़ा केला / Robusta Banana)", 45, "1 दर्जन", "ताज़े फल", "🍌"],
+      ["वेलची केळी (इलायची केला / Yelakki)", 55, "1 दर्जन", "ताज़े फल", "🍌"],
+      ["सफरचंद (कश्मीरी सेब / Apple)", 120, "1 kg", "ताज़े फल", "🍎"],
+      ["डाळिंब (ताज़ा अनार / Pomegranate)", 110, "1 kg", "ताज़े फल", "🍎"],
+      ["चिकू (डहाणू चीकू / Sapota)", 50, "500 g", "ताज़े फल", "🥔"],
+      ["पपई (पपीता / Papaya)", 45, "1 नग (Approx 1kg)", "ताज़े फल", "🍈"],
+      ["कलिंगड (तरबूज / Watermelon)", 55, "1 नग (Approx 2kg)", "ताज़े फल", "🍉"],
+      ["खरबूज (Muskmelon)", 45, "1 नग", "ताज़े फल", "🍈"],
+      ["संत्री (नागपुर संतरा / Orange)", 60, "500 g", "ताज़े फल", "🍊"],
+      ["मोसंबी (Sweet Lime)", 55, "500 g", "ताज़े फल", "🍋"],
+      ["हिरवी द्राक्षे (हरे अंगूर / Green Grapes)", 50, "500 g", "ताज़े फल", "🍇"],
+      ["काळी द्राक्षे (काले अंगूर / Black Grapes)", 65, "500 g", "ताज़े फल", "🍇"],
+      ["पेरू (इलाहाबादी अमरूद / Guava)", 40, "500 g", "ताज़े फल", "🍐"],
+      ["अननस (अनानास / Pineapple)", 55, "1 नग", "ताज़े फल", "🍍"],
+      ["सिताफळ (शरीफा / Custard Apple)", 60, "500 g", "ताज़े फल", "🍏"],
+      ["हापूस आंबा (अल्फांसो आम / Mango)", 250, "6 नग", "ताज़े फल", "🥭"],
+      ["किवी (Fresh Kiwi)", 75, "3 नग पैक", "ताज़े फल", "🥝"],
+      ["ड्रॅगन फ्रूट (Dragon Fruit)", 70, "1 नग", "ताज़े फल", "🐉"],
+      ["स्ट्रॉबेरी (महाबलेश्वर Strawberry)", 65, "1 बॉक्स", "ताज़े फल", "🍓"],
+      ["नारळ पाणी (हरा नारियल पानी)", 45, "1 नग", "ताज़े फल", "🥥"]
     ];
-
-    const defaultConfig = {
-      brandName: "Jhatpat", deliveryTag: "⚡ 10 MIN", brandColor: "#0c831f", locationText: "📍 डोंबिवली - कल्याण (421201)",
-      allowedPincodes: "421201, 421202, 421203, 421301", whatsapp: "919999999999", upiId: "jhatpatstore@upi",
-      bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!", adminPass: "MOHIT@001", storeOpen: true, flashSale: false, rainSurge: false,
-      freeMin: 199, delCharge: 20, couponCode: "JHATPAT20", couponDiscount: 20,
-      tickerText: "⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और किराना डिलीवरी!",
-      categories: ["🥬 ताज़ी सब्ज़ियाँ", "🍎 ताज़े फल", "🥛 डेयरी & किराना"], customSections: []
-    };
-    
-    let config = JSON.parse(localStorage.getItem('jhatpat_self_config')) || { ...defaultConfig };
-    let products = JSON.parse(localStorage.getItem('jhatpat_products')) || [...defaultProducts];
-    let orders = JSON.parse(localStorage.getItem('jhatpat_orders')) || [];
-    let firebaseUrl = localStorage.getItem('jhatpat_firebase_url') || "";
-    let uploadedBase64Img = "";
-
-    function saveLocal() {
-      localStorage.setItem('jhatpat_self_config', JSON.stringify(config));
-      localStorage.setItem('jhatpat_products', JSON.stringify(products));
-      localStorage.setItem('jhatpat_orders', JSON.stringify(orders));
+    function detectAutoEmoji(name) {
+      const n = String(name).toLowerCase();
+      const map = [
+        [["टमाटर", "tomato"], "🍅"], [["आलू", "बटाटा", "potato"], "🥔"], [["प्याज़", "कांदा", "onion"], "🧅"],
+        [["धनिया", "कोथिंबीर", "मेथी", "पालक", "coriander", "methi", "palak", "पुदिना"], "🌿"],
+        [["मिर्च", "मिरची", "chilli"], "🌶️"], [["शिमला", "capsicum"], "🫑"], [["गाजर", "carrot"], "🥕"],
+        [["बैंगन", "वांगी", "brinjal"], "🍆"], [["फूलगोभी", "फ्लॉवर", "ब्रोकोली", "cauliflower", "broccoli"], "🥦"],
+        [["खीरा", "काकडी", "करेला", "कारली", "लौकी", "दुधी", "cucumber"], "🥒"],
+        [["मटर", "वाटाणा", "गवार", "बीन्स", "beans", "peas"], "🫛"], [["भुट्टा", "मक्का", "corn"], "🌽"],
+        [["मशरूम", "mushroom"], "🍄"], [["अदरक", "आलं", "ginger"], "🫚"], [["लहसुन", "लसूण", "garlic"], "🧄"],
+        [["नींबू", "लिंबू", "मोसंबी", "lemon"], "🍋"], [["संतरा", "संत्री", "orange"], "🍊"],
+        [["आम", "आंबा", "हापूस", "कैरी", "mango"], "🥭"], [["केला", "केळी", "banana"], "🍌"],
+        [["सेब", "सफरचंद", "अनार", "डाळिंब", "apple", "pomegranate"], "🍎"],
+        [["अंगूर", "द्राक्षे", "grapes"], "🍇"], [["तरबूज", "कलिंगड", "watermelon"], "🍉"],
+        [["अनानास", "अननस", "pineapple"], "🍍"], [["स्ट्रॉबेरी", "strawberry"], "🍓"],
+        [["किवी", "kiwi"], "🥝"], [["नारियल", "नारळ", "coconut"], "🥥"],
+        [["दूध", "milk", "दही", "curd", "छाछ"], "🥛"], [["ब्रेड", "पाव", "bread"], "🍞"],
+        [["पनीर", "चीज़", "paneer", "cheese"], "🧀"], [["अंडा", "अंडे", "egg"], "🥚"],
+        [["चावल", "तांदूळ", "rice"], "🍚"], [["तेल", "oil", "घी", "ghee"], "🫗"],
+        [["आटा", "गेंहू", "दाल", "शक्कर", "चीनी", "नमक", "atta", "dal", "sugar"], "🛍️"]
+      ];
+      for (const [keys, em] of map) {
+        if (keys.some(k => n.includes(k))) return em;
+      }
+      return "🛒";
     }
 
-    async function pushToCloud() {
-      saveLocal();
-      if (!firebaseUrl) return;
-      try {
-        await fetch(firebaseUrl + "/selfMasterData.json", { method: "PUT", body: JSON.stringify({ config: config, products: products, orders: orders }) });
-      } catch (e) {}
+    function previewAutoPhoto() {
+      const name = document.getElementById("newName").value.trim();
+      const box = document.getElementById("autoPhotoPreview");
+      if (!name) {
+        box.innerText = "✨ ऑटो-फोटो प्रीव्यू: नाम लिखते ही फोटो यहाँ दिखेगी";
+        return;
+      }
+      const em = detectAutoEmoji(name);
+      box.innerHTML = `<span style="font-size:32px;display:block;">${em}</span>ऑटो-फोटो तैयार है: "${name}"`;
     }
 
-    async function syncFromCloud() {
-      if (!firebaseUrl) return;
+    function buildDefaultList() {
+      return rawCatalog.map((item, idx) => ({
+        id: 1001 + idx, name: item[0], price: item[1], weight: item[2], category: item[3], emoji: item[4], inStock: true
+      }));
+    }
+
+    let allProducts = buildDefaultList();
+    let allOrders = {};
+    let settings = { brandName: "Jhatpat", whatsapp: "919999999999", allowedPincodes: "421201, 421202, 421203, 421301", bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!", bannerTheme: "normal", freeMin: 199, delCharge: 20, couponCode: "JHATPAT20", couponDiscount: 20, storeOpen: true };
+
+    function checkLogin() {
+      const val = document.getElementById("adminPass").value.trim();
+      if (val === ADMIN_PASSWORD) {
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("appBox").classList.remove("hidden");
+        syncFromFirebase();
+      } else {
+        alert("❌ गलत पासवर्ड! कृपया MOHIT@001 डालें।");
+      }
+    }
+
+    function openTab(id, btn) {
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    async function autoHealSystem(manual = false) {
+      let fixedCount = 0;
+      if (!Array.isArray(allProducts) || allProducts.length === 0) {
+        allProducts = buildDefaultList();
+        fixedCount++;
+      }
+      allProducts = allProducts.filter(p => p && p.name).map((p, i) => {
+        if (!p.id) { p.id = 2000 + i; fixedCount++; }
+        if (!p.price || isNaN(Number(p.price)) || Number(p.price) <= 0) { p.price = 25; fixedCount++; }
+        if (!p.weight) { p.weight = "1 unit"; fixedCount++; }
+        if (!p.category) { p.category = "ताज़ी सब्ज़ियाँ"; fixedCount++; }
+        if (!p.emoji) { p.emoji = detectAutoEmoji(p.name); fixedCount++; }
+        return p;
+      });
+      if (!settings.brandName) { settings.brandName = "Jhatpat"; fixedCount++; }
+      if (!settings.freeMin) { settings.freeMin = 199; fixedCount++; }
+      await saveProductsToCloud(true);
+      await saveSettingsToCloud(true);
+      renderAdminProducts();
+      if (manual) alert(fixedCount > 0 ? `🛡️ Auto-Fix पूरा! ${fixedCount} गड़बड़ियाँ अपने आप ठीक कर दी गईं।` : "✅ सिस्टम 100% स्वस्थ है, कोई खराबी नहीं मिली!");
+    }
+
+    async function syncFromFirebase() {
       try {
-        const res = await fetch(firebaseUrl + "/selfMasterData.json");
+        const res = await fetch(`${FIREBASE_URL}/.json`);
         const data = await res.json();
         if (data) {
-          if (data.config) config = Object.assign({}, defaultConfig, data.config);
-          if (data.products) products = data.products;
-          if (data.orders) orders = data.orders;
-          saveLocal();
-          renderAll();
-        }
-      } catch (e) {}
-    }
-
-    function loginAdmin() {
-      const pass = document.getElementById('adminPassInput').value.trim();
-      if (pass === (config.adminPass || "admin123")) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboardScreen').classList.remove('hidden');
-        renderAll();
-        syncFromCloud();
-      } else {
-        alert("❌ गलत पासवर्ड!");
-      }
-    }
-
-    function toggleSetting(key) { config[key] = !config[key]; pushToCloud(); renderAll(); }
-
-    function saveAllConfig() {
-      config.brandName = document.getElementById('cfgBrandName').value.trim() || "Jhatpat";
-      config.brandColor = document.getElementById('cfgBrandColor').value;
-      config.locationText = document.getElementById('cfgLocationText').value.trim();
-      config.allowedPincodes = document.getElementById('cfgAllowedPincodes').value.trim();
-      config.whatsapp = document.getElementById('cfgWhatsapp').value.trim();
-      config.upiId = document.getElementById('cfgUpiId').value.trim();
-      config.bannerTitle = document.getElementById('cfgBannerTitle').value.trim();
-      config.adminPass = document.getElementById('cfgAdminPass').value.trim() || "admin123";
-      config.freeMin = Number(document.getElementById('cfgFreeMin').value) || 199;
-      config.delCharge = Number(document.getElementById('cfgDelCharge').value) || 20;
-      config.couponCode = document.getElementById('cfgCouponCode').value.trim().toUpperCase();
-      config.couponDiscount = Number(document.getElementById('cfgCouponDiscount').value) || 20;
-      firebaseUrl = document.getElementById('firebaseUrlInput').value.trim().replace(/\/$/, "");
-      localStorage.setItem('jhatpat_firebase_url', firebaseUrl);
-      pushToCloud();
-      alert("✅ सभी सेटिंग्स सेव हो गईं!");
-    }
-
-    function previewFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) { uploadedBase64Img = e.target.result; };
-      reader.readAsDataURL(file);
-    }
-
-    function addProduct() {
-      const name = document.getElementById('newProdName').value.trim();
-      const price = Number(document.getElementById('newProdPrice').value);
-      const weight = document.getElementById('newProdWeight').value.trim() || "1 kg";
-      const category = document.getElementById('newProdCat').value;
-      const imgUrl = document.getElementById('newProdImgUrl').value.trim();
-      if (!name || !price) { alert("⚠️ नाम और रेट लिखें!"); return; }
-      products.push({ id: Date.now(), name: name, price: price, weight: weight, category: category, inStock: true, img: uploadedBase64Img || imgUrl || "https://placeholder.com" });
-      pushToCloud(); renderAll();
-      document.getElementById('newProdName').value = "";
-      document.getElementById('newProdPrice').value = "";
-      document.getElementById('newProdWeight').value = "";
-      document.getElementById('newProdImgUrl').value = "";
-      document.getElementById('newProdImgFile').value = "";
-      uploadedBase64Img = "";
-      alert("✅ नया सामान जुड़ गया!");
-    }
-
-    function updateProductPrice(id, newPrice) {
-      const item = products.find(p => p.id === id);
-      if (item && Number(newPrice) > 0) { item.price = Number(newPrice); pushToCloud(); }
-    }
-
-    function toggleStock(id) {
-      const item = products.find(p => p.id === id);
-      if (item) { item.inStock = !item.inStock; pushToCloud(); renderAll(); }
-    }
-
-    function deleteProduct(id) {
-      if (!confirm("हटाना चाहते हैं?")) return;
-      products = products.filter(p => p.id !== id);
-      pushToCloud(); renderAll();
-    }
-
-    function updateOrderStatus(id, status) {
-      const order = orders.find(o => o.id === id);
-      if (order) { order.status = status; pushToCloud(); renderAll(); }
-    }
-
-    function autoRepairSystem() {
-      runSelfHealingDoctor();
-      pushToCloud();
-      renderAll();
-      alert("✅ सिस्टम ऑटो-रिपेयर हो गया!");
-    }
-    function startVoiceCommand() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const statusEl = document.getElementById('voiceStatus');
-      if (!SpeechRecognition) { alert("⚠️ वॉइस कमांड उपलब्ध नहीं है।"); return; }
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN';
-      statusEl.classList.remove('hidden');
-      statusEl.innerText = "🎙️ बोलें (जैसे: 'आलू 30')...";
-      recognition.onresult = function(event) {
-        const text = event.results[0][0].transcript;
-        const numMatch = text.match(/\d+/);
-        if (numMatch) {
-          const newPrice = Number(numMatch[0]);
-          const found = products.find(p => text.includes(p.name.split(' ')[0]));
-          if (found) {
-            found.price = newPrice; pushToCloud(); renderAll();
-            statusEl.innerText = "✅ अपडेट: " + found.name + " ₹" + newPrice;
-            return;
+          if (data.settings) {
+            settings = { ...settings, ...data.settings };
+            fillSettingsForm();
           }
+          if (data.master_products && Array.isArray(data.master_products) && data.master_products.length > 0) {
+            allProducts = data.master_products;
+          } else {
+            await saveProductsToCloud(true);
+          }
+          allOrders = data.orders || {};
         }
-        statusEl.innerText = "❓ सुना: " + text;
-      };
-      recognition.start();
-    }
-
-    function exportOrdersCSV() {
-      if (orders.length === 0) { alert("⚠️ कोई ऑर्डर नहीं है।"); return; }
-      let csv = "Order ID,Customer,Phone,Address,Total,Status\n";
-      orders.forEach(o => { csv += o.id + "," + (o.customerName || "") + "," + (o.phone || "") + "," + (o.address || "").replace(/,/g, " ") + "," + o.total + "," + (o.status || "Pending") + "\n"; });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "Jhatpat_Hisab.csv";
-      link.click();
-    }
-
-    function renderAll() {
-      document.getElementById('cfgBrandName').value = config.brandName;
-      document.getElementById('cfgBrandColor').value = config.brandColor;
-      document.getElementById('cfgLocationText').value = config.locationText;
-      document.getElementById('cfgAllowedPincodes').value = config.allowedPincodes;
-      document.getElementById('cfgWhatsapp').value = config.whatsapp;
-      document.getElementById('cfgUpiId').value = config.upiId;
-      document.getElementById('cfgBannerTitle').value = config.bannerTitle;
-      document.getElementById('cfgAdminPass').value = config.adminPass;
-      document.getElementById('cfgFreeMin').value = config.freeMin;
-      document.getElementById('cfgDelCharge').value = config.delCharge;
-      document.getElementById('cfgCouponCode').value = config.couponCode;
-      document.getElementById('cfgCouponDiscount').value = config.couponDiscount;
-      document.getElementById('firebaseUrlInput').value = firebaseUrl;
-
-      const btnStore = document.getElementById('btnStoreOpen');
-      btnStore.innerText = config.storeOpen ? "🏪 दुकान: OPEN" : "🔒 दुकान: CLOSED";
-      btnStore.className = "p-2.5 rounded-xl font-bold text-xs text-white " + (config.storeOpen ? "bg-green-600" : "bg-red-600");
-
-      const btnFlash = document.getElementById('btnFlashSale');
-      btnFlash.innerText = config.flashSale ? "🔥 Flash Sale: चालू" : "🔥 Flash Sale: बंद";
-      btnFlash.className = "p-2.5 rounded-xl font-bold text-xs " + (config.flashSale ? "bg-orange-500 text-white" : "bg-gray-200");
-
-      const btnRain = document.getElementById('btnRainSurge');
-      btnRain.innerText = config.rainSurge ? "🌧️ बारिश Surge: चालू" : "🌧️ बारिश Surge: बंद";
-      btnRain.className = "p-2.5 rounded-xl font-bold text-xs " + (config.rainSurge ? "bg-blue-600 text-white" : "bg-gray-200");
-
-      let totalRev = 0, codCash = 0;
-      orders.forEach(o => {
-        const amt = Number(o.total) || 0;
-        totalRev += amt;
-        if (!o.paymentMethod || o.paymentMethod === "COD") codCash += amt;
-      });
-      document.getElementById('statRevenue').innerText = totalRev;
-      document.getElementById('statProfit').innerText = Math.round(totalRev * 0.25);
-      document.getElementById('statOrders').innerText = orders.length;
-      document.getElementById('statCod').innerText = codCash;
-
-      document.getElementById('adminProductList').innerHTML = products.map(p => 
-        '<div class="flex flex-wrap justify-between items-center p-2.5 border rounded-xl bg-gray-50 gap-2">' +
-          '<div><p class="font-bold text-xs">' + p.name + ' <span class="text-gray-500">(' + p.weight + ')</span></p><p class="text-[11px] text-gray-500">' + p.category + '</p></div>' +
-          '<div class="flex items-center gap-1.5">' +
-            '<span class="text-xs font-bold">₹</span>' +
-            '<input type="number" value="' + p.price + '" onchange="updateProductPrice(' + p.id + ', this.value)" class="w-16 border rounded-lg px-2 py-1 text-xs font-bold text-center bg-white" />' +
-            '<button onclick="toggleStock(' + p.id + ')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-white ' + (p.inStock ? 'bg-green-600' : 'bg-red-500') + '">' + (p.inStock ? 'In Stock' : 'Out') + '</button>' +
-            '<button onclick="deleteProduct(' + p.id + ')" class="px-2 py-1 bg-gray-800 text-white rounded-lg text-xs">🗑️</button>' +
-          '</div>' +
-        '</div>'
-      ).join('');
-
-      document.getElementById('adminOrdersList').innerHTML = orders.length === 0
-        ? '<p class="text-gray-400 text-center py-4">अभी कोई ऑर्डर नहीं आया है।</p>'
-        : orders.slice().reverse().map(o => 
-          '<div class="p-3 border rounded-xl bg-gray-50 space-y-1">' +
-            '<div class="flex justify-between font-bold"><span>ऑर्डर #' + o.id + ' — ₹' + o.total + '</span><span class="text-blue-700">' + (o.status || 'New Order') + '</span></div>' +
-            '<p class="text-gray-600">👤 ' + (o.customerName || 'ग्राहक') + ' | 📞 ' + (o.phone || '') + '</p>' +
-            '<p class="text-gray-600">📍 ' + (o.address || '') + '</p>' +
-            '<div class="flex gap-1.5 pt-1">' +
-              '<button onclick="updateOrderStatus(' + o.id + ', \'Packing\')" class="px-2.5 py-1 bg-yellow-500 text-white rounded-lg font-bold">📦 Packing</button>' +
-              '<button onclick="updateOrderStatus(' + o.id + ', \'Out for Delivery\')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-bold">🛵 Delivery</button>' +
-              '<button onclick="updateOrderStatus(' + o.id + ', \'Delivered\')" class="px-2.5 py-1 bg-green-600 text-white rounded-lg font-bold">✅ Done</button>' +
-            '</div>' +
-          '</div>'
-        ).join('');
-    }
-
-    function runSelfHealingDoctor() {
-      try {
-        let fixed = false;
-        if (!config || typeof config !== "object") { config = Object.assign({}, defaultConfig); fixed = true; }
-        for (let key in defaultConfig) {
-          if (config[key] === undefined || config[key] === null || config[key] === "") { config[key] = defaultConfig[key]; fixed = true; }
-        }
-        if (!Array.isArray(products) || products.length === 0) {
-          const backup = JSON.parse(localStorage.getItem('jhatpat_backup_products'));
-          products = (Array.isArray(backup) && backup.length > 0) ? backup : [...defaultProducts];
-          fixed = true;
-        }
-        products = products.map((p, idx) => {
-          if (!p.id) { p.id = Date.now() + idx; fixed = true; }
-          if (!p.name) { p.name = "ताज़ा आइटम"; fixed = true; }
-          if (isNaN(Number(p.price)) || Number(p.price) <= 0) { p.price = 20; fixed = true; }
-          if (!p.img) { p.img = "https://placeholder.com"; fixed = true; }
-          return p;
-        });
-        if (!Array.isArray(orders)) { orders = []; fixed = true; }
-        localStorage.setItem('jhatpat_backup_products', JSON.stringify(products));
-        if (fixed) {
-          saveLocal();
-          if (!document.getElementById('dashboardScreen').classList.contains('hidden')) renderAll();
-        }
+        await autoHealSystem(false);
+        renderOrders();
+        updateStoreStatusUI();
       } catch (e) {
-        config = Object.assign({}, defaultConfig);
-        products = [...defaultProducts];
-        saveLocal();
+        renderAdminProducts();
       }
     }
 
-    window.onerror = function() { runSelfHealingDoctor(); return true; };
-    runSelfHealingDoctor();
-    setInterval(runSelfHealingDoctor, 5000);
-    setInterval(syncFromCloud, 10000);
+    function fillSettingsForm() {
+      document.getElementById("setBrand").value = settings.brandName || "Jhatpat";
+      document.getElementById("setWa").value = settings.whatsapp || "";
+      document.getElementById("setPins").value = settings.allowedPincodes || "";
+      document.getElementById("setBanner").value = settings.bannerTitle || "";
+      document.getElementById("festSelect").value = settings.bannerTheme || "normal";
+      document.getElementById("setFreeMin").value = settings.freeMin || 199;
+      document.getElementById("setDelCharge").value = settings.delCharge || 20;
+      document.getElementById("setCoupon").value = settings.couponCode || "JHATPAT20";
+      document.getElementById("setDiscount").value = settings.couponDiscount || 20;
+    }
+
+    function applyFestivalPreset() {
+      const val = document.getElementById("festSelect").value;
+      const presets = {
+        normal: ["🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!", "JHATPAT20"],
+        diwali: ["🪔 शुभ दिवाली! ताज़े फल व सब्ज़ियों पर महा-धमाका छूट + FREE डिलीवरी!", "DIWALI25"],
+        ganpati: ["🌺 गणपति बप्पा मोरया! पूजा फल व ताज़ी सब्ज़ियों पर 10 मिनट डिलीवरी!", "BAPPA20"],
+        holi: ["🎨 होली है! ताज़े फल और ठंडाई सामग्री पर खास त्योहार छूट!", "HOLI20"],
+        navratri: ["🔱 शुभ नवरात्रि! उपवास स्पेशल ताज़े फल (केला, सेब, अनार) तुरंत घर मंगाएं!", "NAVRATRI20"],
+        rakhi: ["🧵 रक्षाबंधन स्पेशल! ताज़े फलों की टोकरी पर ₹25 की सीधी बचत!", "RAKHI25"],
+        sankranti: ["🪁 मकर संक्रांति स्पेशल! भोगी भाजी सामग्री (गवार, वांगी, गाजर, बोरे) ताज़ा स्टॉक!", "SANKRANTI20"]
+      };
+      if (presets[val]) {
+        document.getElementById("setBanner").value = presets[val][0];
+        document.getElementById("setCoupon").value = presets[val][1];
+        settings.bannerTheme = val;
+      }
+    }
+
+    async function runAiCommand() {
+      const cmd = document.getElementById("aiCommandInput").value.trim().toLowerCase();
+      const reply = document.getElementById("aiReply");
+      if (!cmd) return;
+
+      if (cmd.includes("बंद") || cmd.includes("band") || cmd.includes("close")) {
+        settings.storeOpen = false;
+        updateStoreStatusUI();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: दुकान बंद (CLOSED) कर दी गई है और सभी ऐप्स अपडेट हो गए हैं।";
+      } else if (cmd.includes("खोल") || cmd.includes("चालू") || cmd.includes("open")) {
+        settings.storeOpen = true;
+        updateStoreStatusUI();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: दुकान चालू (OPEN) कर दी गई है!";
+      } else if (cmd.includes("दिवाली") || cmd.includes("diwali")) {
+        document.getElementById("festSelect").value = "diwali";
+        applyFestivalPreset();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: दिवाली स्पेशल बैनर और कूपन DIWALI25 लाइव कर दिया गया है!";
+      } else if (cmd.includes("होली") || cmd.includes("holi")) {
+        document.getElementById("festSelect").value = "holi";
+        applyFestivalPreset();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: होली स्पेशल बैनर लाइव कर दिया गया है!";
+      } else if (cmd.includes("गणपति") || cmd.includes("ganpati")) {
+        document.getElementById("festSelect").value = "ganpati";
+        applyFestivalPreset();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: गणपति बप्पा स्पेशल बैनर लाइव कर दिया गया है!";
+      } else if (cmd.includes("सामान्य") || cmd.includes("normal")) {
+        document.getElementById("festSelect").value = "normal";
+        applyFestivalPreset();
+        await saveSettingsToCloud(true);
+        reply.innerText = "🤖 AI: सामान्य डेली ऑफर बैनर वापस लगा दिया गया है!";
+      } else {
+        const numMatch = cmd.match(/\d+/);
+        let foundIdx = allProducts.findIndex(p => cmd.split(" ").some(word => word.length > 2 && p.name.toLowerCase().includes(word)));
+        if (foundIdx !== -1 && numMatch) {
+          const newRate = Number(numMatch);
+          allProducts[foundIdx].price = newRate;
+          await saveProductsToCloud(true);
+          renderAdminProducts();
+          reply.innerText = `🤖 AI: "${allProducts[foundIdx].name}" का नया रेट ₹${newRate} करके लाइव कर दिया गया है!`;
+        } else {
+          await autoHealSystem(false);
+          reply.innerText = "🤖 AI: पूरा सिस्टम चेक व रिपेयर कर दिया गया है। रेट बदलने के लिए लिखें: 'टमाटर 40 करो'";
+        }
+      }
+      document.getElementById("aiCommandInput").value = "";
+    }
+
+    function updateStoreStatusUI() {
+      const isOpen = settings.storeOpen !== false;
+      document.getElementById("storeStatusText").innerText = isOpen ? "● दुकान चालू है (OPEN)" : "● दुकान बंद है (CLOSED)";
+      document.getElementById("storeStatusText").style.color = isOpen ? "#4ade80" : "#f87171";
+      document.getElementById("toggleStoreBtn").innerText = isOpen ? "दुकान बंद" : "दुकान खोलें";
+      document.getElementById("toggleStoreBtn").className = isOpen ? "btn btn-sm btn-red" : "btn btn-sm";
+    }
+
+    async function toggleStore() {
+      settings.storeOpen = settings.storeOpen === false ? true : false;
+      updateStoreStatusUI();
+      await saveSettingsToCloud(true);
+    }
+
+    function renderAdminProducts() {
+      const q = document.getElementById("prodSearch").value.toLowerCase();
+      const box = document.getElementById("adminProductList");
+      box.innerHTML = "";
+      document.getElementById("statItems").innerText = allProducts.length;
+
+      allProducts.forEach((p, index) => {
+        if (!p.name.toLowerCase().includes(q)) return;
+        box.innerHTML += `
+          <div class="item-row">
+            <div style="flex:1;">
+              <b style="font-size:13px;">${p.emoji || "🥬"} ${p.name}</b>
+              <div style="font-size:11px;color:#64748b;">${p.weight} • ${p.category}</div>
+            </div>
+            <input type="number" value="${p.price}" onchange="updatePriceInstant(${index}, this.value)" style="width:65px;padding:6px;text-align:center;font-weight:800;" />
+            <button onclick="toggleStock(${index})" class="btn btn-sm ${p.inStock !== false ? '' : 'btn-red'}">${p.inStock !== false ? 'In' : 'Out'}</button>
+            <button onclick="deleteProduct(${index})" class="btn btn-sm btn-dark">🗑️</button>
+          </div>
+        `;
+      });
+    }
+
+    async function updatePriceInstant(idx, val) {
+      allProducts[idx].price = Number(val) || 10;
+      await saveProductsToCloud(true);
+    }
+
+    async function toggleStock(idx) {
+      allProducts[idx].inStock = allProducts[idx].inStock === false ? true : false;
+      renderAdminProducts();
+      await saveProductsToCloud(true);
+    }
+
+    async function deleteProduct(idx) {
+      if (!confirm(`क्या आप "${allProducts[idx].name}" को हमेशा के लिए हटाना चाहते हैं?`)) return;
+      allProducts.splice(idx, 1);
+      renderAdminProducts();
+      await saveProductsToCloud(true);
+    }
+
+    async function saveProductsToCloud(silent = false) {
+      await fetch(`${FIREBASE_URL}/master_products.json`, { method: "PUT", body: JSON.stringify(allProducts) });
+      if (!silent) alert("✅ सभी रेट और बदलाव एक क्लिक में लाइव अपडेट हो गए!");
+    }
+
+    async function addNewProduct() {
+      const name = document.getElementById("newName").value.trim();
+      const price = Number(document.getElementById("newPrice").value);
+      const weight = document.getElementById("newWeight").value.trim() || "1 unit";
+      const category = document.getElementById("newCat").value;
+      if (!name || !price) return alert("नाम और रेट दोनों भरें!");
+
+      const emoji = detectAutoEmoji(name);
+      allProducts.unshift({ id: Date.now(), name, price, weight, category, emoji, inStock: true });
+      await saveProductsToCloud(false);
+      document.getElementById("newName").value = "";
+      document.getElementById("newPrice").value = "";
+      previewAutoPhoto();
+      renderAdminProducts();
+    }
+
+    async function saveSettingsToCloud(silent = false) {
+      settings = {
+        ...settings,
+        brandName: document.getElementById("setBrand").value.trim(),
+        whatsapp: document.getElementById("setWa").value.trim(),
+        allowedPincodes: document.getElementById("setPins").value.trim(),
+        bannerTitle: document.getElementById("setBanner").value.trim(),
+        bannerTheme: document.getElementById("festSelect").value,
+        freeMin: Number(document.getElementById("setFreeMin").value),
+        delCharge: Number(document.getElementById("setDelCharge").value),
+        couponCode: document.getElementById("setCoupon").value.trim().toUpperCase(),
+        couponDiscount: Number(document.getElementById("setDiscount").value)
+      };
+      await fetch(`${FIREBASE_URL}/settings.json`, { method: "PUT", body: JSON.stringify(settings) });
+      if (!silent) alert("✅ सभी दुकान सेटिंग्स और त्योहार बैनर लाइव हो गए!");
+    }
+
+    function renderOrders() {
+      const box = document.getElementById("ordersList");
+      const list = Object.values(allOrders).reverse();
+      document.getElementById("statOrders").innerText = list.length;
+
+      let totalSales = 0, pending = 0;
+      box.innerHTML = list.length === 0 ? `<p style="font-size:12px;color:#64748b;">अभी कोई ऑर्डर नहीं आया है।</p>` : "";
+
+      list.forEach(o => {
+        const amt = Number(String(o.total || "0").replace(/[^0-9]/g, "")) || 0;
+        totalSales += amt;
+        if (o.status !== "Delivered") pending++;
+
+        box.innerHTML += `
+          <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin-bottom:10px;">
+            <div class="row" style="justify-content:space-between;">
+              <b>#${o.id} — ${o.total}</b>
+              <span class="badge" style="background:#fef9c3;color:#854d0e;">${o.status || "Order Placed"}</span>
+            </div>
+            <p style="font-size:12px;margin:6px 0;">👤 ${o.customerName} | 📞 ${o.phone}<br>📍 ${o.address}</p>
+            <div class="row" style="margin-top:8px;">
+              <button class="btn btn-sm" style="background:#dbeafe;color:#1e40af;" onclick="setOrderStatus('${o.id}', 'Packing')">📦 Store को भेजें</button>
+              <button class="btn btn-sm" style="background:#dcfce7;color:#166534;" onclick="setOrderStatus('${o.id}', 'Out for Delivery')">🛵 Rider को भेजें</button>
+              <button class="btn btn-sm btn-dark" onclick="setOrderStatus('${o.id}', 'Delivered')">✅ Delivered</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById("statSales").innerText = `₹${totalSales}`;
+      document.getElementById("statPending").innerText = pending;
+    }
+
+    async function setOrderStatus(id, status) {
+      await fetch(`${FIREBASE_URL}/orders/${id}.json`, { method: "PATCH", body: JSON.stringify({ status }) });
+      syncFromFirebase();
+    }
   </script>
 </body>
 </html>
