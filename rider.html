@@ -3,73 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat - Rider Delivery App</title>
-  <script src="https://tailwindcss.com"></script>
+  <title>Jhatpat Delivery Rider App</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f8fafc; color: #0f172a; padding-bottom: 60px; }
+    header { background: #15803d; color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 18px; font-weight: 900; }
+    .wrap { max-width: 750px; margin: 14px auto; padding: 0 12px; }
+    .card { background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #cbd5e1; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .btn { background: #15803d; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; text-decoration: none; display: inline-block; text-align: center; }
+    .btn-blue { background: #2563eb; }
+    .btn-sm { padding: 8px 12px; width: auto; font-size: 12px; background: #0f172a; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #dcfce7; color: #166534; }
+  </style>
 </head>
-<body class="bg-gray-100 p-4">
-  <div class="max-w-xl mx-auto">
-    <div class="bg-blue-700 text-white p-4 rounded-2xl shadow mb-4 flex justify-between items-center">
-      <div><h1 class="text-xl font-black">🛵 RIDER DELIVERY APP</h1><p class="text-xs">10-मिनट सुपरफास्ट डिलीवरी</p></div>
-      <button onclick="loadOrders()" class="bg-white text-blue-900 px-3 py-1.5 rounded-xl text-xs font-bold">🔄 Refresh</button>
-    </div>
+<body>
 
-    <div id="loginBox" class="bg-white p-5 rounded-2xl shadow text-center">
-      <p class="text-xs text-gray-600 mb-2">राइडर PIN डालें (Default: <b>1234</b>)</p>
-      <input type="password" id="pin" placeholder="PIN" class="border rounded-xl px-3 py-2 text-sm text-center w-full mb-3" />
-      <button onclick="unlock()" class="w-full bg-blue-700 text-white py-2.5 rounded-xl font-extrabold text-sm">ड्यूटी शुरू करें</button>
+  <header>
+    <div>
+      <h1>🛵 Jhatpat Rider App</h1>
+      <span style="font-size:11px;opacity:0.9;">● Live Delivery Dashboard</span>
     </div>
+    <button class="btn btn-sm" onclick="loadRiderOrders()">🔄 रिफ्रेश</button>
+  </header>
 
-    <div id="appArea" class="hidden space-y-3"></div>
+  <div class="wrap">
+    <div id="riderOrdersList"><p style="text-align:center;color:#64748b;">डिलीवरी ऑर्डर्स लोड हो रहे हैं...</p></div>
   </div>
 
   <script>
-    const FIREBASE_DB_URL = "";
-    let orders = [];
-    function getDbUrl() { return (FIREBASE_DB_URL || localStorage.getItem('jhatpat_firebase_url') || "").replace(/\/$/, ""); }
+    const FIREBASE_URL = "https://firebaseio.com";
 
-    function unlock() {
-      if (document.getElementById('pin').value === '1234') {
-        document.getElementById('loginBox').classList.add('hidden');
-        document.getElementById('appArea').classList.remove('hidden');
-        loadOrders();
-        setInterval(loadOrders, 10000);
-      } else alert("❌ गलत PIN!");
-    }
-
-    async function loadOrders() {
-      const url = getDbUrl();
-      if (url) {
-        const res = await fetch(`${url}/selfMasterData/orders.json`);
-        orders = (await res.json()) || [];
-      } else {
-        orders = JSON.parse(localStorage.getItem('jhatpat_orders')) || [];
+    async function loadRiderOrders() {
+      const box = document.getElementById("riderOrdersList");
+      try {
+        const res = await fetch(`${FIREBASE_URL}/orders.json`);
+        const data = await res.json();
+        if (!data) {
+          box.innerHTML = `<p style="text-align:center;color:#64748b;padding:30px;">अभी कोई डिलीवरी उपलब्ध नहीं है।</p>`;
+          return;
+        }
+        const orders = Object.values(data).reverse().filter(o => o.status !== "Delivered");
+        if (orders.length === 0) {
+          box.innerHTML = `<p style="text-align:center;color:#16a34a;font-weight:800;padding:30px;">🎉 सभी डिलीवरी पूरी हो चुकी हैं!</p>`;
+          return;
+        }
+        box.innerHTML = "";
+        orders.forEach(o => {
+          box.innerHTML += `
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <b style="font-size:16px;">ऑर्डर #${o.id} — ${o.total}</b>
+                <span class="badge">${o.status || "Ready"}</span>
+              </div>
+              <p style="font-size:13px;margin:8px 0;line-height:1.5;">
+                👤 <b>${o.customerName}</b><br>
+                📍 ${o.address}<br>
+                💳 <b>${o.payment || "COD"}</b>
+              </p>
+              <div style="display:flex;gap:8px;margin-top:10px;">
+                <a href="tel:${o.phone}" class="btn btn-blue" style="flex:1;">📞 कॉल करें</a>
+                <button class="btn" style="flex:2;" onclick="markDelivered('${o.id}')">✅ डिलीवर हो गया</button>
+              </div>
+            </div>
+          `;
+        });
+      } catch (e) {
+        box.innerHTML = `<p style="text-align:center;color:#ef4444;">नेटवर्क त्रुटि, रिफ्रेश दबाएं।</p>`;
       }
-      render();
     }
 
-    async function setStatus(idx, st) {
-      orders[idx].status = st;
-      localStorage.setItem('jhatpat_orders', JSON.stringify(orders));
-      const url = getDbUrl();
-      if (url) await fetch(`${url}/selfMasterData/orders.json`, { method: 'PUT', body: JSON.stringify(orders) });
-      render();
+    async function markDelivered(id) {
+      if (!confirm("क्या ग्राहक को सामान मिल गया है और पेमेंट ले लिया है?")) return;
+      await fetch(`${FIREBASE_URL}/orders/${id}.json`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "Delivered" })
+      });
+      alert("🎉 शाबाश! ऑर्डर Delivered मार्क हो गया।");
+      loadRiderOrders();
     }
 
-    function render() {
-      const area = document.getElementById('appArea');
-      area.innerHTML = orders.length === 0 ? "<p class='text-center text-gray-500'>कोई डिलीवरी नहीं है।</p>" : orders.map((o, i) => `
-        <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-blue-600 space-y-2">
-          <div class="flex justify-between font-extrabold text-sm"><span>${o.id} - ${o.name}</span><span class="text-green-700">₹${o.total} (${o.mode})</span></div>
-          <p class="text-xs font-bold text-gray-800">📍 पता: ${o.address}</p>
-          <p class="text-xs text-gray-600">🛒 ${o.items}</p>
-          <div class="flex gap-2 pt-1">
-            <a href="tel:${o.phone}" class="bg-gray-900 text-white px-3 py-2 rounded-xl text-xs font-bold">📞 कॉल करें</a>
-            <button onclick="setStatus(${i}, 'Out for Delivery 🛵')" class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-xs font-bold">🛵 रास्ते में हूँ</button>
-            <button onclick="setStatus(${i}, 'Delivered ✅')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-bold">✅ डिलीवर हुआ</button>
-          </div>
-        </div>
-      `).join("");
-    }
+    loadRiderOrders();
+    setInterval(loadRiderOrders, 15000);
   </script>
 </body>
 </html>
