@@ -3,73 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat - Dark Store Packing App</title>
-  <script src="https://tailwindcss.com"></script>
+  <title>Jhatpat Store Packing App</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 60px; }
+    .hidden { display: none !important; }
+    #loginBox { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: #1e293b; }
+    .login-card { background: #fff; padding: 28px; border-radius: 22px; width: 100%; max-width: 350px; text-align: center; }
+    .login-card h2 { margin: 0 0 6px; color: #2563eb; font-size: 24px; font-weight: 900; }
+    .login-card input { width: 100%; padding: 12px; margin: 14px 0; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 15px; text-align: center; font-weight: 700; }
+    .btn { background: #2563eb; color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; }
+    .btn-green { background: #16a34a; }
+    .btn-sm { padding: 8px 12px; width: auto; font-size: 12px; }
+    header { background: #1e3a8a; color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 18px; font-weight: 900; }
+    .wrap { max-width: 800px; margin: 14px auto; padding: 0 12px; }
+    .order-card { background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #cbd5e1; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .badge { padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #fef9c3; color: #854d0e; }
+    .items-box { background: #f8fafc; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 13px; border: 1px dashed #cbd5e1; }
+  </style>
 </head>
-<body class="bg-gray-100 p-4">
-  <div class="max-w-xl mx-auto">
-    <div class="bg-yellow-500 text-black p-4 rounded-2xl shadow mb-4 flex justify-between items-center">
-      <div><h1 class="text-xl font-black">🏪 DARK STORE PACKING APP</h1><p class="text-xs font-bold">ऑर्डर पैक करें और राइडर को सौंपें</p></div>
-      <button onclick="loadOrders()" class="bg-black text-white px-3 py-1.5 rounded-xl text-xs font-bold">🔄 Refresh</button>
-    </div>
+<body>
 
-    <div id="loginBox" class="bg-white p-5 rounded-2xl shadow text-center">
-      <p class="text-xs text-gray-600 mb-2">स्टोर स्टाफ पासवर्ड डालें (Default: <b>store123</b>)</p>
-      <input type="password" id="pass" placeholder="पासवर्ड" class="border rounded-xl px-3 py-2 text-sm text-center w-full mb-3" />
-      <button onclick="unlock()" class="w-full bg-gray-900 text-yellow-400 py-2.5 rounded-xl font-extrabold text-sm">लॉगिन करें</button>
+  <div id="loginBox">
+    <div class="login-card">
+      <h2>📦 Jhatpat Store</h2>
+      <p style="font-size:12px;color:#64748b;margin:0;">स्टोर पैकिंग स्टाफ लॉगिन</p>
+      <input type="password" id="storePass" placeholder="पासवर्ड डालें" />
+      <button class="btn" onclick="checkStoreLogin()">स्टोर खोलें</button>
     </div>
-
-    <div id="appArea" class="hidden space-y-3"></div>
   </div>
 
+  <div id="storeApp" class="hidden">
+    <header>
+      <h1>📦 Jhatpat Store Packing</h1>
+      <button class="btn btn-sm btn-green" onclick="loadStoreOrders()">🔄 रिफ्रेश</button>
+    </header>
+    <div class="wrap">
+      <div id="storeOrdersList"><p style="text-align:center;color:#64748b;">ऑर्डर्स लोड हो रहे हैं...</p></div>
+    </div>
+  </div>
   <script>
-    const FIREBASE_DB_URL = "";
-    let orders = [];
-    function getDbUrl() { return (FIREBASE_DB_URL || localStorage.getItem('jhatpat_firebase_url') || "").replace(/\/$/, ""); }
+    const FIREBASE_URL = "https://firebaseio.com";
+    const STORE_PASSWORD = "KING@001";
 
-    function unlock() {
-      if (document.getElementById('pass').value === 'store123') {
-        document.getElementById('loginBox').classList.add('hidden');
-        document.getElementById('appArea').classList.remove('hidden');
-        loadOrders();
-        setInterval(loadOrders, 10000);
-      } else alert("❌ गलत पासवर्ड!");
-    }
-
-    async function loadOrders() {
-      const url = getDbUrl();
-      if (url) {
-        const res = await fetch(`${url}/selfMasterData/orders.json`);
-        orders = (await res.json()) || [];
+    function checkStoreLogin() {
+      const val = document.getElementById("storePass").value.trim();
+      if (val === STORE_PASSWORD) {
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("storeApp").classList.remove("hidden");
+        loadStoreOrders();
+        setInterval(loadStoreOrders, 15000);
       } else {
-        orders = JSON.parse(localStorage.getItem('jhatpat_orders')) || [];
+        alert("❌ गलत पासवर्ड! कृपया KING@001 डालें।");
       }
-      render();
     }
 
-    async function setStatus(idx, st) {
-      orders[idx].status = st;
-      localStorage.setItem('jhatpat_orders', JSON.stringify(orders));
-      const url = getDbUrl();
-      if (url) await fetch(`${url}/selfMasterData/orders.json`, { method: 'PUT', body: JSON.stringify(orders) });
-      render();
+    async function loadStoreOrders() {
+      const box = document.getElementById("storeOrdersList");
+      try {
+        const res = await fetch(`${FIREBASE_URL}/orders.json`);
+        const data = await res.json();
+        if (!data) {
+          box.innerHTML = `<p style="text-align:center;color:#64748b;padding:30px;">अभी कोई नया ऑर्डर नहीं है।</p>`;
+          return;
+        }
+        const orders = Object.values(data).reverse().filter(o => o.status !== "Delivered");
+        if (orders.length === 0) {
+          box.innerHTML = `<p style="text-align:center;color:#16a34a;font-weight:700;padding:30px;">✅ सभी ऑर्डर पैक होकर डिलीवर हो चुके हैं!</p>`;
+          return;
+        }
+        box.innerHTML = "";
+        orders.forEach(o => {
+          const itemsHtml = (o.items || []).map(i => `<div>• <b>${i.name}</b> (${i.weight || ""}) × <b>${i.qty}</b></div>`).join("");
+          box.innerHTML += `
+            <div class="order-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <b style="font-size:15px;">ऑर्डर #${o.id}</b>
+                <span class="badge">${o.status || "Order Placed"}</span>
+              </div>
+              <p style="font-size:12px;color:#475569;margin:6px 0;">👤 ${o.customerName} | 📞 ${o.phone}<br>📍 ${o.address}</p>
+              <div class="items-box">${itemsHtml || "सामान की लिस्ट"}</div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn" onclick="updatePackStatus('${o.id}', 'Packing')">📦 पैकिंग चालू करें</button>
+                <button class="btn btn-green" onclick="updatePackStatus('${o.id}', 'Out for Delivery')">✅ पैक हो गया (Rider को दें)</button>
+              </div>
+            </div>
+          `;
+        });
+      } catch (e) {
+        box.innerHTML = `<p style="text-align:center;color:#ef4444;">नेटवर्क त्रुटि, रिफ्रेश दबाएं।</p>`;
+      }
     }
 
-    function render() {
-      const area = document.getElementById('appArea');
-      area.innerHTML = orders.length === 0 ? "<p class='text-center text-gray-500'>कोई ऑर्डर नहीं है।</p>" : orders.map((o, i) => `
-        <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-yellow-500 space-y-1.5">
-          <div class="flex justify-between font-extrabold text-sm"><span>${o.id} - ${o.name}</span><span class="text-blue-700">${o.status}</span></div>
-          <p class="text-xs text-gray-500">⏰ ${o.time} | पेमेंट: <b>${o.mode} (₹${o.total})</b></p>
-          <div class="bg-yellow-50 p-2.5 rounded-xl text-xs font-bold text-gray-800">🛒 सामान: ${o.items}</div>
-          <div class="flex gap-2 pt-2">
-            <button onclick="setStatus(${i}, 'Packing 📦')" class="flex-1 bg-yellow-500 text-black py-2 rounded-xl text-xs font-extrabold">📦 पैकिंग शुरू</button>
-            <button onclick="setStatus(${i}, 'Ready for Pickup 🛍️')" class="flex-1 bg-green-600 text-white py-2 rounded-xl text-xs font-extrabold">✅ पैक हो गया (Ready)</button>
-          </div>
-        </div>
-      `).join("");
+    async function updatePackStatus(id, status) {
+      await fetch(`${FIREBASE_URL}/orders/${id}.json`, {
+        method: "PATCH",
+        body: JSON.stringify({ status })
+      });
+      loadStoreOrders();
     }
   </script>
 </body>
-  </html>
-  
+</html>
