@@ -1,0 +1,694 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat - 10 Min Grocery Delivery | Dombivli - Kalyan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { --brand-color: #0c831f; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6fb; }
+    .brand-bg { background-color: var(--brand-color); }
+    .brand-text { color: var(--brand-color); }
+    .brand-border { border-color: var(--brand-color); }
+  </style>
+</head>
+<body class="pb-24">
+
+  <div id="uiTicker" class="bg-gray-900 text-yellow-300 text-xs font-bold py-1.5 px-3 text-center">
+    ⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और किराना डिलीवरी!
+  </div>
+
+  <div id="uiFlashBanner" class="hidden bg-red-600 text-white text-center py-2 px-4 font-extrabold text-xs animate-pulse">
+    🔥 LIVE FLASH SALE: अभी ऑर्डर करने पर सभी सामान पर 20% की भारी छूट!
+  </div>
+  <div id="uiClosedBanner" class="hidden bg-orange-600 text-white text-center py-2.5 px-4 font-bold text-xs">
+    🚫 डार्क स्टोर अभी बंद है (Store Closed)। कृपया सुबह 7:00 बजे के बाद ऑर्डर करें!
+  </div>
+
+  <header class="bg-white sticky top-0 z-40 shadow-sm px-4 py-3">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="bg-yellow-400 text-black font-extrabold px-2 py-0.5 rounded text-xs" id="uiDeliveryTag">⚡ 10 MIN</span>
+          <h1 class="text-2xl font-black brand-text tracking-tight" id="uiBrandName">Jhatpat</h1>
+        </div>
+        <p class="text-xs text-gray-600 font-medium" id="uiLocationText">📍 डोंबिवली - कल्याण (421201)</p>
+      </div>
+      <div class="flex gap-1.5 sm:gap-2">
+        <button onclick="openModal('staffModal')" class="bg-gray-100 text-gray-800 border text-xs px-2.5 py-2 rounded-xl font-bold">🛵 स्टाफ</button>
+        <button onclick="openModal('adminLoginModal')" class="bg-gray-900 text-yellow-400 border border-yellow-400 text-xs px-3 py-2 rounded-xl font-extrabold shadow">👑 मालिक</button>
+        <button onclick="openModal('cartModal')" class="brand-bg text-white text-xs px-3 py-2 rounded-xl font-bold">🛒 <span id="topCartCount">0</span></button>
+      </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto mt-3 flex gap-2">
+      <input type="text" id="searchInput" onkeyup="renderProducts()" placeholder="🔍 टमाटर, आलू, प्याज़, दूध, फल खोजें..." class="flex-1 bg-gray-100 border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none" />
+      <input type="text" id="pincodeCheckInput" onkeyup="checkPincodeLive()" maxlength="6" placeholder="पिनकोड" class="w-28 bg-gray-100 border border-gray-200 rounded-xl px-3 py-2 text-xs font-bold text-center" />
+    </div>
+    <p id="pincodeStatusMsg" class="max-w-5xl mx-auto text-[11px] font-bold mt-1 hidden"></p>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-4 mt-4">
+    <div class="brand-bg text-white rounded-2xl p-4 shadow flex justify-between items-center">
+      <div>
+        <span class="bg-yellow-400 text-black text-[10px] font-extrabold px-2 py-0.5 rounded uppercase">MEGA OFFER</span>
+        <h2 class="text-base sm:text-lg font-extrabold mt-1" id="uiBannerTitle">🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!</h2>
+        <p class="text-xs text-white/90 mt-0.5">कूपन कोड: <b class="text-yellow-300" id="uiBannerCoupon">JHATPAT20</b> से तुरंत बचाएं</p>
+      </div>
+      <div id="uiRainBadge" class="hidden bg-blue-900 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-xl text-center">🌧️ बारिश अलर्ट<br>Surge लागू</div>
+    </div>
+  </div>
+
+  <div id="customSectionsContainer" class="max-w-5xl mx-auto px-4 mt-3 space-y-2"></div>
+  <div id="injectedCustomHtmlArea" class="max-w-5xl mx-auto px-4 mt-2"></div>
+  <div id="categoryButtonsBar" class="max-w-5xl mx-auto px-4 mt-4 flex gap-2 overflow-x-auto pb-1"></div>
+
+  <main class="max-w-5xl mx-auto px-4 mt-4">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="font-extrabold text-gray-800 text-base" id="categoryTitle">सभी ताज़ा सामान</h3>
+      <button onclick="openModal('trackOrderModal')" class="text-xs font-bold brand-text underline">📦 मेरा ऑर्डर ट्रैक करें</button>
+    </div>
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+  </main>
+
+  <a id="floatingWaBtn" href="https://wa.me" target="_blank" class="fixed bottom-20 right-4 bg-green-600 text-white p-3 rounded-full shadow-xl z-30 text-xs font-bold flex items-center gap-1">
+    💬 मदद
+  </a>
+
+  <div id="bottomCartBar" class="hidden fixed bottom-3 left-3 right-3 max-w-5xl mx-auto brand-bg text-white p-3.5 rounded-2xl shadow-2xl flex justify-between items-center z-30">
+    <div>
+      <p class="text-xs font-medium"><span id="barItemCount">0</span> ITEMS</p>
+      <p class="text-base font-extrabold">₹<span id="barTotal">0</span></p>
+    </div>
+    <button onclick="openModal('cartModal')" class="font-extrabold text-sm bg-white text-gray-900 px-4 py-2 rounded-xl">View Cart ➔</button>
+  </div>
+
+  <div id="cartModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h2 class="text-lg font-extrabold">🛒 आपका कार्ट (Review Order)</h2>
+        <button onclick="closeModal('cartModal')" class="text-gray-500 font-bold text-xl">✕</button>
+      </div>
+      <div id="cartItemsList" class="divide-y my-3 max-h-40 overflow-y-auto"></div>
+      <div class="flex gap-2 my-2">
+        <input type="text" id="couponInput" placeholder="कूपन कोड (JHATPAT20)" class="border rounded-xl px-3 py-2 text-xs flex-1 uppercase" />
+        <button onclick="applyCoupon()" class="bg-gray-900 text-white text-xs px-4 py-2 rounded-xl font-bold">Apply</button>
+      </div>
+      <div class="bg-gray-50 p-3 rounded-xl text-xs space-y-1">
+        <div class="flex justify-between"><span>सामान का कुल मूल्य:</span><span>₹<span id="billItemTotal">0</span></span></div>
+        <div class="flex justify-between"><span>डिलीवरी चार्ज:</span><span>₹<span id="billDelivery">0</span></span></div>
+        <div class="flex justify-between text-green-700 font-bold"><span>कूपन बचत:</span><span>-₹<span id="billDiscount">0</span></span></div>
+        <div class="flex justify-between text-sm font-extrabold border-t pt-1"><span>कुल देय राशि:</span><span>₹<span id="billGrandTotal">0</span></span></div>
+      </div>
+      <div class="mt-3 space-y-2">
+        <input type="text" id="custName" placeholder="आपका पूरा नाम *" class="w-full border rounded-xl px-3 py-2 text-xs" />
+        <input type="tel" id="custPhone" placeholder="मोबाइल नंबर (WhatsApp) *" class="w-full border rounded-xl px-3 py-2 text-xs" />
+        <div class="flex gap-2">
+          <input type="text" id="custPincode" placeholder="पिनकोड *" maxlength="6" class="w-1/3 border rounded-xl px-3 py-2 text-xs font-bold" />
+          <input type="text" id="custAddress" placeholder="पूरा पता / बिल्डिंग / गली *" class="w-2/3 border rounded-xl px-3 py-2 text-xs" />
+        </div>
+        <select id="paymentMode" onchange="toggleUpiQr()" class="w-full border rounded-xl px-3 py-2 text-xs font-bold">
+          <option value="COD">💵 Cash on Delivery (डिलीवरी पर कैश)</option>
+          <option value="UPI">📱 Online UPI / QR कोड स्कैन पेमेंट</option>
+        </select>
+        <div id="upiQrBox" class="hidden bg-blue-50 border border-blue-200 p-3 rounded-xl text-center">
+          <p class="text-xs font-bold text-blue-900 mb-1">GPay / PhonePe / Paytm से स्कैन करें:</p>
+          <img id="dynamicQrImg" src="" class="w-36 h-36 mx-auto rounded-lg border bg-white p-1" />
+          <p class="text-[11px] text-gray-600 mt-1">UPI ID: <b id="displayUpiId"></b></p>
+        </div>
+      </div>
+      <button onclick="placeOrder()" class="w-full brand-bg text-white font-extrabold py-3 rounded-xl mt-3 text-sm shadow-lg">✅ ऑर्डर प्लेस करें (Place Order)</button>
+    </div>
+  </div>
+
+  <div id="trackOrderModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl p-5">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-extrabold text-base">📦 लाइव ऑर्डर ट्रैकिंग</h3>
+        <button onclick="closeModal('trackOrderModal')" class="font-bold">✕</button>
+      </div>
+      <div id="customerOrderTrackList" class="mt-3 space-y-2 max-h-80 overflow-y-auto text-xs"></div>
+    </div>
+  </div>
+
+  <div id="staffModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-extrabold text-base">🏪 Dark Store & 🛵 Rider Panel</h3>
+        <button onclick="closeModal('staffModal')" class="font-bold">✕</button>
+      </div>
+      <div class="mt-3 space-y-2" id="staffLoginBox">
+        <p class="text-xs text-gray-600">स्टाफ पासवर्ड (<b>store123</b>) या राइडर PIN (<b>1234</b>) डालें:</p>
+        <div class="flex gap-2">
+          <input type="password" id="staffPassInput" placeholder="PIN / पासवर्ड" class="border rounded-xl px-3 py-2 text-xs flex-1" />
+          <button onclick="loginStaff()" class="bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold">खोलें</button>
+        </div>
+      </div>
+      <div id="staffOrdersArea" class="hidden mt-3 space-y-2 text-xs"></div>
+    </div>
+  </div>
+
+  <div id="adminLoginModal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 text-center">
+      <h2 class="text-lg font-extrabold">👑 मालिक का मास्टर कंट्रोल रूम</h2>
+Use code with caution.
+गुप्त पासवर्ड डालें (Default: admin123)
+बंद करें
+कंट्रोल खोलें
+
+
+👑 SELF-MASTER CONTROL CENTER
+सब कुछ यहीं से बनाएं, बदलें और रिपेयर करें
+📥 Excel हिसाब
+बंद करें ✕
+
+कुल बिक्री (Revenue)
+₹0
+शुद्ध मुनाफ़ा (25%)
+₹0
+कुल ऑर्डर्स
+0
+राइडर COD कैश
+₹0
+⚡ 1-क्लिक लाइव स्विच & सिस्टम डॉक्टर
+
+🏪 दुकान: OPEN
+🔥 Flash Sale: बंद
+🌧️ बारिश Surge: बंद
+🎙️ बोलकर रेट बदलें
+📈 रेट +10%
+🔧 Auto-Repair
+🧱 खुद का पेज बिल्डर (नया ऑफर बॉक्स या कैटेगरी जोड़ें)
+
+
+
+
+
+पीला बॉक्स
+लाल अलर्ट
+नीला बॉक्स
+बैंगनी बॉक्स
+
++ जोड़ें
+
+
+नई कैटेगरी जोड़ें:
+
++ कैटेगरी जोड़ें
+
+
+🎨 पूरी वेबसाइट का नाम, रंग, व्हाट्सएप नंबर, UPI और नियम
+
+ऐप / दुकान का नाम:
+डिलीवरी टैग:
+वेबसाइट का मुख्य रंग:
+लोकेशन नाम:
+चालू पिनकोड:
+आपका WhatsApp सपोर्ट नंबर (91 सहित):
+आपका UPI ID:
+मुख्य बैनर हेडिंग:
+Admin पासवर्ड:
+फ्री डिलीवरी लिमिट (₹):
+डिलीवरी चार्ज (₹):
+कूपन कोड & छूट ₹:
+ऊपर चलने वाली लाइव पट्टी:
+🌐 Firebase Realtime Database URL (सबके फोन में लाइव सिंक के लिए):
+
+💾 सभी बदलाव तुरंत लागू करें
+➕ नया प्रोडक्ट / सब्ज़ी जोड़ें
+
+
+
+
+
+
+
+
+✅ लिस्ट में जोड़ें
+📦 सभी सामान के रेट बदलें, स्टॉक आउट करें या हटाएं
+
+📋 सभी लाइव ऑर्डर्स & WhatsApp बिल
+
+🛡️ फुल बैकअप, रिस्टोर और एडवांस कस्टम कोड इंजेक्टर
+
+⬇️ पूरा बैकअप डाउनलोड करें (.json)
+⬆️ बैकअप फाइल वापस डालें (Restore)
+⚡ कस्टम कोड लागू करें
+const defaultProducts = [
+{ id: 1, name: "ताज़ा लाल टमाटर", price: 32, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "unsplash.com" },
+{ id: 2, name: "नया आलू", price: 28, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "unsplash.com" },
+{ id: 3, name: "प्याज़ (Onion)", price: 35, weight: "1 kg", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "unsplash.com" },
+{ id: 4, name: "हरा धनिया", price: 15, weight: "100 g", category: "🥬 ताज़ी सब्ज़ियाँ", inStock: true, img: "unsplash.com" },
+{ id: 5, name: "केला (Banana)", price: 45, weight: "6 pcs", category: "🍎 ताज़े फल", inStock: true, img: "unsplash.com" },
+{ id: 6, name: "अमूल ताज़ा दूध", price: 27, weight: "500 ml", category: "🥛 डेयरी & किराना", inStock: true, img: "unsplash.com" }
+];
+const defaultConfig = {
+brandName: "Jhatpat",
+deliveryTag: "⚡ 10 MIN",
+brandColor: "#0c831f",
+locationText: "📍 डोंबिवली - कल्याण (421201)",
+allowedPincodes: "421201, 421202, 421203, 421301",
+whatsapp: "919999999999",
+upiId: "jhatpatstore@upi",
+bannerTitle: "🎉 ₹199 से ऊपर के ऑर्डर पर डिलीवरी बिल्कुल FREE!",
+adminPass: "admin123",
+storeOpen: true,
+flashSale: false,
+rainSurge: false,
+freeMin: 199,
+delCharge: 20,
+couponCode: "JHATPAT20",
+couponDiscount: 20,
+tickerText: "⚡ डोंबिवली & कल्याण में 10 मिनट में ताज़ी सब्ज़ियाँ और किराना डिलीवरी!",
+categories: ["🥬 ताज़ी सब्ज़ियाँ", "🍎 ताज़े फल", "🥛 डेयरी & किराना"],
+customSections: [],
+customHtml: ""
+};
+let config = JSON.parse(localStorage.getItem('jhatpat_self_config')) || defaultConfig;
+let products = JSON.parse(localStorage.getItem('jhatpat_products')) || defaultProducts;
+let orders = JSON.parse(localStorage.getItem('jhatpat_orders')) || [];
+let firebaseUrl = localStorage.getItem('jhatpat_firebase_url') || "";
+let cart = {};
+let currentCategory = 'All';
+let appliedDiscount = 0;
+let uploadedBase64Img = "";
+async function syncFromCloud() {
+if (!firebaseUrl) return;
+try {
+const res = await fetch(${firebaseUrl}/selfMasterData.json);
+const data = await res.json();
+if (data) {
+if (data.config) config = { ...defaultConfig, ...data.config };
+if (data.products) products = data.products;
+if (data.orders) orders = data.orders;
+saveLocal();
+applyConfigToUI();
+renderProducts();
+}
+} catch (e) { console.log("Sync error", e); }
+}
+function saveLocal() {
+localStorage.setItem('jhatpat_self_config', JSON.stringify(config));
+localStorage.setItem('jhatpat_products', JSON.stringify(products));
+localStorage.setItem('jhatpat_orders', JSON.stringify(orders));
+}
+async function pushToCloud() {
+saveLocal();
+if (!firebaseUrl) return;
+try {
+await fetch(${firebaseUrl}/selfMasterData.json, {
+method: 'PUT',
+body: JSON.stringify({ config, products, orders })
+});
+} catch (e) { console.log("Push error", e); }
+}
+function autoRepairSystem() {
+if (!confirm("क्या आप सिस्टम को Auto-Repair करना चाहते हैं? (आपके ऑर्डर्स सुरक्षित रहेंगे)")) return;
+if (!Array.isArray(products) || products.length === 0) products = defaultProducts;
+if (!Array.isArray(config.categories) || config.categories.length === 0) config.categories = defaultConfig.categories;
+config.customHtml = "";
+pushToCloud();
+applyConfigToUI();
+renderProducts();
+renderAdminDashboard();
+alert("✅ सिस्टम पूरी तरह रिपेयर और फ्रेश हो गया है!");
+}
+function applyConfigToUI() {
+document.documentElement.style.setProperty('--brand-color', config.brandColor);
+document.getElementById('uiBrandName').innerText = config.brandName;
+document.getElementById('uiDeliveryTag').innerText = config.deliveryTag;
+document.getElementById('uiLocationText').innerText = config.locationText;
+document.getElementById('uiBannerTitle').innerText = config.bannerTitle;
+document.getElementById('uiBannerCoupon').innerText = config.couponCode;
+document.getElementById('uiTicker').innerText = config.tickerText;
+document.getElementById('floatingWaBtn').href = https://wa.me{config.whatsapp};
+document.getElementById('injectedCustomHtmlArea').innerHTML = config.customHtml || "";
+document.getElementById('uiClosedBanner').classList.toggle('hidden', config.storeOpen);
+document.getElementById('uiFlashBanner').classList.toggle('hidden', !config.flashSale);
+document.getElementById('uiRainBadge').classList.toggle('hidden', !config.rainSurge);
+const secContainer = document.getElementById('customSectionsContainer');
+secContainer.innerHTML = (config.customSections || []).map(s => `
+${s.title}
+${s.desc}
+`).join("");
+const catBar = document.getElementById('categoryButtonsBar');
+catBar.innerHTML = <button onclick="filterCategory('All')" class="brand-bg text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">सभी सामान</button> +
+(config.categories || []).map(c => <button onclick="filterCategory('${c}')" class="bg-white text-gray-700 border px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">${c}</button>).join("");
+const catSelect = document.getElementById('newProdCat');
+if (catSelect) catSelect.innerHTML = (config.categories || []).map(c => <option value="${c}">${c}</option>).join("");
+const btnStore = document.getElementById('btnStoreOpen');
+if (btnStore) {
+btnStore.innerText = config.storeOpen ? "🏪 दुकान: OPEN" : "🚫 दुकान: CLOSED";
+btnStore.className = config.storeOpen ? "p-2.5 rounded-xl font-bold text-xs text-white bg-green-600" : "p-2.5 rounded-xl font-bold text-xs text-white bg-red-600";
+}
+const btnFlash = document.getElementById('btnFlashSale');
+if (btnFlash) {
+btnFlash.innerText = config.flashSale ? "🔥 Flash Sale: चालू" : "🔥 Flash Sale: बंद";
+btnFlash.className = config.flashSale ? "p-2.5 rounded-xl font-bold text-xs text-white bg-red-600" : "p-2.5 rounded-xl font-bold text-xs bg-gray-200";
+}
+const btnRain = document.getElementById('btnRainSurge');
+if (btnRain) {
+btnRain.innerText = config.rainSurge ? "🌧️ बारिश Surge: चालू" : "🌧️ बारिश Surge: बंद";
+btnRain.className = config.rainSurge ? "p-2.5 rounded-xl font-bold text-xs text-white bg-blue-600" : "p-2.5 rounded-xl font-bold text-xs bg-gray-200";
+}
+}
+function addCustomSection() {
+const title = document.getElementById('secTitle').value.trim();
+const desc = document.getElementById('secDesc').value.trim();
+const color = document.getElementById('secColor').value;
+if (!title) return alert("हेडिंग लिखें!");
+config.customSections = config.customSections || [];
+config.customSections.push({ id: Date.now(), title, desc, color });
+document.getElementById('secTitle').value = ""; document.getElementById('secDesc').value = "";
+pushToCloud(); applyConfigToUI(); renderBuilderLists();
+}
+function removeCustomSection(id) {
+config.customSections = config.customSections.filter(s => s.id !== id);
+pushToCloud(); applyConfigToUI(); renderBuilderLists();
+}
+function addCategory() {
+const cat = document.getElementById('newCatInput').value.trim();
+if (!cat) return;
+config.categories = config.categories || [];
+if (!config.categories.includes(cat)) config.categories.push(cat);
+document.getElementById('newCatInput').value = "";
+pushToCloud(); applyConfigToUI(); renderBuilderLists();
+}
+function removeCategory(cat) {
+config.categories = config.categories.filter(c => c !== cat);
+pushToCloud(); applyConfigToUI(); renderBuilderLists();
+}
+function renderBuilderLists() {
+document.getElementById('adminCustomSectionsList').innerHTML = (config.customSections || []).map(s => <div class="flex justify-between items-center bg-gray-100 px-3 py-1.5 rounded-lg"> <span><b>${s.title}</b>: ${s.desc}</span> <button onclick="removeCustomSection(${s.id})" class="text-red-600 font-bold">हटाएं ✕</button> </div>).join("");
+document.getElementById('adminCatList').innerHTML = (config.categories || []).map(c => <span class="bg-gray-200 px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1"> ${c} <button onclick="removeCategory('${c}')" class="text-red-600 ml-1">✕</button> </span>).join("");
+}
+function saveCustomHtml() {
+config.customHtml = document.getElementById('cfgCustomHtml').value;
+pushToCloud(); applyConfigToUI();
+alert("✅ कस्टम कोड लाइव हो गया!");
+}
+function downloadFullBackup() {
+const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ config, products, orders }));
+const a = document.createElement('a');
+a.href = dataStr;
+a.download = Jhatpat_Full_Backup_${new Date().toISOString().slice(0,10)}.json;
+a.click();
+}
+function restoreFullBackup(event) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(e) {
+try {
+const parsed = JSON.parse(e.target.result);
+if (parsed.config) config = parsed.config;
+if (parsed.products) products = parsed.products;
+if (parsed.orders) orders = parsed.orders;
+pushToCloud(); applyConfigToUI(); renderProducts(); renderAdminDashboard();
+alert("✅ पूरा बैकअप सफलतापूर्वक रिस्टोर हो गया!");
+} catch (err) { alert("❌ गलत बैकअप फाइल!"); }
+};
+reader.readAsText(file);
+}
+function toggleSetting(key) {
+config[key] = !config[key];
+applyConfigToUI(); renderProducts(); updateCartUI(); pushToCloud();
+}
+function bulkPriceChange(mult) {
+if (!confirm("सभी सामान के दाम +10% बढ़ाएं?")) return;
+products.forEach(p => { p.price = Math.round(p.price * mult); });
+pushToCloud(); renderProducts(); renderAdminProducts();
+}
+function saveAllConfig() {
+config.brandName = document.getElementById('cfgBrandName').value.trim() || "Jhatpat";
+config.deliveryTag = document.getElementById('cfgDeliveryTag').value.trim() || "⚡ 10 MIN";
+config.brandColor = document.getElementById('cfgBrandColor').value;
+config.locationText = document.getElementById('cfgLocationText').value.trim();
+config.allowedPincodes = document.getElementById('cfgAllowedPincodes').value.trim();
+config.whatsapp = document.getElementById('cfgWhatsapp').value.trim();
+config.upiId = document.getElementById('cfgUpiId').value.trim();
+config.bannerTitle = document.getElementById('cfgBannerTitle').value.trim();
+config.adminPass = document.getElementById('cfgAdminPass').value.trim() || "admin123";
+config.freeMin = Number(document.getElementById('cfgFreeMin').value) || 199;
+config.delCharge = Number(document.getElementById('cfgDelCharge').value) || 20;
+config.couponCode = document.getElementById('cfgCouponCode').value.trim().toUpperCase();
+config.couponDiscount = Number(document.getElementById('cfgCouponDiscount').value) || 20;
+config.tickerText = document.getElementById('cfgTickerText').value.trim();
+let url = document.getElementById('firebaseUrlInput').value.trim().replace(//$/, "");
+localStorage.setItem('jhatpat_firebase_url', url);
+firebaseUrl = url;
+applyConfigToUI(); pushToCloud();
+alert("✅ सभी बदलाव तुरंत लागू हो गए!");
+}
+function checkPincodeLive() {
+const pin = document.getElementById('pincodeCheckInput').value.trim();
+const msg = document.getElementById('pincodeStatusMsg');
+if (pin.length < 6) { msg.classList.add('hidden'); return; }
+msg.classList.remove('hidden');
+const list = config.allowedPincodes.split(',').map(s => s.trim());
+msg.className = list.includes(pin) ? "max-w-5xl mx-auto text-[11px] font-bold mt-1 text-green-700" : "max-w-5xl mx-auto text-[11px] font-bold mt-1 text-red-600";
+msg.innerText = list.includes(pin) ? ✅ पिनकोड ${pin} पर 10-मिनट डिलीवरी उपलब्ध है। : ❌ पिनकोड ${pin} पर अभी डिलीवरी उपलब्ध नहीं है।;
+}
+function startVoiceCommand() {
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) return alert("Chrome का उपयोग करें।");
+const rec = new SR(); rec.lang = 'hi-IN';
+const st = document.getElementById('voiceStatus');
+st.classList.remove('hidden'); st.innerText = "🎙️ बोलें (जैसे: 'टमाटर 30')...";
+rec.onresult = function(e) {
+const text = e.results[0][0].transcript;
+const num = text.match(/\d+/);
+if (num) {
+products.forEach(p => {
+if (text.includes(p.name) || text.includes(p.name.split(" ").pop())) {
+p.price = Number(num[0]); st.innerText = ✅ "${p.name}" का नया रेट ₹${num[0]} हो गया!;
+}
+});
+pushToCloud(); renderProducts(); renderAdminProducts();
+}
+};
+rec.start();
+}
+function previewFile(event) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(e) {
+const img = new Image(); img.src = e.target.result;
+img.onload = function() {
+const canvas = document.createElement('canvas');
+const scale = 300 / img.width;
+canvas.width = 300; canvas.height = img.height * scale;
+canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+uploadedBase64Img = canvas.toDataURL('image/jpeg', 0.7);
+};
+};
+reader.readAsDataURL(file);
+}
+function getEffectivePrice(price) { return config.flashSale ? Math.round(price * 0.8) : price; }
+function renderProducts() {
+const grid = document.getElementById('productGrid');
+const search = document.getElementById('searchInput').value.toLowerCase();
+grid.innerHTML = "";
+products.filter(p => (currentCategory === 'All' || p.category === currentCategory) && p.name.toLowerCase().includes(search)).forEach(p => {
+const qty = cart[p.id] || 0;
+const finalPrice = getEffectivePrice(p.price);
+grid.innerHTML += `
+
+
+
+${config.deliveryTag}
+${p.name}
+${p.weight}
+₹${finalPrice}${config.flashSale ? <span class="text-[10px] line-through text-gray-400 ml-1">₹${p.price}</span> : ''}
+${!p.inStock ? <span class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-1 rounded">Out</span> :
+qty === 0 ? <button onclick="updateCart(${p.id}, 1)" class="border brand-border brand-text font-bold text-xs px-3 py-1 rounded-lg">ADD</button> :
+<div class="flex items-center gap-2 brand-bg text-white px-2 py-1 rounded-lg text-xs font-bold"><button onclick="updateCart(${p.id}, -1)">-</button><span>${qty}</span><button onclick="updateCart(${p.id}, 1)">+</button></div>}
+
+
+`;
+});
+}
+function filterCategory(cat) {
+currentCategory = cat;
+document.getElementById('categoryTitle').innerText = cat === 'All' ? 'सभी ताज़ा सामान' : cat;
+renderProducts();
+}
+function updateCart(id, change) {
+if (!config.storeOpen) return alert("🚫 दुकान अभी बंद है!");
+cart[id] = (cart[id] || 0) + change;
+if (cart[id] <= 0) delete cart[id];
+renderProducts(); updateCartUI();
+}
+function updateCartUI() {
+let totalItems = 0, itemTotal = 0;
+const list = document.getElementById('cartItemsList');
+list.innerHTML = "";
+Object.keys(cart).forEach(id => {
+const prod = products.find(p => p.id == id);
+if (!prod) return;
+const qty = cart[id]; const price = getEffectivePrice(prod.price);
+totalItems += qty; itemTotal += price * qty;
+list.innerHTML += <div class="py-2 flex justify-between items-center text-xs"><div><p class="font-bold">${prod.name}</p><p class="text-gray-400">${prod.weight} x ${qty}</p></div><div class="flex items-center gap-3"><span class="font-bold">₹${price * qty}</span><div class="flex items-center gap-2 brand-bg text-white px-2 py-0.5 rounded"><button onclick="updateCart(${prod.id}, -1)">-</button><span>${qty}</span><button onclick="updateCart(${prod.id}, 1)">+</button></div></div></div>;
+});
+document.getElementById('topCartCount').innerText = totalItems;
+document.getElementById('barItemCount').innerText = totalItems;
+let delivery = itemTotal >= config.freeMin || itemTotal === 0 ? 0 : config.delCharge;
+if (config.rainSurge && itemTotal > 0) delivery += 20;
+const grandTotal = Math.max(0, itemTotal + delivery - appliedDiscount);
+document.getElementById('barTotal').innerText = grandTotal;
+document.getElementById('billItemTotal').innerText = itemTotal;
+document.getElementById('billDelivery').innerText = delivery;
+document.getElementById('billDiscount').innerText = appliedDiscount;
+document.getElementById('billGrandTotal').innerText = grandTotal;
+document.getElementById('bottomCartBar').classList.toggle('hidden', totalItems === 0);
+toggleUpiQr();
+}
+function toggleUpiQr() {
+const mode = document.getElementById('paymentMode').value;
+const box = document.getElementById('upiQrBox');
+if (mode === 'UPI') {
+const amt = document.getElementById('billGrandTotal').innerText;
+const upiLink = upi://pay?pa=${config.upiId}&pn=${encodeURIComponent(config.brandName)}&am=${amt}&cu=INR;
+document.getElementById('dynamicQrImg').src = https://qrserver.com{encodeURIComponent(upiLink)};
+document.getElementById('displayUpiId').innerText = config.upiId;
+box.classList.remove('hidden');
+} else box.classList.add('hidden');
+}
+function applyCoupon() {
+if (document.getElementById('couponInput').value.trim().toUpperCase() === config.couponCode) {
+appliedDiscount = config.couponDiscount; alert(🎉 कूपन लागू! ₹${appliedDiscount} की बचत।); updateCartUI();
+} else alert(❌ गलत कूपन! अभी '${config.couponCode}' चालू है।);
+}
+async function placeOrder() {
+const name = document.getElementById('custName').value.trim();
+const phone = document.getElementById('custPhone').value.trim();
+const pin = document.getElementById('custPincode').value.trim();
+const address = document.getElementById('custAddress').value.trim();
+const mode = document.getElementById('paymentMode').value;
+const total = Number(document.getElementById('billGrandTotal').innerText);
+if (!name || !phone || !address || Object.keys(cart).length === 0) return alert("⚠️ कृपया नाम, मोबाइल और पता भरें!");
+const allowed = config.allowedPincodes.split(',').map(s => s.trim());
+if (pin && !allowed.includes(pin)) return alert(❌ पिनकोड ${pin} पर अभी डिलीवरी उपलब्ध नहीं है।);
+const itemsSummary = Object.keys(cart).map(id => ${products.find(x => x.id == id).name} x${cart[id]}).join(", ");
+const newOrder = { id: "ORD" + Math.floor(1000 + Math.random() * 9000), name, phone, address: ${address} (${pin}), mode, total, items: itemsSummary, status: "Order Placed 🟡", time: new Date().toLocaleTimeString() };
+orders.unshift(newOrder); await pushToCloud();
+alert(✅ ऑर्डर सफल! ID: ${newOrder.id});
+cart = {}; appliedDiscount = 0; renderProducts(); updateCartUI(); closeModal('cartModal');
+}
+function loginAdmin() {
+if (document.getElementById('adminPassInput').value === config.adminPass) {
+closeModal('adminLoginModal');
+document.getElementById('cfgBrandName').value = config.brandName;
+document.getElementById('cfgDeliveryTag').value = config.deliveryTag;
+document.getElementById('cfgBrandColor').value = config.brandColor;
+document.getElementById('cfgLocationText').value = config.locationText;
+document.getElementById('cfgAllowedPincodes').value = config.allowedPincodes;
+document.getElementById('cfgWhatsapp').value = config.whatsapp;
+document.getElementById('cfgUpiId').value = config.upiId;
+document.getElementById('cfgBannerTitle').value = config.bannerTitle;
+document.getElementById('cfgAdminPass').value = config.adminPass;
+document.getElementById('cfgFreeMin').value = config.freeMin;
+document.getElementById('cfgDelCharge').value = config.delCharge;
+document.getElementById('cfgCouponCode').value = config.couponCode;
+document.getElementById('cfgCouponDiscount').value = config.couponDiscount;
+document.getElementById('cfgTickerText').value = config.tickerText;
+document.getElementById('cfgCustomHtml').value = config.customHtml || "";
+document.getElementById('firebaseUrlInput').value = firebaseUrl;
+renderAdminDashboard(); renderBuilderLists();
+openModal('adminDashboardModal');
+} else alert("❌ गलत पासवर्ड!");
+}
+function loginStaff() {
+const pass = document.getElementById('staffPassInput').value;
+if (pass === 'store123' || pass === '1234') {
+document.getElementById('staffLoginBox').classList.add('hidden');
+const area = document.getElementById('staffOrdersArea'); area.classList.remove('hidden');
+area.innerHTML = orders.length === 0 ? "कोई ऑर्डर नहीं है।" : orders.map((o, i) => `
+\({o.id} - \){o.name} (₹\({o.total} - \){o.mode})
+${o.address}
+🛒 ${o.items}
+Packing
+Out for Delivery
+Delivered
+
+
+`).join("");
+} else alert("❌ गलत स्टाफ PIN!");
+}
+async function changeOrderStatus(idx, newStatus) {
+orders[idx].status = newStatus; await pushToCloud(); renderAdminOrders(); alert(✅ स्टेटस अपडेट: ${newStatus});
+}
+function renderAdminDashboard() {
+let rev = 0, cod = 0;
+orders.forEach(o => { rev += Number(o.total); if (o.mode === 'COD') cod += Number(o.total); });
+document.getElementById('statRevenue').innerText = rev;
+document.getElementById('statProfit').innerText = Math.round(rev * 0.25);
+document.getElementById('statOrders').innerText = orders.length;
+document.getElementById('statCod').innerText = cod;
+renderAdminProducts(); renderAdminOrders();
+}
+function addProduct() {
+const name = document.getElementById('newProdName').value.trim();
+const price = Number(document.getElementById('newProdPrice').value);
+const weight = document.getElementById('newProdWeight').value.trim() || "1 kg";
+const category = document.getElementById('newProdCat').value;
+const urlInput = document.getElementById('newProdImgUrl').value.trim();
+const finalImg = uploadedBase64Img || urlInput || "unsplash.com";
+if (!name || !price) return alert("⚠️ नाम और रेट डालें!");
+products.unshift({ id: Date.now(), name, price, weight, category, inStock: true, img: finalImg });
+pushToCloud(); renderProducts(); renderAdminProducts();
+document.getElementById('newProdName').value = ""; document.getElementById('newProdPrice').value = "";
+document.getElementById('newProdWeight').value = ""; document.getElementById('newProdImgUrl').value = "";
+uploadedBase64Img = ""; alert("✅ नया सामान जुड़ गया!");
+}
+function updateProductPrice(id) {
+const newPrice = Number(document.getElementById(priceInput_${id}).value);
+const idx = products.findIndex(p => p.id === id);
+if (idx > -1 && newPrice > 0) { products[idx].price = newPrice; pushToCloud(); renderProducts(); alert("✅ रेट अपडेट!"); }
+}
+function toggleStock(id) {
+const idx = products.findIndex(p => p.id === id);
+if (idx > -1) { products[idx].inStock = !products[idx].inStock; pushToCloud(); renderProducts(); renderAdminProducts(); }
+}
+function deleteProduct(id) {
+if (!confirm("हटाना चाहते हैं?")) return;
+products = products.filter(p => p.id !== id); pushToCloud(); renderProducts(); renderAdminProducts();
+}
+function renderAdminProducts() {
+document.getElementById('adminProductList').innerHTML = products.map(p => <div class="flex flex-wrap items-center justify-between border p-2 rounded-xl bg-gray-50 gap-2"> <div class="flex items-center gap-2"><img src="${p.img}" class="w-10 h-10 rounded-lg object-cover" /><div><p class="font-bold text-xs">${p.name} (${p.weight})</p><p class="text-[10px] text-gray-500">${p.category}</p></div></div> <div class="flex items-center gap-1.5"> <input type="number" id="priceInput_${p.id}" value="${p.price}" class="w-14 border rounded-lg px-2 py-1 text-xs font-bold" /> <button onclick="updateProductPrice(${p.id})" class="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-bold">Save</button> <button onclick="toggleStock(${p.id})" class="${p.inStock ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} px-2 py-1 rounded-lg text-[10px] font-bold">${p.inStock ? 'Stock' : 'Out'}</button> <button onclick="deleteProduct(${p.id})" class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold">🗑</button> </div> </div>).join("");
+}
+function renderAdminOrders() {
+const list = document.getElementById('adminOrdersList');
+list.innerHTML = orders.length === 0 ? "कोई ऑर्डर नहीं है।" : orders.map((o, idx) => {
+const waText = encodeURIComponent(नमस्ते ${o.name}, आपका ${config.brandName} ऑर्डर (${o.id}) ₹${o.total} का स्टेटस: ${o.status});
+return `
+
+${o.id} - ${o.name} (${o.phone})₹${o.total} (${o.mode}) | ${o.status}
+📍 \({o.address} | ⏰ \){o.time}
+🛒 ${o.items}
+🛵 भेजें
+✅ डिलीवर
+📲 WhatsApp बिल
+
+
+`;
+}).join("");
+}
+function exportOrdersCSV() {
+let csv = "OrderID,Name,Phone,Address,Items,Total,Payment,Status,Time\n";
+orders.forEach(o => { csv += "${o.id}","${o.name}","${o.phone}","${o.address}","${o.items}",${o.total},"${o.mode}","${o.status}","${o.time}"\n; });
+const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'Jhatpat_Sales_Report.csv'; a.click();
+}
+function openModal(id) {
+if (id === 'trackOrderModal') {
+document.getElementById('customerOrderTrackList').innerHTML = orders.length === 0 ? "अभी कोई ऑर्डर नहीं है।" : orders.map(o => <div class="border p-2.5 rounded-xl bg-gray-50"><div class="flex justify-between font-bold"><span>${o.id}</span><span class="brand-text">${o.status}</span></div><p class="text-gray-600 mt-1">${o.items} — <b>₹${o.total}</b></p></div>).join("");
+}
+document.getElementById(id).classList.remove('hidden');
+}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+applyConfigToUI(); renderProducts(); syncFromCloud();
+
+
