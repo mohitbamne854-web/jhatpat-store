@@ -48,6 +48,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .collage-tile img {
       width: 100%;
@@ -62,8 +63,8 @@
   <header class="blinkit-header-grad px-4 pt-3 pb-3.5 sticky top-0 z-30 border-b border-amber-200/70">
     <div class="flex items-center justify-between gap-2">
       <!-- Brand + 10 Mins + Distance Pill -->
-      <div>
-        <div class="flex items-center gap-1.5">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5 flex-wrap">
           <span class="font-black text-[22px] leading-none tracking-tight text-slate-900">Jhatpat</span>
           <span class="bg-slate-900 text-[#F8CB46] text-[10px] font-extrabold px-2 py-0.5 rounded-full">in 10 minutes</span>
           <span id="distancePill" class="bg-white/90 text-slate-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300/80">
@@ -72,18 +73,18 @@
         </div>
 
         <!-- Location Selector -->
-        <button onclick="openLocationModal()" class="mt-1.5 flex items-center gap-1.5 text-left group">
-          <span class="text-xs font-extrabold text-slate-900">Deliver to</span>
-          <span id="headerLocationText" class="text-xs font-semibold text-slate-800 truncate max-w-[175px]">Kalyan West • 421301</span>
+        <button type="button" onclick="window.openLocationModal()" class="mt-1.5 flex items-center gap-1.5 text-left group">
+          <span class="text-xs font-extrabold text-slate-900 shrink-0">Deliver to</span>
+          <span id="headerLocationText" class="text-xs font-semibold text-slate-800 truncate max-w-[190px]">Kalyan West</span>
           <i class="fa-solid fa-chevron-down text-[10px] text-slate-700 group-hover:translate-y-0.5 transition"></i>
         </button>
-        <div id="activeStoreSubtext" class="text-[10px] font-semibold text-slate-700/90 mt-0.5">
+        <div id="activeStoreSubtext" class="text-[10px] font-semibold text-slate-700/90 mt-0.5 truncate">
           Hub: Jhatpat Kalyan Khadakpada Hub
         </div>
       </div>
 
       <!-- Profile / Orders Icon Button -->
-      <button onclick="openOrdersModal()" aria-label="Profile & Orders"
+      <button type="button" onclick="window.openOrdersModal()" aria-label="Profile & Orders"
         class="w-10 h-10 rounded-full bg-white/95 shadow-sm border border-amber-300/70 flex items-center justify-center text-slate-800 hover:bg-white shrink-0 relative">
         <i class="fa-regular fa-user text-base"></i>
         <span id="ordersBadgeDot" class="hidden absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#0C831F] ring-2 ring-white"></span>
@@ -94,18 +95,16 @@
     <div class="mt-3 relative">
       <i class="fa-solid fa-magnifying-glass text-slate-500 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
       <input id="searchInput" type="text" placeholder='Search "sabzi", "mango", "juice", "milk"...'
-        oninput="onSearchChange(this.value)"
+        oninput="window.onSearchChange(this.value)"
         class="w-full bg-white rounded-xl pl-9 pr-8 py-2.5 text-xs font-medium text-slate-800 shadow-sm border border-amber-200/80 focus:outline-none focus:ring-2 focus:ring-[#0C831F]" />
-      <button id="clearSearchBtn" onclick="clearSearch()" class="hidden text-slate-400 hover:text-slate-700 text-xs absolute right-3 top-1/2 -translate-y-1/2">
+      <button type="button" id="clearSearchBtn" onclick="window.clearSearch()" class="hidden text-slate-400 hover:text-slate-700 text-xs absolute right-3 top-1/2 -translate-y-1/2">
         <i class="fa-solid fa-circle-xmark"></i>
       </button>
     </div>
   </header>
 
   <!-- HORIZONTAL ICON CATEGORY TABS -->
-  <nav id="categoryTabsBar" class="bg-white/95 backdrop-blur sticky top-[116px] z-20 border-b border-slate-200/80 px-2 py-2 flex items-center gap-1 overflow-x-auto no-scrollbar">
-    <!-- Rendered dynamically by JS -->
-  </nav>
+  <nav id="categoryTabsBar" class="bg-white/95 backdrop-blur sticky top-[116px] z-20 border-b border-slate-200/80 px-2 py-2 flex items-center gap-1 overflow-x-auto no-scrollbar"></nav>
 
   <!-- PROMO STRIP -->
   <div id="promoStrip" class="mx-3 mt-3 bg-white rounded-xl px-3.5 py-2 border border-green-200 flex items-center justify-between text-[11px] shadow-2xs">
@@ -166,7 +165,7 @@
 
   <!-- FLOATING GREEN 'VIEW CART' BOTTOM PILL BAR -->
   <div id="floatingCartBar" class="hidden fixed bottom-[62px] left-1/2 -translate-x-1/2 w-full max-w-md px-4 z-30">
-    <button onclick="openCheckoutModal()"
+    <button type="button" onclick="window.openCheckoutModal()"
       class="w-full blinkit-green hover:bg-green-800 text-white rounded-2xl px-4 py-3 shadow-xl flex items-center justify-between transition active:scale-[0.99]">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
@@ -187,21 +186,21 @@
     </button>
   </div>
 
-  <!-- BOTTOM NAVIGATION BAR (Home, Order Again, Categories, Orders) -->
+  <!-- BOTTOM NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-slate-200 z-30 grid grid-cols-4 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
-    <button id="bnav-home" onclick="setBottomNav('home')" class="flex flex-col items-center justify-center py-1 text-[#0C831F] font-extrabold">
+    <button type="button" id="bnav-home" onclick="window.setBottomNav('home')" class="flex flex-col items-center justify-center py-1 text-[#0C831F] font-extrabold">
       <i class="fa-solid fa-house text-base mb-0.5"></i>
       <span class="text-[10px]">Home</span>
     </button>
-    <button id="bnav-again" onclick="setBottomNav('again')" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
+    <button type="button" id="bnav-again" onclick="window.setBottomNav('again')" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
       <i class="fa-solid fa-bag-shopping text-base mb-0.5"></i>
       <span class="text-[10px]">Order Again</span>
     </button>
-    <button id="bnav-categories" onclick="setBottomNav('categories')" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
+    <button type="button" id="bnav-categories" onclick="window.setBottomNav('categories')" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
       <i class="fa-solid fa-layer-group text-base mb-0.5"></i>
       <span class="text-[10px]">Categories</span>
     </button>
-    <button id="bnav-orders" onclick="openOrdersModal()" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
+    <button type="button" id="bnav-orders" onclick="window.openOrdersModal()" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold">
       <i class="fa-solid fa-receipt text-base mb-0.5"></i>
       <span class="text-[10px]">Orders</span>
     </button>
@@ -212,15 +211,15 @@
     <div class="bg-white w-full max-w-md rounded-t-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-extrabold text-slate-900">Select Delivery Location & Hub</h3>
-        <button onclick="closeLocationModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+        <button type="button" onclick="window.closeLocationModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <div class="flex gap-2">
-        <input id="pincodeSearchInput" type="text" maxlength="6" placeholder="Enter 6-digit Pincode (e.g. 421301, 400053)"
+        <input id="pincodeSearchInput" type="text" maxlength="6" placeholder="Enter 6-digit Pincode (e.g. 421301, 421201)"
           class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0C831F]" />
-        <button onclick="matchPincodeStore()" class="blinkit-green text-white text-xs font-bold px-4 py-2 rounded-xl">
+        <button type="button" onclick="window.matchPincodeStore()" class="blinkit-green text-white text-xs font-bold px-4 py-2 rounded-xl">
           Apply
         </button>
       </div>
@@ -229,7 +228,7 @@
     </div>
   </div>
 
-  <!-- CART & CHECKOUT MODAL (Kotak UPI QR + COD + ₹7 Delivery Below ₹199) -->
+  <!-- CART & CHECKOUT MODAL -->
   <div id="checkoutModal" class="hidden fixed inset-0 bg-slate-900/65 z-50 flex items-end justify-center">
     <div class="bg-white w-full max-w-md rounded-t-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -237,18 +236,15 @@
           <h3 class="text-base font-extrabold text-slate-900">Your Cart & Checkout</h3>
           <p id="checkoutStoreLabel" class="text-[11px] font-semibold text-[#0C831F]">Jhatpat Kalyan Khadakpada Hub</p>
         </div>
-        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+        <button type="button" onclick="window.closeCheckoutModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Cart Items -->
       <div id="checkoutItemsList" class="space-y-2.5 max-h-48 overflow-y-auto"></div>
 
-      <!-- Free Delivery Progress Bar -->
       <div id="freeDeliveryBanner" class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-[11px] font-semibold text-amber-900"></div>
 
-      <!-- Bill Details -->
       <div class="bg-slate-50 rounded-2xl p-3.5 space-y-1.5 text-xs border border-slate-200/80">
         <div class="flex justify-between text-slate-600">
           <span>Item Total</span>
@@ -264,7 +260,6 @@
         </div>
       </div>
 
-      <!-- Customer Delivery Details -->
       <div class="space-y-2.5">
         <div class="grid grid-cols-2 gap-2">
           <input id="custName" type="text" placeholder="Your Name *"
@@ -276,16 +271,15 @@
           class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-medium" />
       </div>
 
-      <!-- Payment Method Selector: Kotak UPI vs COD -->
       <div class="space-y-2">
         <label class="block text-xs font-extrabold text-slate-800">Select Payment Method</label>
         <div class="grid grid-cols-2 gap-2">
-          <button type="button" id="payModeUpiBtn" onclick="selectPaymentMode('UPI')"
+          <button type="button" id="payModeUpiBtn" onclick="window.selectPaymentMode('UPI')"
             class="p-2.5 rounded-xl border-2 border-[#0C831F] bg-green-50/70 text-left">
             <div class="text-xs font-extrabold text-[#0C831F]"><i class="fa-solid fa-qrcode mr-1"></i> Kotak UPI</div>
             <div class="text-[10px] text-slate-600 font-mono truncate">8305530240@kotakbank</div>
           </button>
-          <button type="button" id="payModeCodBtn" onclick="selectPaymentMode('COD')"
+          <button type="button" id="payModeCodBtn" onclick="window.selectPaymentMode('COD')"
             class="p-2.5 rounded-xl border border-slate-300 bg-white text-left">
             <div class="text-xs font-extrabold text-slate-800"><i class="fa-solid fa-money-bill-wave mr-1"></i> Cash on Delivery</div>
             <div class="text-[10px] text-slate-500">Pay on doorstep</div>
@@ -293,7 +287,6 @@
         </div>
       </div>
 
-      <!-- Kotak UPI QR Box -->
       <div id="upiQrPanel" class="bg-purple-50/70 border border-purple-200 rounded-2xl p-3.5 space-y-2.5 text-center">
         <div class="flex items-center justify-between text-[11px]">
           <span class="font-extrabold text-purple-950">Payee: <span id="upiPayeeDisplay">Jhatpat</span></span>
@@ -307,14 +300,14 @@
             class="bg-purple-700 hover:bg-purple-800 text-white text-[11px] font-bold px-3.5 py-2 rounded-xl inline-flex items-center gap-1.5">
             <i class="fa-solid fa-arrow-up-right-from-square"></i> Pay via UPI App
           </a>
-          <button type="button" onclick="copyUpiId()"
+          <button type="button" onclick="window.copyUpiId()"
             class="bg-white border border-purple-300 text-purple-900 text-[11px] font-bold px-3 py-2 rounded-xl">
             Copy UPI ID
           </button>
         </div>
       </div>
 
-      <button onclick="placeOrder()"
+      <button type="button" onclick="window.placeOrder()"
         class="w-full blinkit-green hover:bg-green-800 text-white font-extrabold text-sm py-3.5 rounded-2xl shadow-lg">
         Place Order • <span id="placeOrderBtnAmount">₹0</span>
       </button>
@@ -326,7 +319,7 @@
     <div class="bg-white w-full max-w-md rounded-t-3xl p-5 space-y-3 max-h-[82vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <h3 class="text-base font-extrabold text-slate-900">My Jhatpat Orders</h3>
-        <button onclick="closeOrdersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+        <button type="button" onclick="window.closeOrdersModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -339,7 +332,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com"
@@ -348,10 +341,115 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const FALLBACK_IMG = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
+    const DEFAULT_IMG = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
+
+    // Distinct HD image pool by product/item keyword so each item gets a unique photo
+    const ITEM_SPECIFIC_PHOTOS = {
+      onion: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=85",
+      kanda: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=85",
+      potato: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=85",
+      batata: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=85",
+      tomato: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=85",
+      tamatar: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=85",
+      coriander: "https://images.unsplash.com/photo-1588879460618-9249e7d947d1?auto=format&fit=crop&w=600&q=85",
+      kothimbir: "https://images.unsplash.com/photo-1588879460618-9249e7d947d1?auto=format&fit=crop&w=600&q=85",
+      spinach: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85",
+      palak: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85",
+      chilli: "https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?auto=format&fit=crop&w=600&q=85",
+      ginger: "https://images.unsplash.com/photo-1615485500704-8e990f9900f7?auto=format&fit=crop&w=600&q=85",
+      garlic: "https://images.unsplash.com/photo-1501420136627-da2bc1b6e323?auto=format&fit=crop&w=600&q=85",
+      lemon: "https://images.unsplash.com/photo-1590502593747-42a996133562?auto=format&fit=crop&w=600&q=85",
+      bhindi: "https://images.unsplash.com/photo-1664286423438-1b21f7b0df23?auto=format&fit=crop&w=600&q=85",
+      lady: "https://images.unsplash.com/photo-1664286423438-1b21f7b0df23?auto=format&fit=crop&w=600&q=85",
+      carrot: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?auto=format&fit=crop&w=600&q=85",
+      beetroot: "https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?auto=format&fit=crop&w=600&q=85",
+      cucumber: "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?auto=format&fit=crop&w=600&q=85",
+      mushroom: "https://images.unsplash.com/photo-1504545102780-26774c1bb073?auto=format&fit=crop&w=600&q=85",
+      broccoli: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?auto=format&fit=crop&w=600&q=85",
+      corn: "https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&w=600&q=85",
+      capsicum: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?auto=format&fit=crop&w=600&q=85",
+      brinjal: "https://images.unsplash.com/photo-1615484477778-ca3b77940c25?auto=format&fit=crop&w=600&q=85",
+      mango: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=85",
+      banana: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=85",
+      apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=85",
+      orange: "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=85",
+      mosambi: "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=600&q=85",
+      pomegranate: "https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?auto=format&fit=crop&w=600&q=85",
+      anar: "https://images.unsplash.com/photo-1615485925600-97237c4fc1ec?auto=format&fit=crop&w=600&q=85",
+      watermelon: "https://images.unsplash.com/photo-1563114773-84221bd62daa?auto=format&fit=crop&w=600&q=85",
+      papaya: "https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?auto=format&fit=crop&w=600&q=85",
+      pineapple: "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=600&q=85",
+      grapes: "https://images.unsplash.com/photo-1537640538966-79f369143f8f?auto=format&fit=crop&w=600&q=85",
+      guava: "https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?auto=format&fit=crop&w=600&q=85",
+      kiwi: "https://images.unsplash.com/photo-1585059895524-72359e06133a?auto=format&fit=crop&w=600&q=85",
+      strawberry: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=600&q=85",
+      blueberry: "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?auto=format&fit=crop&w=600&q=85",
+      avocado: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=600&q=85",
+      coconut: "https://images.unsplash.com/photo-1581006852262-e4307cf6283a?auto=format&fit=crop&w=600&q=85",
+      shake: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=600&q=85",
+      coffee: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=600&q=85",
+      lassi: "https://images.unsplash.com/photo-1626200419199-391ae4be7a41?auto=format&fit=crop&w=600&q=85",
+      juice: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=85",
+      milk: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=85",
+      paneer: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=85",
+      rice: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=85",
+      atta: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=85",
+      masala: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=85",
+      haldi: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=85",
+      turmeric: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=85"
+    };
+
+    const DISTINCT_FALLBACK_POOL = [
+      "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=85",
+      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=85"
+    ];
+
+    function hashString(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      }
+      return h;
+    }
+
+    function resolveProductImage(prod) {
+      const customUrl = (prod && prod.image ? String(prod.image).trim() : "");
+      if (customUrl && customUrl !== DEFAULT_IMG) {
+        return customUrl;
+      }
+      const text = `${prod?.name || ""} ${prod?.category || ""}`.toLowerCase();
+      for (const [kw, url] of Object.entries(ITEM_SPECIFIC_PHOTOS)) {
+        if (text.includes(kw)) {
+          return url;
+        }
+      }
+      const idx = hashString(`${prod?.id || ""}_${prod?.name || ""}`) % DISTINCT_FALLBACK_POOL.length;
+      return DISTINCT_FALLBACK_POOL[idx] || DEFAULT_IMG;
+    }
+
+    window.getItemFallbackSrc = function(prodId) {
+      const p = productsMap[prodId];
+      const text = `${p?.name || ""} ${p?.category || ""}`.toLowerCase();
+      for (const [kw, url] of Object.entries(ITEM_SPECIFIC_PHOTOS)) {
+        if (text.includes(kw)) return url;
+      }
+      const idx = hashString(String(prodId || "item")) % DISTINCT_FALLBACK_POOL.length;
+      return DISTINCT_FALLBACK_POOL[idx] || DEFAULT_IMG;
+    };
 
     const DEFAULT_STORES = {
-      "DS_KALYAN": { id: "DS_KALYAN", name: "Jhatpat Kalyan Khadakpada Hub", area: "Kalyan West", pincodes: "421301, 421306, 421201", dist: "1.2 km", commission: 10 },
+      "DS_KALYAN": { id: "DS_KALYAN", name: "Jhatpat Kalyan Khadakpada Hub", area: "Kalyan West", pincodes: "421301, 421306", dist: "1.2 km", commission: 10 },
+      "DS_DOMBIVLI": { id: "DS_DOMBIVLI", name: "Jhatpat Dombivli East Hub", area: "Dombivli East", pincodes: "421201, 421204", dist: "1.4 km", commission: 10 },
       "DS_ANDHERI": { id: "DS_ANDHERI", name: "Jhatpat Andheri West Hub", area: "Andheri West, Mumbai", pincodes: "400053, 400058, 400061", dist: "1.5 km", commission: 12 },
       "DS_BANDRA": { id: "DS_BANDRA", name: "Jhatpat Bandra Linking Hub", area: "Bandra West, Mumbai", pincodes: "400050, 400051, 400052", dist: "1.4 km", commission: 12 },
       "DS_DADAR": { id: "DS_DADAR", name: "Jhatpat Dadar Central Hub", area: "Dadar East, Mumbai", pincodes: "400014, 400028, 400019", dist: "1.1 km", commission: 12 },
@@ -360,27 +458,42 @@
       "DS_BORIVALI": { id: "DS_BORIVALI", name: "Jhatpat Borivali IC Colony Hub", area: "Borivali West, Mumbai", pincodes: "400092, 400103, 400066", dist: "1.8 km", commission: 12 },
       "DS_MALAD": { id: "DS_MALAD", name: "Jhatpat Malad Mindspace Hub", area: "Malad West, Mumbai", pincodes: "400064, 400095, 400097", dist: "1.5 km", commission: 12 },
       "DS_GHATKOPAR": { id: "DS_GHATKOPAR", name: "Jhatpat Ghatkopar R-City Hub", area: "Ghatkopar West, Mumbai", pincodes: "400086, 400077, 400075", dist: "1.2 km", commission: 12 },
-      "DS_NAVI": { id: "DS_NAVI", name: "Jhatpat Vashi Palm Beach Hub", area: "Vashi, Navi Mumbai", pincodes: "400703, 400705, 400706", dist: "1.7 km", commission: 11 },
-      "DS_LOWERPAREL": { id: "DS_LOWERPAREL", name: "Jhatpat Lower Parel Worli Hub", area: "Lower Parel, Mumbai", pincodes: "400013, 400018, 400011", dist: "1.4 km", commission: 12 }
+      "DS_NAVI": { id: "DS_NAVI", name: "Jhatpat Vashi Palm Beach Hub", area: "Vashi, Navi Mumbai", pincodes: "400703, 400705, 400706", dist: "1.7 km", commission: 11 }
     };
 
+    function formatCleanStoreLocation(st, fallbackId) {
+      if (!st || typeof st !== "object") {
+        const cleanId = String(fallbackId || "").replace(/^DS_/i, "").replace(/_/g, " ").trim();
+        return cleanId ? `${cleanId.charAt(0).toUpperCase()}${cleanId.slice(1).toLowerCase()}` : "Kalyan West";
+      }
+      const area = String(st.area || st.city || st.locality || "").trim();
+      if (area && area.toLowerCase() !== "undefined" && area.toLowerCase() !== "null") {
+        return area;
+      }
+      const rawName = String(st.name || "")
+        .replace(/^Jhatpat\s+/i, "")
+        .replace(/\s+Hub$/i, "")
+        .trim();
+      return rawName || "Kalyan West";
+    }
+
     const SEED_PRODUCTS = {
-      "MUM_PACK_001": { id: "MUM_PACK_001", name: "Nashik Red Onion (Kanda)", category: "Sabzi & Fruits", unit: "1 kg", mrp: 45, price: 34, image: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_002": { id: "MUM_PACK_002", name: "Agra Jyoti Potato (Batata)", category: "Sabzi & Fruits", unit: "1 kg", mrp: 40, price: 30, image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_003": { id: "MUM_PACK_003", name: "Hybrid Red Tomato (Tamatar)", category: "Sabzi & Fruits", unit: "500 g", mrp: 30, price: 22, image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_004": { id: "MUM_PACK_004", name: "Fresh Coriander (Kothimbir)", category: "Sabzi & Fruits", unit: "100 g", mrp: 18, price: 12, image: "https://images.unsplash.com/photo-1588879460618-9249e7d947d1?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_046": { id: "MUM_PACK_046", name: "Ratnagiri Alphonso Mango", category: "Sabzi & Fruits", unit: "6 pcs", mrp: 599, price: 449, image: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_048": { id: "MUM_PACK_048", name: "Elaichi Banana (Yelakki)", category: "Sabzi & Fruits", unit: "500 g", mrp: 48, price: 36, image: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_050": { id: "MUM_PACK_050", name: "Shimla Royal Gala Apple", category: "Sabzi & Fruits", unit: "4 pcs (500g)", mrp: 140, price: 109, image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_076": { id: "MUM_PACK_076", name: "Cold-Pressed Orange Juice", category: "Juices", unit: "250 ml", mrp: 85, price: 65, image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_077": { id: "MUM_PACK_077", name: "Fresh Mosambi Juice", category: "Juices", unit: "250 ml", mrp: 75, price: 55, image: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_078": { id: "MUM_PACK_078", name: "Fresh Pomegranate Juice", category: "Juices", unit: "250 ml", mrp: 99, price: 79, image: "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_106": { id: "MUM_PACK_106", name: "Amul Taaza Toned Milk", category: "Dairy", unit: "500 ml", mrp: 28, price: 27, image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_107": { id: "MUM_PACK_107", name: "Fresh Malai Paneer Block", category: "Dairy", unit: "200 g", mrp: 95, price: 79, image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_108": { id: "MUM_PACK_108", name: "Indrayani Basmati Rice", category: "Staples", unit: "1 kg", mrp: 110, price: 89, image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_109": { id: "MUM_PACK_109", name: "Sharbati Chakki Atta", category: "Staples", unit: "5 kg", mrp: 295, price: 245, image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_110": { id: "MUM_PACK_110", name: "Kanda Lasun Masala", category: "Masala", unit: "200 g", mrp: 85, price: 68, image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80", inStock: true },
-      "MUM_PACK_111": { id: "MUM_PACK_111", name: "Pure Turmeric Haldi", category: "Masala", unit: "200 g", mrp: 65, price: 52, image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=600&q=80", inStock: true }
+      "MUM_PACK_001": { id: "MUM_PACK_001", name: "Nashik Red Onion (Kanda)", category: "Sabzi & Fruits", unit: "1 kg", mrp: 45, price: 34, image: ITEM_SPECIFIC_PHOTOS.onion, inStock: true },
+      "MUM_PACK_002": { id: "MUM_PACK_002", name: "Agra Jyoti Potato (Batata)", category: "Sabzi & Fruits", unit: "1 kg", mrp: 40, price: 30, image: ITEM_SPECIFIC_PHOTOS.potato, inStock: true },
+      "MUM_PACK_003": { id: "MUM_PACK_003", name: "Hybrid Red Tomato (Tamatar)", category: "Sabzi & Fruits", unit: "500 g", mrp: 30, price: 22, image: ITEM_SPECIFIC_PHOTOS.tomato, inStock: true },
+      "MUM_PACK_004": { id: "MUM_PACK_004", name: "Fresh Coriander (Kothimbir)", category: "Sabzi & Fruits", unit: "100 g", mrp: 18, price: 12, image: ITEM_SPECIFIC_PHOTOS.coriander, inStock: true },
+      "MUM_PACK_046": { id: "MUM_PACK_046", name: "Ratnagiri Alphonso Mango", category: "Sabzi & Fruits", unit: "6 pcs", mrp: 599, price: 449, image: ITEM_SPECIFIC_PHOTOS.mango, inStock: true },
+      "MUM_PACK_048": { id: "MUM_PACK_048", name: "Elaichi Banana (Yelakki)", category: "Sabzi & Fruits", unit: "500 g", mrp: 48, price: 36, image: ITEM_SPECIFIC_PHOTOS.banana, inStock: true },
+      "MUM_PACK_050": { id: "MUM_PACK_050", name: "Shimla Royal Gala Apple", category: "Sabzi & Fruits", unit: "4 pcs (500g)", mrp: 140, price: 109, image: ITEM_SPECIFIC_PHOTOS.apple, inStock: true },
+      "MUM_PACK_076": { id: "MUM_PACK_076", name: "Cold-Pressed Orange Juice", category: "Juices", unit: "250 ml", mrp: 85, price: 65, image: ITEM_SPECIFIC_PHOTOS.juice, inStock: true },
+      "MUM_PACK_077": { id: "MUM_PACK_077", name: "Fresh Mosambi Juice", category: "Juices", unit: "250 ml", mrp: 75, price: 55, image: ITEM_SPECIFIC_PHOTOS.mosambi, inStock: true },
+      "MUM_PACK_078": { id: "MUM_PACK_078", name: "Fresh Pomegranate Juice", category: "Juices", unit: "250 ml", mrp: 99, price: 79, image: ITEM_SPECIFIC_PHOTOS.pomegranate, inStock: true },
+      "MUM_PACK_106": { id: "MUM_PACK_106", name: "Amul Taaza Toned Milk", category: "Dairy", unit: "500 ml", mrp: 28, price: 27, image: ITEM_SPECIFIC_PHOTOS.milk, inStock: true },
+      "MUM_PACK_107": { id: "MUM_PACK_107", name: "Fresh Malai Paneer Block", category: "Dairy", unit: "200 g", mrp: 95, price: 79, image: ITEM_SPECIFIC_PHOTOS.paneer, inStock: true },
+      "MUM_PACK_108": { id: "MUM_PACK_108", name: "Indrayani Basmati Rice", category: "Staples", unit: "1 kg", mrp: 110, price: 89, image: ITEM_SPECIFIC_PHOTOS.rice, inStock: true },
+      "MUM_PACK_109": { id: "MUM_PACK_109", name: "Sharbati Chakki Atta", category: "Staples", unit: "5 kg", mrp: 295, price: 245, image: ITEM_SPECIFIC_PHOTOS.atta, inStock: true },
+      "MUM_PACK_110": { id: "MUM_PACK_110", name: "Kanda Lasun Masala", category: "Masala", unit: "200 g", mrp: 85, price: 68, image: ITEM_SPECIFIC_PHOTOS.masala, inStock: true },
+      "MUM_PACK_111": { id: "MUM_PACK_111", name: "Pure Turmeric Haldi", category: "Masala", unit: "200 g", mrp: 65, price: 52, image: ITEM_SPECIFIC_PHOTOS.haldi, inStock: true }
     };
 
     const CATEGORY_TABS = [
@@ -397,22 +510,32 @@
     let ordersMap = {};
     let settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat" };
     let activeStoreId = localStorage.getItem("jhatpat_store_id") || "DS_KALYAN";
-    let activeLocationLabel = localStorage.getItem("jhatpat_loc_label") || "Kalyan West • 421301";
+    if (!activeStoreId || activeStoreId === "undefined") {
+      activeStoreId = "DS_KALYAN";
+    }
     let activeCategory = "ALL";
     let searchQuery = "";
-    let cart = JSON.parse(localStorage.getItem("jhatpat_cart") || "{}");
+    let cart = {};
+    try {
+      const savedCart = JSON.parse(localStorage.getItem("jhatpat_cart") || "{}");
+      if (savedCart && typeof savedCart === "object") cart = savedCart;
+    } catch (e) {
+      cart = {};
+    }
     let paymentMode = "UPI";
 
     window.showToast = (msg) => {
       const t = document.getElementById("toast");
+      if (!t) return;
       t.textContent = msg;
       t.classList.remove("hidden");
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 2400);
+      window._toastTimer = setTimeout(() => t.classList.add("hidden"), 2200);
     };
 
     function getProductStockForStore(prod) {
-      if (prod.storeStock && prod.storeStock[activeStoreId] !== undefined) {
+      if (!prod) return false;
+      if (prod.storeStock && typeof prod.storeStock === "object" && prod.storeStock[activeStoreId] !== undefined) {
         return Boolean(prod.storeStock[activeStoreId]);
       }
       return prod.inStock !== false;
@@ -423,7 +546,7 @@
       bar.innerHTML = CATEGORY_TABS.map(tab => {
         const isActive = activeCategory === tab.id;
         return `
-          <button onclick="selectCategory('${tab.id}')"
+          <button type="button" onclick="window.selectCategory('${tab.id}')"
             class="flex flex-col items-center justify-center min-w-[68px] px-2 py-1.5 rounded-xl transition shrink-0 ${
               isActive ? 'bg-green-50 border border-[#0C831F] text-[#0C831F] font-extrabold' : 'text-slate-600 hover:bg-slate-50 font-semibold'
             }">
@@ -439,8 +562,8 @@
     window.selectCategory = (catId) => {
       activeCategory = catId;
       renderCategoryTabs();
-      setBottomNav("home");
-      renderStorefront();
+      window.setBottomNav("home");
+      window.renderStorefront();
     };
 
     function renderBestsellersCollage() {
@@ -455,19 +578,20 @@
       grid.innerHTML = groups.map(g => {
         const catItems = allProds.filter(p => p.category === g.cat);
         const tiles = [0, 1, 2, 3].map(idx => {
-          const item = catItems[idx] || allProds[idx % Math.max(1, allProds.length)];
-          const imgSrc = (item && item.image) || FALLBACK_IMG;
+          const item = catItems[idx] || allProds[idx % Math.max(1, allProds.length)] || { id: `tile_${idx}`, name: g.title, category: g.cat };
+          const imgSrc = resolveProductImage(item);
+          const fallbackSrc = window.getItemFallbackSrc(item.id || `${g.cat}_${idx}`);
           const isLast = idx === 3;
           return `
-            <div class="collage-tile relative">
-              <img src="${imgSrc}" onerror="this.src='${FALLBACK_IMG}'" alt="${g.title}" />
+            <div class="collage-tile">
+              <img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" alt="${g.title}" />
               ${isLast ? `<span class="absolute bottom-1 right-1 bg-slate-900/85 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full">${g.badge}</span>` : ""}
             </div>
           `;
         }).join("");
 
         return `
-          <div onclick="selectCategory('${g.cat}')" class="bestseller-card">
+          <div onclick="window.selectCategory('${g.cat}')" class="bestseller-card">
             <div class="collage-grid">${tiles}</div>
             <div class="mt-1.5 text-[11px] font-extrabold text-slate-800 truncate text-center">${g.title}</div>
           </div>
@@ -478,6 +602,7 @@
     function renderProductsGrid() {
       const grid = document.getElementById("productsGrid");
       const list = Object.values(productsMap).filter(p => {
+        if (!p || !p.id) return false;
         const matchesCat = activeCategory === "ALL" || p.category === activeCategory;
         const q = searchQuery.trim().toLowerCase();
         const matchesSearch = !q ||
@@ -498,15 +623,30 @@
 
       grid.innerHTML = list.map(p => {
         const inStock = getProductStockForStore(p);
-        const qty = cart[p.id]?.qty || 0;
-        const mrp = Number(p.mrp || p.price);
-        const price = Number(p.price);
+        const qty = Number(cart[p.id]?.qty || 0);
+        const mrp = Number(p.mrp || p.price || 0);
+        const price = Number(p.price || 0);
+        const imgSrc = resolveProductImage(p);
+        const fallbackSrc = window.getItemFallbackSrc(p.id);
+
+        const actionControl = !inStock
+          ? `<button type="button" disabled class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-extrabold cursor-not-allowed">Sold Out</button>`
+          : qty <= 0
+            ? `<button type="button" data-action="add" data-prod-id="${p.id}"
+                class="px-3.5 py-1.5 rounded-lg border border-[#0C831F] bg-green-50/70 hover:bg-[#0C831F] text-[#0C831F] hover:text-white text-[11px] font-extrabold transition cursor-pointer">
+                ADD
+              </button>`
+            : `<div class="flex items-center blinkit-green text-white rounded-lg overflow-hidden text-[11px] font-extrabold select-none">
+                 <button type="button" data-action="dec" data-prod-id="${p.id}" class="px-2 py-1.5 hover:bg-green-900 cursor-pointer">-</button>
+                 <span class="px-1.5">${qty}</span>
+                 <button type="button" data-action="inc" data-prod-id="${p.id}" class="px-2 py-1.5 hover:bg-green-900 cursor-pointer">+</button>
+               </div>`;
 
         return `
           <div class="bg-white rounded-2xl p-2.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
             <div>
               <div class="relative aspect-square rounded-xl bg-slate-50 overflow-hidden mb-2">
-                <img src="${p.image || FALLBACK_IMG}" onerror="this.src='${FALLBACK_IMG}'" alt="${p.name}"
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" alt="${p.name}"
                   class="w-full h-full object-cover ${!inStock ? 'opacity-45 grayscale' : ''}" />
                 <span class="absolute top-1.5 left-1.5 bg-white/95 text-slate-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md shadow-2xs">
                   <i class="fa-solid fa-bolt text-amber-500"></i> 10 MINS
@@ -523,22 +663,29 @@
                 <div class="text-xs font-black text-slate-900">₹${price}</div>
                 ${mrp > price ? `<div class="text-[10px] text-slate-400 line-through">₹${mrp}</div>` : ""}
               </div>
-
-              ${!inStock
-                ? `<button disabled class="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-extrabold cursor-not-allowed">Sold Out</button>`
-                : qty === 0
-                  ? `<button onclick="addToCart('${p.id}')" class="px-3.5 py-1.5 rounded-lg border border-[#0C831F] bg-green-50/70 hover:bg-[#0C831F] text-[#0C831F] hover:text-white text-[11px] font-extrabold transition">ADD</button>`
-                  : `<div class="flex items-center blinkit-green text-white rounded-lg overflow-hidden text-[11px] font-extrabold">
-                       <button onclick="changeCartQty('${p.id}', -1)" class="px-2 py-1.5 hover:bg-green-900">-</button>
-                       <span class="px-1.5">${qty}</span>
-                       <button onclick="changeCartQty('${p.id}', 1)" class="px-2 py-1.5 hover:bg-green-900">+</button>
-                     </div>`
-              }
+              ${actionControl}
             </div>
           </div>
         `;
       }).join("");
     }
+
+    // Event delegation on productsGrid so ADD / - / + always fire reliably
+    document.getElementById("productsGrid").addEventListener("click", (ev) => {
+      const btn = ev.target.closest("button[data-action][data-prod-id]");
+      if (!btn || btn.disabled) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const action = btn.getAttribute("data-action");
+      const prodId = btn.getAttribute("data-prod-id");
+      if (action === "add") {
+        window.addToCart(prodId);
+      } else if (action === "inc") {
+        window.changeCartQty(prodId, 1);
+      } else if (action === "dec") {
+        window.changeCartQty(prodId, -1);
+      }
+    });
 
     window.renderStorefront = () => {
       renderBestsellersCollage();
@@ -548,31 +695,41 @@
 
     // CART & DELIVERY FEE LOGIC (₹7 below ₹199, FREE ≥ ₹199)
     function saveCart() {
-      localStorage.setItem("jhatpat_cart", JSON.stringify(cart));
+      try {
+        localStorage.setItem("jhatpat_cart", JSON.stringify(cart));
+      } catch (e) {}
       renderProductsGrid();
       renderFloatingCartBar();
     }
 
     window.addToCart = (prodId) => {
       const p = productsMap[prodId];
-      if (!p || !getProductStockForStore(p)) return;
+      if (!p) return;
+      if (!getProductStockForStore(p)) {
+        window.showToast(`${p.name} is currently out of stock`);
+        return;
+      }
+      const prevQty = Number(cart[prodId]?.qty || 0);
       cart[prodId] = {
         id: p.id,
-        name: p.name,
-        price: Number(p.price),
+        name: p.name || "Item",
+        price: Number(p.price || 0),
         unit: p.unit || "1 pc",
-        image: p.image || FALLBACK_IMG,
-        qty: (cart[prodId]?.qty || 0) + 1
+        image: resolveProductImage(p),
+        qty: prevQty + 1
       };
       saveCart();
-      showToast(`${p.name} added to cart`);
+      window.showToast(`${p.name} added • Qty: ${cart[prodId].qty}`);
     };
 
     window.changeCartQty = (prodId, delta) => {
       if (!cart[prodId]) return;
-      const next = cart[prodId].qty + delta;
-      if (next <= 0) delete cart[prodId];
-      else cart[prodId].qty = next;
+      const next = Number(cart[prodId].qty || 0) + Number(delta || 0);
+      if (next <= 0) {
+        delete cart[prodId];
+      } else {
+        cart[prodId].qty = next;
+      }
       saveCart();
       if (!document.getElementById("checkoutModal").classList.contains("hidden")) {
         renderCheckoutSummary();
@@ -580,9 +737,9 @@
     };
 
     function getCartTotals() {
-      const items = Object.values(cart);
-      const count = items.reduce((sum, i) => sum + i.qty, 0);
-      const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+      const items = Object.values(cart).filter(i => i && Number(i.qty) > 0);
+      const count = items.reduce((sum, i) => sum + Number(i.qty || 0), 0);
+      const subtotal = items.reduce((sum, i) => sum + Number(i.price || 0) * Number(i.qty || 0), 0);
       const threshold = Number(settings.freeThreshold ?? 199);
       const baseFee = Number(settings.deliveryFee ?? 7);
       const deliveryFee = subtotal === 0 ? 0 : (subtotal >= threshold ? 0 : baseFee);
@@ -593,7 +750,7 @@
     function renderFloatingCartBar() {
       const bar = document.getElementById("floatingCartBar");
       const { count, subtotal, deliveryFee, grandTotal, threshold, baseFee } = getCartTotals();
-      if (count === 0) {
+      if (count <= 0) {
         bar.classList.add("hidden");
         return;
       }
@@ -608,19 +765,35 @@
       }
     }
 
-    // LOCATION & STORE MODAL
+    // LOCATION & STORE MODAL (Never shows 'undefined')
+    function updateHeaderLocation() {
+      const st = storesMap[activeStoreId] || DEFAULT_STORES[activeStoreId] || DEFAULT_STORES.DS_KALYAN;
+      const cleanArea = formatCleanStoreLocation(st, activeStoreId);
+      const hubName = (st && st.name && String(st.name).toLowerCase() !== "undefined")
+        ? st.name
+        : `Jhatpat ${cleanArea} Hub`;
+      const distText = (st && st.dist && String(st.dist).toLowerCase() !== "undefined") ? st.dist : "1.2 km";
+
+      document.getElementById("headerLocationText").textContent = cleanArea;
+      document.getElementById("activeStoreSubtext").textContent = `Hub: ${hubName}`;
+      document.getElementById("distancePill").innerHTML = `<i class="fa-solid fa-location-crosshairs text-[#0C831F] mr-0.5"></i> ${distText}`;
+    }
+
     window.openLocationModal = () => {
       const list = document.getElementById("storePickerList");
       list.innerHTML = Object.values(storesMap).map(st => {
         const selected = st.id === activeStoreId;
+        const cleanArea = formatCleanStoreLocation(st, st.id);
+        const hubName = st.name || `Jhatpat ${cleanArea} Hub`;
+        const pins = st.pincodes || "421301";
         return `
-          <button onclick="selectStore('${st.id}', '${st.area} • ${(st.pincodes || '').split(',')[0].trim()}')"
+          <button type="button" onclick="window.selectStore('${st.id}')"
             class="w-full p-3 rounded-2xl border text-left flex items-center justify-between ${
               selected ? 'border-[#0C831F] bg-green-50/70' : 'border-slate-200 bg-white hover:bg-slate-50'
             }">
             <div>
-              <div class="text-xs font-extrabold text-slate-900">${st.name}</div>
-              <div class="text-[11px] text-slate-500">${st.area} • Pins: ${st.pincodes || "-"}</div>
+              <div class="text-xs font-extrabold text-slate-900">${hubName}</div>
+              <div class="text-[11px] text-slate-500">${cleanArea} • Pins: ${pins}</div>
             </div>
             <span class="text-[10px] font-extrabold px-2 py-1 rounded-full ${selected ? 'bg-[#0C831F] text-white' : 'bg-slate-100 text-slate-700'}">
               ${st.dist || "1.3 km"}
@@ -633,36 +806,31 @@
 
     window.closeLocationModal = () => document.getElementById("locationModal").classList.add("hidden");
 
-    window.selectStore = (storeId, label) => {
+    window.selectStore = (storeId) => {
+      if (!storeId || storeId === "undefined") return;
       activeStoreId = storeId;
-      activeLocationLabel = label || storesMap[storeId]?.area || storeId;
-      localStorage.setItem("jhatpat_store_id", activeStoreId);
-      localStorage.setItem("jhatpat_loc_label", activeLocationLabel);
+      try { localStorage.setItem("jhatpat_store_id", activeStoreId); } catch (e) {}
       updateHeaderLocation();
-      renderStorefront();
-      closeLocationModal();
-      showToast(`Switched to ${storesMap[storeId]?.name || storeId}`);
+      window.renderStorefront();
+      window.closeLocationModal();
+      const st = storesMap[storeId] || DEFAULT_STORES[storeId];
+      window.showToast(`Delivering to ${formatCleanStoreLocation(st, storeId)}`);
     };
 
     window.matchPincodeStore = () => {
       const pin = (document.getElementById("pincodeSearchInput").value || "").trim();
       if (!pin) return;
-      const found = Object.values(storesMap).find(st => (st.pincodes || "").includes(pin)) || Object.values(storesMap)[0];
+      const found = Object.values(storesMap).find(st => String(st.pincodes || "").includes(pin));
       if (found) {
-        selectStore(found.id, `${found.area} • ${pin}`);
+        window.selectStore(found.id);
+      } else {
+        window.showToast(`No exact hub for ${pin}, using nearest hub`);
       }
     };
 
-    function updateHeaderLocation() {
-      const st = storesMap[activeStoreId] || { name: "Jhatpat Kalyan Khadakpada Hub", dist: "1.2 km" };
-      document.getElementById("headerLocationText").textContent = activeLocationLabel;
-      document.getElementById("activeStoreSubtext").textContent = `Hub: ${st.name}`;
-      document.getElementById("distancePill").innerHTML = `<i class="fa-solid fa-location-crosshairs text-[#0C831F] mr-0.5"></i> ${st.dist || "1.2 km"}`;
-    }
-
     // CHECKOUT + KOTAK UPI QR + COD
     window.openCheckoutModal = () => {
-      if (getCartTotals().count === 0) return;
+      if (getCartTotals().count <= 0) return;
       renderCheckoutSummary();
       document.getElementById("checkoutModal").classList.remove("hidden");
     };
@@ -689,22 +857,22 @@
 
     function renderCheckoutSummary() {
       const { items, subtotal, deliveryFee, grandTotal, threshold, baseFee } = getCartTotals();
-      const st = storesMap[activeStoreId] || { name: "Jhatpat Kalyan Khadakpada Hub" };
-      document.getElementById("checkoutStoreLabel").textContent = st.name;
+      const st = storesMap[activeStoreId] || DEFAULT_STORES.DS_KALYAN;
+      document.getElementById("checkoutStoreLabel").textContent = `${st.name} (${formatCleanStoreLocation(st, activeStoreId)})`;
 
       document.getElementById("checkoutItemsList").innerHTML = items.map(i => `
         <div class="flex items-center justify-between bg-slate-50 rounded-xl p-2 border border-slate-200/70">
           <div class="flex items-center gap-2.5 min-w-0">
-            <img src="${i.image || FALLBACK_IMG}" class="w-10 h-10 rounded-lg object-cover shrink-0" />
+            <img src="${i.image || DEFAULT_IMG}" onerror="this.onerror=null; this.src='${window.getItemFallbackSrc(i.id)}';" class="w-10 h-10 rounded-lg object-cover shrink-0" />
             <div class="truncate">
               <div class="text-xs font-bold text-slate-900 truncate">${i.name}</div>
               <div class="text-[10px] text-slate-500">${i.unit} • ₹${i.price} each</div>
             </div>
           </div>
           <div class="flex items-center blinkit-green text-white rounded-lg overflow-hidden text-xs font-extrabold shrink-0 ml-2">
-            <button onclick="changeCartQty('${i.id}', -1)" class="px-2 py-1">-</button>
+            <button type="button" onclick="window.changeCartQty('${i.id}', -1)" class="px-2 py-1">-</button>
             <span class="px-2">${i.qty}</span>
-            <button onclick="changeCartQty('${i.id}', 1)" class="px-2 py-1">+</button>
+            <button type="button" onclick="window.changeCartQty('${i.id}', 1)" class="px-2 py-1">+</button>
           </div>
         </div>
       `).join("");
@@ -736,7 +904,7 @@
     window.copyUpiId = () => {
       const upiId = settings.upiId || "8305530240@kotakbank";
       navigator.clipboard?.writeText(upiId);
-      showToast(`Copied ${upiId}`);
+      window.showToast(`Copied ${upiId}`);
     };
 
     window.placeOrder = async () => {
@@ -751,16 +919,17 @@
         return;
       }
 
-      const st = storesMap[activeStoreId] || { id: "DS_KALYAN", name: "Jhatpat Kalyan Khadakpada Hub" };
+      const st = storesMap[activeStoreId] || DEFAULT_STORES.DS_KALYAN;
       const orderRef = push(ref(db, "orders"));
       const orderPayload = {
         id: orderRef.key,
         storeId: st.id,
         storeName: st.name,
+        area: formatCleanStoreLocation(st, st.id),
         customerName: name,
         customerPhone: phone,
         address,
-        pincode: activeLocationLabel.split("•").pop()?.trim() || "421301",
+        pincode: String(st.pincodes || "421301").split(",")[0].trim(),
         items,
         subtotal,
         deliveryFee,
@@ -774,15 +943,15 @@
       try {
         await set(orderRef, orderPayload);
       } catch (e) {
-        console.warn("Offline fallback order save:", e);
+        console.warn("Offline order fallback:", e);
       }
 
       ordersMap[orderRef.key] = orderPayload;
       cart = {};
       saveCart();
-      closeCheckoutModal();
-      showToast(`Order #${orderRef.key.slice(-6).toUpperCase()} placed (${paymentMode})!`);
-      openOrdersModal();
+      window.closeCheckoutModal();
+      window.showToast(`Order #${orderRef.key.slice(-6).toUpperCase()} placed (${paymentMode})!`);
+      window.openOrdersModal();
     };
 
     // BOTTOM NAV & ORDERS MODAL
@@ -809,7 +978,7 @@
       const items = [];
       allOrders.forEach(o => {
         (o.items || []).forEach(i => {
-          if (!seen.has(i.id)) {
+          if (i && i.id && !seen.has(i.id)) {
             seen.add(i.id);
             items.push(i);
           }
@@ -817,21 +986,21 @@
       });
 
       if (!items.length) {
-        wrap.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-slate-200">No previous orders yet. Add items from Home to place your first 10-min order!</div>`;
+        wrap.innerHTML = `<div class="bg-white rounded-2xl p-6 text-center text-xs text-slate-500 border border-slate-200">No previous orders yet. Tap ADD on any item from Home to start!</div>`;
         return;
       }
 
       wrap.innerHTML = items.map(i => `
         <div class="bg-white rounded-2xl p-3 border border-slate-200 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <img src="${i.image || FALLBACK_IMG}" class="w-12 h-12 rounded-xl object-cover" />
+            <img src="${i.image || DEFAULT_IMG}" onerror="this.onerror=null; this.src='${window.getItemFallbackSrc(i.id)}';" class="w-12 h-12 rounded-xl object-cover" />
             <div>
               <div class="text-xs font-extrabold text-slate-900">${i.name}</div>
               <div class="text-[11px] text-slate-500">${i.unit} • ₹${i.price}</div>
             </div>
           </div>
-          <button onclick="addToCart('${i.id}'); showToast('Added ${i.name}')"
-            class="px-3.5 py-1.5 rounded-lg border border-[#0C831F] bg-green-50 text-[#0C831F] text-xs font-extrabold">
+          <button type="button" onclick="window.addToCart('${i.id}')"
+            class="px-3.5 py-1.5 rounded-lg border border-[#0C831F] bg-green-50 text-[#0C831F] text-xs font-extrabold cursor-pointer">
             ADD
           </button>
         </div>
@@ -841,7 +1010,7 @@
     function renderAllCategoriesView() {
       const wrap = document.getElementById("allCategoriesGrid");
       wrap.innerHTML = CATEGORY_TABS.filter(c => c.id !== "ALL").map(c => `
-        <button onclick="selectCategory('${c.id}')" class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3 text-left shadow-2xs">
+        <button type="button" onclick="window.selectCategory('${c.id}')" class="bg-white p-4 rounded-2xl border border-slate-200 flex items-center gap-3 text-left shadow-2xs">
           <span class="w-10 h-10 rounded-xl ${c.color} flex items-center justify-center shrink-0">
             <i class="fa-solid ${c.icon}"></i>
           </span>
@@ -897,7 +1066,17 @@
 
       onValue(ref(db, "stores"), (snap) => {
         if (snap.exists()) {
-          storesMap = { ...DEFAULT_STORES, ...snap.val() };
+          const rawStores = snap.val() || {};
+          const sanitized = {};
+          for (const [k, v] of Object.entries(rawStores)) {
+            if (v && typeof v === "object") {
+              sanitized[k] = { ...v, id: v.id || k };
+            }
+          }
+          storesMap = { ...DEFAULT_STORES, ...sanitized };
+          if (!storesMap[activeStoreId]) {
+            activeStoreId = Object.keys(storesMap)[0] || "DS_KALYAN";
+          }
           updateHeaderLocation();
           renderProductsGrid();
         }
@@ -905,8 +1084,17 @@
 
       onValue(ref(db, "products"), (snap) => {
         if (snap.exists()) {
-          productsMap = snap.val();
-          renderStorefront();
+          const rawProds = snap.val() || {};
+          const merged = {};
+          for (const [k, v] of Object.entries(rawProds)) {
+            if (v && typeof v === "object") {
+              merged[k] = { ...v, id: v.id || k };
+            }
+          }
+          if (Object.keys(merged).length > 0) {
+            productsMap = merged;
+            window.renderStorefront();
+          }
         }
       });
 
@@ -920,7 +1108,7 @@
     // Initial boot
     renderCategoryTabs();
     updateHeaderLocation();
-    renderStorefront();
+    window.renderStorefront();
     initFirebaseSync();
   </script>
 </body>
