@@ -3,763 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jhatpat — Groceries in 10 Minutes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Jhatpat — 10 Min Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  :root {
-    --yellow-top: #F8CB46;
-    --yellow-bot: #FBE18D;
-    --green: #0C831F;
-    --green-light: #E8F5E9;
-    --bg: #F4F6FB;
-    --card: #FFFFFF;
-    --text: #1C1C1C;
-    --muted: #696969;
-    --border: #E8E8E8;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #E5E7EB;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-  }
-  .app-shell {
-    width: 100%;
-    max-width: 480px;
-    background: var(--bg);
-    min-height: 100vh;
-    position: relative;
-    padding-bottom: 95px;
-    box-shadow: 0 0 35px rgba(0,0,0,0.08);
-  }
-  /* Blinkit Warm Yellow Gradient Header */
-  .blinkit-header {
-    background: linear-gradient(180deg, #F8CB46 0%, #FCE596 85%, #F4F6FB 100%);
-    padding: 14px 16px 12px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  .eta-badge {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: #111;
-  }
-  .eta-title {
-    font-size: 22px;
-    font-weight: 800;
-    line-height: 1.15;
-    color: #000;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .location-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #222;
-    margin-top: 3px;
-    cursor: pointer;
-    max-width: 280px;
-  }
-  .location-pill span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .profile-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  }
-  .search-wrap {
-    margin-top: 12px;
-    position: relative;
-  }
-  .search-input {
-    width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.08);
-    background: #FFFFFF;
-    padding: 0 38px 0 40px;
-    font-size: 14px;
-    font-weight: 500;
-    font-family: inherit;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-    outline: none;
-  }
-  .search-icon {
-    position: absolute;
-    left: 13px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #444;
-  }
-  .clear-search {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #eee;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    display: none;
-  }
-  /* Store Status Strip */
-  .store-strip {
-    margin: 4px 16px 10px;
-    background: #FFFDF5;
-    border: 1px solid #F3E2A9;
-    border-radius: 10px;
-    padding: 7px 12px;
-    font-size: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  /* Carousel */
-  .carousel-wrap {
-    padding: 4px 16px 10px;
-    overflow: hidden;
-  }
-  .carousel-track {
-    display: flex;
-    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .banner-slide {
-    min-width: 100%;
-    border-radius: 16px;
-    padding: 18px 20px;
-    color: #fff;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 128px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.09);
-  }
-  .banner-tag {
-    display: inline-block;
-    background: rgba(255,255,255,0.22);
-    padding: 3px 9px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    width: fit-content;
-    margin-bottom: 6px;
-  }
-  .banner-title { font-size: 20px; font-weight: 800; line-height: 1.2; max-width: 75%; }
-  .banner-sub { font-size: 12px; opacity: 0.92; margin-top: 4px; max-width: 75%; }
-  .banner-emoji {
-    position: absolute;
-    right: 16px;
-    bottom: 10px;
-    font-size: 54px;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
-  }
-  .carousel-dots {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    margin-top: 8px;
-  }
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 99px;
-    background: #CBD5E1;
-    transition: all 0.25s;
-  }
-  .dot.active { width: 18px; background: #111; }
-
-  /* Horizontal Category Tabs */
-  .cat-scroll {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 6px 16px 12px;
-    scrollbar-width: none;
-  }
-  .cat-scroll::-webkit-scrollbar { display: none; }
-  .cat-tab {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 12px;
-    border-radius: 14px;
-    background: #fff;
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    min-width: 74px;
-    transition: all 0.15s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-  }
-  .cat-tab.active {
-    border-color: var(--green);
-    background: var(--green-light);
-  }
-  .cat-icon { font-size: 22px; }
-  .cat-name { font-size: 11px; font-weight: 700; color: #222; white-space: nowrap; }
-
-  /* Section Title */
-  .sec-head {
-    padding: 8px 16px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .sec-head h2 { font-size: 16px; font-weight: 800; }
-  .sec-head span { font-size: 12px; color: var(--green); font-weight: 700; }
-
-  /* Order Again Strip */
-  .reorder-row {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 0 16px 14px;
-    scrollbar-width: none;
-  }
-  .reorder-row::-webkit-scrollbar { display: none; }
-  .reorder-card {
-    flex: 0 0 230px;
-    background: #fff;
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 8px;
-  }
-  .reorder-btn {
-    background: var(--green-light);
-    color: var(--green);
-    border: 1px solid var(--green);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  /* 2x2 Bestsellers Grid Cards */
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 0 16px 20px;
-  }
-  .p-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 10px;
-    border: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    transition: transform 0.12s;
-  }
-  .p-card.oos { opacity: 0.62; }
-  .p-img-box {
-    width: 100%;
-    height: 118px;
-    border-radius: 12px;
-    background: #F8FAFC;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 8px;
-  }
-  .p-img-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .p-eta-tag {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    background: rgba(255,255,255,0.92);
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-size: 9px;
-    font-weight: 800;
-    color: #111;
-  }
-  .p-oos-badge {
-    position: absolute;
-    inset: 0;
-    background: rgba(255,255,255,0.78);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 800;
-    color: #DC2626;
-    text-transform: uppercase;
-  }
-  .p-name {
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.25;
-    color: #111;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 32px;
-  }
-  .p-unit {
-    font-size: 11px;
-    color: var(--muted);
-    margin: 3px 0 8px;
-    font-weight: 500;
-  }
-  .p-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-  }
-  .p-price { font-size: 14px; font-weight: 800; color: #111; }
-  .p-mrp { font-size: 11px; color: #999; text-decoration: line-through; display: block; }
-
-  /* Blinkit ADD Button & Stepper */
-  .add-btn {
-    background: #F7FFF9;
-    color: var(--green);
-    border: 1.5px solid var(--green);
-    border-radius: 8px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    text-transform: uppercase;
-    min-width: 72px;
-    height: 32px;
-  }
-  .add-btn:disabled {
-    border-color: #CBD5E1;
-    color: #94A3B8;
-    background: #F8FAFC;
-    cursor: not-allowed;
-  }
-  .stepper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--green);
-    color: #fff;
-    border-radius: 8px;
-    min-width: 76px;
-    height: 32px;
-    padding: 0 6px;
-    font-weight: 800;
-    font-size: 13px;
-  }
-  .stepper button {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
-    width: 22px;
-    height: 28px;
-    cursor: pointer;
-  }
-
-  /* Floating Cart Bar */
-  .floating-cart {
-    position: fixed;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 28px);
-    max-width: 452px;
-    background: var(--green);
-    color: #fff;
-    border-radius: 14px;
-    padding: 12px 16px;
-    display: none;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 10px 25px rgba(12, 131, 31, 0.35);
-    cursor: pointer;
-    z-index: 60;
-  }
-
-  /* Modals & Drawers */
-  .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    z-index: 100;
-    display: none;
-    justify-content: center;
-    align-items: flex-end;
-  }
-  .overlay.open { display: flex; }
-  .drawer {
-    background: #fff;
-    width: 100%;
-    max-width: 480px;
-    max-height: 92vh;
-    border-radius: 22px 22px 0 0;
-    overflow-y: auto;
-    padding: 18px 16px 28px;
-    animation: slideUp 0.25s ease-out;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .drawer-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 12px;
-  }
-  .close-btn {
-    background: #F1F5F9;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  /* Free Delivery Bar */
-  .free-del-box {
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 12px;
-  }
-  .free-del-box.unlocked {
-    background: #ECFDF5;
-    border-color: #A7F3D0;
-  }
-  .progress-bg {
-    height: 6px;
-    background: #DBEAFE;
-    border-radius: 99px;
-    margin-top: 6px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--green);
-    transition: width 0.3s;
-  }
-  .bill-box {
-    background: #F8FAFC;
-    border-radius: 12px;
-    padding: 12px;
-    margin: 12px 0;
-    font-size: 13px;
-  }
-  .bill-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-  }
-  .bill-row.total {
-    border-top: 1px dashed #CBD5E1;
-    padding-top: 8px;
-    margin-top: 6px;
-    font-weight: 800;
-    font-size: 15px;
-  }
-  .input-field {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #CBD5E1;
-    border-radius: 10px;
-    font-family: inherit;
-    font-size: 13px;
-    margin-bottom: 10px;
-  }
-  .primary-btn {
-    width: 100%;
-    background: var(--green);
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 13px;
-    font-size: 14px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  .pay-opt {
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .pay-opt.active {
-    border-color: var(--green);
-    background: var(--green-light);
-  }
-  #upiQrBox {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
-    padding: 12px;
-    margin: 10px 0;
-  }
-  .tracker-card {
-    margin: 10px 16px;
-    background: #111827;
-    color: #fff;
-    border-radius: 14px;
-    padding: 13px 15px;
-    cursor: pointer;
-  }
-  .step-line {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    gap: 4px;
-  }
-  .step-seg {
-    flex: 1;
-    height: 5px;
-    border-radius: 99px;
-    background: #374151;
-  }
-  .step-seg.done { background: #22C55E; }
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;}
+  body{background:#E5E7EB;display:flex;justify-content:center;}
+  .app{width:100%;max-width:480px;background:#F4F6FB;min-height:100vh;padding-bottom:95px;}
+  .top{background:linear-gradient(180deg,#F8CB46,#FCE596);padding:14px 16px;position:sticky;top:0;z-index:40;}
+  .search{width:100%;height:42px;border-radius:12px;border:none;padding:0 14px;margin-top:10px;font-size:14px;outline:none;}
+  .tracker{margin:10px 16px 0;background:#111827;color:#fff;padding:12px 14px;border-radius:14px;display:none;cursor:pointer;}
+  .cats{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cat{background:#fff;padding:8px 14px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap;border:1.5px solid transparent;cursor:pointer;}
+  .cat.active{border-color:#0C831F;background:#E8F5E9;color:#0C831F;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+  .card{background:#fff;border-radius:14px;padding:10px;border:1px solid #E5E7EB;display:flex;flex-direction:column;}
+  .card img{width:100%;height:112px;object-fit:cover;border-radius:10px;margin-bottom:8px;background:#F8FAFC;}
+  .btn-add{background:#F7FFF9;color:#0C831F;border:1.5px solid #0C831F;border-radius:8px;padding:6px 14px;font-weight:800;font-size:12px;cursor:pointer;}
+  .step{display:inline-flex;align-items:center;gap:8px;background:#0C831F;color:#fff;border-radius:8px;padding:4px 10px;font-weight:800;}
+  .step button{background:none;border:none;color:#fff;font-size:16px;font-weight:800;cursor:pointer;}
+  .cart-bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#0C831F;color:#fff;padding:13px 16px;border-radius:14px;display:none;justify-content:space-between;align-items:center;font-weight:800;z-index:50;cursor:pointer;box-shadow:0 8px 20px rgba(12,131,31,0.3);}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:99;}
+  .modal.open{display:flex;}
+  .sheet{background:#fff;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px 16px 28px;}
+  .inp{width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:10px;margin-bottom:10px;font-size:13px;}
+  .pay-btn{width:100%;background:#0C831F;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;}
 </style>
 </head>
 <body>
-<div class="app-shell">
-  <!-- Header -->
-  <header class="blinkit-header">
-    <div class="top-row">
-      <div>
-        <div class="eta-badge">⚡ Delivery in</div>
-        <div class="eta-title">Jhatpat in 10 minutes</div>
-        <div class="location-pill" onclick="openModal('locationModal')">
-          <span>📍 <strong id="selectedAreaText">Detecting nearest dark store...</strong></span>
-          <span>▾</span>
-        </div>
-      </div>
-      <button class="profile-btn" onclick="openModal('ordersModal')" title="My Orders & Profile">👤</button>
-    </div>
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder='Search "fresh apple", "mango juice", "aloo"...' oninput="handleSearch()">
-      <button id="clearSearchBtn" class="clear-search" onclick="clearSearch()">✕</button>
-    </div>
-  </header>
-
-  <!-- Active Store Info Strip -->
-  <div class="store-strip" id="storeStrip">
-    <span id="storeStatusText">⏳ Connecting to Jhatpat Live Network...</span>
-    <button onclick="detectGPSLocation(true)" style="background:none;border:none;color:#0C831F;font-weight:800;font-size:11px;cursor:pointer;">📡 GPS</button>
-  </div>
-
-  <!-- Live Active Order Tracker Banner -->
-  <div id="liveTrackerBanner" class="tracker-card" style="display:none;" onclick="openModal('ordersModal')">
+<div class="app">
+  <div class="top">
     <div style="display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div style="font-size:11px;color:#9CA3AF;font-weight:700;">LIVE ORDER TRACKER</div>
-        <div id="trackerStatusTitle" style="font-size:15px;font-weight:800;margin-top:2px;">Order Placed</div>
+        <div style="font-size:11px;font-weight:800;">⚡ JHATPAT EXPRESS</div>
+        <div style="font-size:21px;font-weight:800;">Delivery in 10 mins</div>
       </div>
-      <span id="trackerOrderId" style="font-size:11px;background:#1F2937;padding:4px 8px;border-radius:6px;font-weight:700;">#JHAT</span>
+      <button onclick="openModal('ordersModal')" style="background:#fff;border:none;padding:8px 12px;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;">📦 My Orders</button>
     </div>
-    <div class="step-line" id="trackerSteps">
-      <div class="step-seg done"></div>
-      <div class="step-seg"></div>
-      <div class="step-seg"></div>
-      <div class="step-seg"></div>
+    <input type="text" id="searchInp" class="search" placeholder="Search vegetables, fruits, juices..." oninput="renderProducts()">
+  </div>
+
+  <div id="liveTracker" class="tracker" onclick="openModal('ordersModal')">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:10px;color:#9CA3AF;font-weight:700;">LIVE ORDER STATUS</div>
+        <div id="trkStatus" style="font-size:15px;font-weight:800;margin-top:2px;">Order Placed</div>
+      </div>
+      <span id="trkId" style="font-size:11px;background:#1F2937;padding:4px 8px;border-radius:6px;">#JHAT</span>
     </div>
   </div>
 
-  <!-- Auto-sliding Promo Banner Carousel -->
-  <div class="carousel-wrap" id="carouselSection">
-    <div class="carousel-track" id="carouselTrack"></div>
-    <div class="carousel-dots" id="carouselDots"></div>
-  </div>
+  <div id="bannerBox" style="padding:12px 16px 0;"></div>
+  <div class="cats" id="catTabs"></div>
 
-  <!-- Horizontal Icon Category Tabs -->
-  <div class="cat-scroll" id="categoryTabs"></div>
-
-  <!-- Order Again 1-Tap Reorder -->
-  <div id="orderAgainSection" style="display:none;">
-    <div class="sec-head">
-      <h2>🔄 Order Again</h2>
-      <span>1-Tap Reorder</span>
-    </div>
-    <div class="reorder-row" id="reorderRow"></div>
+  <div style="padding:4px 16px 10px;display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="font-size:16px;font-weight:800;">Fresh Products</h3>
+    <span id="itemCount" style="font-size:12px;color:#0C831F;font-weight:700;">0 items</span>
   </div>
-
-  <!-- Bestsellers / Products Grid -->
-  <div class="sec-head">
-    <h2 id="gridHeading">Bestsellers</h2>
-    <span id="productCountBadge">0 items</span>
-  </div>
-  <div class="product-grid" id="productGrid"></div>
+  <div class="grid" id="prodGrid"></div>
 </div>
 
-<!-- Floating Cart Bar -->
-<div class="floating-cart" id="floatingCart" onclick="openCartDrawer()">
+<div class="cart-bar" id="cartBar" onclick="openCart()">
   <div>
-    <div style="font-size:11px;font-weight:700;opacity:0.9;" id="floatItemCount">0 ITEMS</div>
-    <div style="font-size:15px;font-weight:800;" id="floatTotalAmount">₹0</div>
+    <div id="barQty" style="font-size:11px;opacity:0.9;">0 ITEMS</div>
+    <div id="barTotal" style="font-size:16px;">₹0</div>
   </div>
-  <div style="font-size:14px;font-weight:800;">View Cart ▸</div>
+  <div>View Cart ▸</div>
 </div>
 
-<!-- Location / City & Area Selector Modal -->
-<div class="overlay" id="locationModal">
-  <div class="drawer">
-    <div class="drawer-head">
-      <h3>📍 Select Delivery City & Store</h3>
-      <button class="close-btn" onclick="closeModal('locationModal')">✕</button>
+<div class="modal" id="cartModal">
+  <div class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3>🛒 Your Cart</h3>
+      <button onclick="closeModal('cartModal')" style="border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;font-weight:800;">✕</button>
     </div>
-    <button class="primary-btn" style="background:#111;margin-bottom:14px;" onclick="detectGPSLocation(true)">
-      📡 Auto-Detect Nearest Store via GPS
-    </button>
-    <label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px;">Select City</label>
-    <select id="citySelect" class="input-field" onchange="renderStoreChoices()"></select>
-    <div id="storeChoicesList" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
-  </div>
-</div>
-
-<!-- Cart & Checkout Drawer -->
-<div class="overlay" id="cartModal">
-  <div class="drawer">
-    <div class="drawer-head">
-      <h3>🛒 Your Jhatpat Cart</h3>
-      <button class="close-btn" onclick="closeModal('cartModal')">✕</button>
+    <div id="freeDelBanner" style="background:#ECFDF5;border:1px solid #A7F3D0;padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#065F46;margin-bottom:12px;">
+      Free Delivery above ₹199
     </div>
-
-    <!-- Free Delivery Progress Bar -->
-    <div class="free-del-box" id="freeDelBox">
-      <div style="font-size:12px;font-weight:800;" id="freeDelText">Add ₹199 more for FREE Delivery</div>
-      <div class="progress-bg"><div class="progress-fill" id="freeDelFill" style="width:0%"></div></div>
+    <div id="cartList"></div>
+    <div style="display:flex;gap:8px;margin:10px 0;">
+      <input type="text" id="cpInput" class="inp" style="margin:0;text-transform:uppercase;" placeholder="Promo Coupon Code">
+      <button onclick="applyCoupon()" style="background:#111;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-size:12px;">APPLY</button>
     </div>
-
-    <div id="cartItemsContainer"></div>
-
-    <!-- Coupon Box -->
-    <div style="display:flex;gap:8px;margin-top:10px;">
-      <input type="text" id="couponInput" class="input-field" style="margin:0;text-transform:uppercase;" placeholder="Enter promo coupon code">
-      <button onclick="applyCoupon()" style="background:#111;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-size:12px;cursor:pointer;">APPLY</button>
+    <div id="cpMsg" style="font-size:12px;color:#0C831F;font-weight:700;margin-bottom:8px;"></div>
+    <div style="background:#F8FAFC;padding:12px;border-radius:12px;font-size:13px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span>Item Total</span><span id="bSub">₹0</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span>Delivery Fee</span><span id="bDel">₹7</span></div>
+      <div id="bDiscRow" style="display:none;justify-content:space-between;margin-bottom:5px;color:#0C831F;"><span>Discount</span><span id="bDisc">-₹0</span></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px dashed #CBD5E1;padding-top:8px;font-weight:800;font-size:15px;"><span>Grand Total</span><span id="bGrand">₹0</span></div>
     </div>
-    <div id="appliedCouponMsg" style="font-size:11px;color:var(--green);font-weight:700;margin-top:4px;"></div>
-
-    <!-- Bill Details -->
-    <div class="bill-box">
-      <div class="bill-row"><span>Item Total</span><span id="billItemTotal">₹0</span></div>
-      <div class="bill-row"><span>Delivery Fee (FREE above ₹199)</span><span id="billDeliveryFee">₹7</span></div>
-      <div class="bill-row" id="billDiscountRow" style="display:none;color:var(--green);"><span>Coupon Discount</span><span id="billDiscount">-₹0</span></div>
-      <div class="bill-row total"><span>Grand Total</span><span id="billGrandTotal">₹0</span></div>
-    </div>
-
-    <!-- Customer Details -->
-    <h4 style="font-size:13px;margin-bottom:8px;">Delivery Details</h4>
-    <input type="text" id="custName" class="input-field" placeholder="Full Name *">
-    <input type="tel" id="custPhone" class="input-field" placeholder="10-Digit Mobile Number *" maxlength="10">
-    <input type="text" id="custAddress" class="input-field" placeholder="House / Flat No., Building, Landmark *">
-
-    <!-- Payment Options -->
+    <h4 style="font-size:13px;margin-bottom:8px;">Delivery Address</h4>
+    <input type="text" id="cName" class="inp" placeholder="Your Full Name *">
+    <input type="tel" id="cPhone" class="inp" placeholder="10-Digit Mobile Number *" maxlength="10">
+    <input type="text" id="cAddr" class="inp" placeholder="Flat / House No., Building, Area *">
     <h4 style="font-size:13px;margin:6px 0 8px;">Payment Method</h4>
-    <div class="pay-opt active" id="payOptUpi" onclick="selectPayment('UPI')">
-      <div>
-        <div style="font-size:13px;font-weight:800;">⚡ Direct Kotak UPI (QR / App)</div>
-        <div style="font-size:11px;color:var(--muted);">8305530240@kotakbank • Instant Pay</div>
-      </div>
-      <span>●</span>
+    <select id="payMode" class="inp" onchange="toggleUpiBox()">
+      <option value="COD">💵 Cash on Delivery (COD)</option>
+      <option value="UPI">⚡ Direct Kotak UPI (QR Code)</option>
+    </select>
+    <div id="upiBox" style="display:none;text-align:center;background:#F8FAFC;padding:12px;border-radius:12px;margin-bottom:12px;">
+      <div id="qrcode" style="display:inline-block;"></div>
+      <div style="font-size:12px;font-weight:700;margin-top:6px;">UPI: 8305530240@kotakbank</div>
     </div>
-    <div id="upiSection">
-      <div id="upiQrBox">
-        <div id="qrcode"></div>
-        <div style="font-size:11px;font-weight:700;margin-top:6px;">UPI ID: 8305530240@kotakbank</div>
-        <a id="upiDeepLink" href="#" style="margin-top:8px;display:inline-block;background:#0C831F;color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:800;">📲 Pay via UPI App</a>
-      </div>
-    </div>
-
-    <div class="pay-opt" id="payOptCod" onclick="selectPayment('COD')">
-      <div>
-        <div style="font-size:13px;font-weight:800;">💵 Cash on Delivery (COD)</div>
-        <div style="font-size:11px;color:var(--muted);">Pay cash / UPI at doorstep</div>
-      </div>
-      <span>○</span>
-    </div>
-
-    <button class="primary-btn" style="margin-top:10px;" onclick="placeOrder()">Place Order in 10 Mins ▸</button>
+    <button class="pay-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order Now ▸</button>
   </div>
 </div>
 
-<!-- Orders & Live Tracker Modal -->
-<div class="overlay" id="ordersModal">
-  <div class="drawer">
-    <div class="drawer-head">
-      <h3>📦 My Orders & Live Tracking</h3>
-      <button class="close-btn" onclick="closeModal('ordersModal')">✕</button>
+<div class="modal" id="ordersModal">
+  <div class="sheet">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3>📦 My Orders</h3>
+      <button onclick="closeModal('ordersModal')" style="border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;font-weight:800;">✕</button>
     </div>
     <div id="myOrdersList"></div>
   </div>
 </div>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyDummyKeyForRTDBAccess",
   authDomain: "jhatpat-22aa8.firebaseapp.com",
@@ -769,689 +132,271 @@ const firebaseConfig = {
   messagingSenderId: "100000000000",
   appId: "1:100000000000:web:jhatpat22aa8"
 };
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function showToast(msg, type = 'dark') {
-  let box = document.getElementById('toastBox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
-    document.body.appendChild(box);
-  }
-  const el = document.createElement('div');
-  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
-  el.textContent = msg;
-  box.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
-}
-
-
-const CATEGORIES = [
-  { id: 'All', name: 'All Items', icon: '🛍️' },
-  { id: 'Fresh Vegetables', name: 'Sabzi', icon: '🥦' },
-  { id: 'Fresh Fruits', name: 'Fruits', icon: '🍎' },
-  { id: 'Cold Pressed Juices', name: 'Juices', icon: '🧃' },
-  { id: 'Leafy & Herbs', name: 'Leafy', icon: '🌿' },
-  { id: 'Exotic & Organic', name: 'Exotic', icon: '🥑' }
-];
-
-let storesMap = {};
-let productsMap = {};
-let couponsMap = {};
-let bannersList = [];
-let selectedStoreId = localStorage.getItem('jhatpat_store_id') || '';
-let selectedCategory = 'All';
-let searchQuery = '';
+let products = {};
+let coupons = {};
 let cart = JSON.parse(localStorage.getItem('jhatpat_cart') || '{}');
+let activeCat = 'ALL';
 let appliedCoupon = null;
-let paymentMethod = 'UPI';
-let carouselIdx = 0;
-let carouselTimer = null;
 
-// Prefill saved customer info
-window.addEventListener('DOMContentLoaded', () => {
-  const savedProfile = JSON.parse(localStorage.getItem('jhatpat_cust_profile') || '{}');
-  if (savedProfile.name) document.getElementById('custName').value = savedProfile.name;
-  if (savedProfile.phone) document.getElementById('custPhone').value = savedProfile.phone;
-  if (savedProfile.address) document.getElementById('custAddress').value = savedProfile.address;
+document.getElementById('cName').value = localStorage.getItem('jhatpat_cname') || '';
+document.getElementById('cPhone').value = localStorage.getItem('jhatpat_cphone') || '';
+document.getElementById('cAddr').value = localStorage.getItem('jhatpat_caddr') || '';
 
+db.ref('products').on('value', snap => {
+  products = snap.val() || {};
   renderCategories();
-  initFirebaseListeners();
+  renderProducts();
   updateCartUI();
-  renderOrderAgain();
 });
 
-function initFirebaseListeners() {
-  // Listen to Stores
-  db.ref('stores').on('value', snap => {
-    storesMap = snap.val() || {};
-    const storeIds = Object.keys(storesMap);
-    if (storeIds.length === 0) {
-      selectedStoreId = '';
-      localStorage.removeItem('jhatpat_store_id');
-      document.getElementById('selectedAreaText').textContent = 'No Active Dark Stores';
-      document.getElementById('storeStatusText').textContent = '⚠️ Admin has not added any stores yet.';
-      populateCityDropdown();
-      renderProducts();
-      return;
-    }
-    if (!selectedStoreId || !storesMap[selectedStoreId]) {
-      detectGPSLocation(false);
-    } else {
-      updateSelectedStoreUI();
-    }
-    populateCityDropdown();
-    renderProducts();
-  });
+db.ref('coupons').on('value', snap => {
+  coupons = snap.val() || {};
+});
 
-  // Listen to Products (ALL products in RTDB are available by default unless marked outOfStock for that store)
-  db.ref('products').on('value', snap => {
-    productsMap = snap.val() || {};
-    renderProducts();
-    updateCartUI();
-  });
-
-  // Listen to Banners
-  db.ref('banners').on('value', snap => {
-    const val = snap.val() || {};
-    bannersList = Object.entries(val).map(([id, b]) => ({ id, ...b }));
-    if (bannersList.length === 0) {
-      bannersList = [
-        { tag: '10 MIN DELIVERY', title: 'Farm Fresh Sabzi & Fruits', sub: 'Zero middlemen • Free delivery above ₹199', bg: 'linear-gradient(135deg,#0C831F,#16A34A)', emoji: '🥗' },
-        { tag: 'COLD PRESSED', title: '100% Pure Fruit Juices', sub: 'Chilled & delivered in 10 minutes flat', bg: 'linear-gradient(135deg,#EA580C,#F59E0B)', emoji: '🍊' }
-      ];
-    }
-    renderCarousel();
-  });
-
-  // Listen to Coupons
-  db.ref('coupons').on('value', snap => {
-    couponsMap = snap.val() || {};
-  });
-
-  // Listen to Orders for live tracker
-  db.ref('orders').on('value', snap => {
-    const allOrders = snap.val() || {};
-    const myOrderIds = JSON.parse(localStorage.getItem('jhatpat_my_orders') || '[]');
-    const myOrders = myOrderIds.map(id => allOrders[id] ? { id, ...allOrders[id] } : null).filter(Boolean).reverse();
-    renderLiveTracker(myOrders);
-    renderMyOrdersModal(myOrders);
-    renderOrderAgain(myOrders);
-  });
-}
-
-function detectGPSLocation(userTriggered) {
-  const storeIds = Object.keys(storesMap);
-  if (storeIds.length === 0) {
-    if (userTriggered) showToast('No dark stores configured yet.', 'error');
-    return;
-  }
-  if (!navigator.geolocation) {
-    pickFallbackStore();
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude, longitude } = pos.coords;
-      let nearestId = storeIds[0];
-      let minKm = Infinity;
-      storeIds.forEach(id => {
-        const s = storesMap[id];
-        if (s && s.isOpen !== false) {
-          const sLat = parseFloat(s.lat) || 0;
-          const sLng = parseFloat(s.lng) || 0;
-          const d = (sLat && sLng) ? haversineKm(latitude, longitude, sLat, sLng) : 9999;
-          if (d < minKm) {
-            minKm = d;
-            nearestId = id;
-          }
-        }
-      });
-      setSelectedStore(nearestId);
-      if (userTriggered) {
-        const distTxt = minKm < 500 ? ` (${minKm.toFixed(1)} km away)` : '';
-        showToast(`Connected to ${storesMap[nearestId].name}${distTxt}`, 'success');
-        closeModal('locationModal');
-      }
-    },
-    () => {
-      pickFallbackStore();
-      if (userTriggered) showToast('GPS unavailable. Showing available dark store.', 'dark');
-    },
-    { timeout: 5000 }
-  );
-}
-
-function pickFallbackStore() {
-  const storeIds = Object.keys(storesMap);
-  if (storeIds.length > 0) {
-    const openOne = storeIds.find(id => storesMap[id].isOpen !== false) || storeIds[0];
-    setSelectedStore(openOne);
-  }
-}
-
-function setSelectedStore(storeId) {
-  if (!storesMap[storeId]) return;
-  selectedStoreId = storeId;
-  localStorage.setItem('jhatpat_store_id', storeId);
-  updateSelectedStoreUI();
-  renderProducts();
-  updateCartUI();
-}
-
-function updateSelectedStoreUI() {
-  const s = storesMap[selectedStoreId];
-  if (!s) return;
-  document.getElementById('selectedAreaText').textContent = `${s.area || s.name}, ${s.city}`;
-  const isOpen = s.isOpen !== false;
-  document.getElementById('storeStatusText').innerHTML = isOpen
-    ? `🟢 <strong>${escapeHtml(s.name)}</strong> • Express 10m Ready`
-    : `🔴 <strong>${escapeHtml(s.name)}</strong> • Currently Closed`;
-}
-
-function populateCityDropdown() {
-  const citySel = document.getElementById('citySelect');
-  const cities = [...new Set(Object.values(storesMap).map(s => s.city).filter(Boolean))];
-  if (cities.length === 0) {
-    citySel.innerHTML = '<option value="">No cities available</option>';
-    document.getElementById('storeChoicesList').innerHTML = '<div class="empty-state">No dark stores available yet.</div>';
-    return;
-  }
-  const currentStore = storesMap[selectedStoreId];
-  const activeCity = currentStore ? currentStore.city : cities[0];
-  citySel.innerHTML = cities.map(c => `<option value="${escapeHtml(c)}" ${c === activeCity ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-  renderStoreChoices();
-}
-
-function renderStoreChoices() {
-  const city = document.getElementById('citySelect').value;
-  const list = document.getElementById('storeChoicesList');
-  const matching = Object.entries(storesMap).filter(([, s]) => s.city === city);
-  list.innerHTML = matching.map(([id, s]) => `
-    <div onclick="setSelectedStore('${id}');closeModal('locationModal');"
-         style="padding:12px;border:1.5px solid ${id === selectedStoreId ? '#0C831F' : '#E2E8F0'};border-radius:12px;background:${id === selectedStoreId ? '#F0FDF4' : '#fff'};cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-weight:800;font-size:14px;">${escapeHtml(s.name)}</div>
-        <div style="font-size:12px;color:#64748B;">${escapeHtml(s.area || s.city)} • ID: ${escapeHtml(id)}</div>
-      </div>
-      <span style="font-size:11px;font-weight:800;color:${s.isOpen !== false ? '#0C831F' : '#DC2626'};">
-        ${s.isOpen !== false ? 'OPEN' : 'CLOSED'}
-      </span>
-    </div>
-  `).join('');
-}
-
-function renderCarousel() {
-  const track = document.getElementById('carouselTrack');
-  const dots = document.getElementById('carouselDots');
-  track.innerHTML = bannersList.map(b => `
-    <div class="banner-slide" style="background:${b.bg || 'linear-gradient(135deg,#0C831F,#15803D)'}">
-      <span class="banner-tag">${escapeHtml(b.tag || 'JHATPAT EXPRESS')}</span>
-      <div class="banner-title">${escapeHtml(b.title)}</div>
-      <div class="banner-sub">${escapeHtml(b.sub || '')}</div>
-      <div class="banner-emoji">${escapeHtml(b.emoji || '⚡')}</div>
-    </div>
-  `).join('');
-  dots.innerHTML = bannersList.map((_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`).join('');
-  carouselIdx = 0;
-  if (carouselTimer) clearInterval(carouselTimer);
-  if (bannersList.length > 1) {
-    carouselTimer = setInterval(() => {
-      carouselIdx = (carouselIdx + 1) % bannersList.length;
-      track.style.transform = `translateX(-${carouselIdx * 100}%)`;
-      Array.from(dots.children).forEach((d, idx) => d.classList.toggle('active', idx === carouselIdx));
-    }, 3500);
-  }
-}
+db.ref('banners').on('value', snap => {
+  const bList = Object.values(snap.val() || {});
+  const box = document.getElementById('bannerBox');
+  if (!bList.length) { box.innerHTML = ''; return; }
+  const b = bList[bList.length - 1];
+  box.innerHTML = `<div style="background:${b.bg || 'linear-gradient(135deg,#0C831F,#16A34A)'};color:#fff;padding:16px;border-radius:16px;">
+    <div style="font-size:10px;font-weight:800;opacity:0.9;">${b.tag || 'SPECIAL OFFER'}</div>
+    <div style="font-size:18px;font-weight:800;margin-top:2px;">${b.emoji || '⚡'} ${b.title}</div>
+    <div style="font-size:12px;opacity:0.9;">${b.subtitle || ''}</div>
+  </div>`;
+});
 
 function renderCategories() {
-  const container = document.getElementById('categoryTabs');
-  container.innerHTML = CATEGORIES.map(c => `
-    <div class="cat-tab ${c.id === selectedCategory ? 'active' : ''}" onclick="selectCategory('${c.id}')">
-      <span class="cat-icon">${c.icon}</span>
-      <span class="cat-name">${c.name}</span>
-    </div>
-  `).join('');
-}
-
-function selectCategory(catId) {
-  selectedCategory = catId;
-  renderCategories();
-  renderProducts();
-}
-
-function handleSearch() {
-  const inp = document.getElementById('searchInput');
-  searchQuery = inp.value.trim().toLowerCase();
-  document.getElementById('clearSearchBtn').style.display = searchQuery ? 'block' : 'none';
-  renderProducts();
-}
-
-function clearSearch() {
-  document.getElementById('searchInput').value = '';
-  searchQuery = '';
-  document.getElementById('clearSearchBtn').style.display = 'none';
-  renderProducts();
-}
-
-function isProductOutOfStock(prod) {
-  if (!selectedStoreId) return false;
-  return Boolean(prod && prod.outOfStock && prod.outOfStock[selectedStoreId] === true);
+  const cats = ['ALL', ...new Set(Object.values(products).map(p => p.category).filter(Boolean))];
+  document.getElementById('catTabs').innerHTML = cats.map(c =>
+    `<div class="cat ${activeCat === c ? 'active' : ''}" onclick="activeCat='${c}';renderCategories();renderProducts();">${c === 'ALL' ? '✨ All Items' : c}</div>`
+  ).join('');
 }
 
 function renderProducts() {
-  const grid = document.getElementById('productGrid');
-  const entries = Object.entries(productsMap);
-  const filtered = entries.filter(([, p]) => {
-    if (!p) return false;
-    const matchCat = selectedCategory === 'All' || (p.category || '').toLowerCase() === selectedCategory.toLowerCase();
-    const matchSearch = !searchQuery || (p.name || '').toLowerCase().includes(searchQuery) || (p.category || '').toLowerCase().includes(searchQuery);
-    return matchCat && matchSearch;
+  const q = document.getElementById('searchInp').value.trim().toLowerCase();
+  const list = Object.entries(products).filter(([, p]) => {
+    if (!p || p.globalOutOfStock) return false;
+    if (activeCat !== 'ALL' && p.category !== activeCat) return false;
+    if (q && !(p.name || '').toLowerCase().includes(q)) return false;
+    return true;
   });
 
-  document.getElementById('gridHeading').textContent = searchQuery ? `Results for "${searchQuery}"` : (selectedCategory === 'All' ? 'Bestsellers' : selectedCategory);
-  document.getElementById('productCountBadge').textContent = `${filtered.length} items`;
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-      <div style="font-size:36px;margin-bottom:8px;">🧺</div>
-      <div style="font-weight:700;">No products found</div>
-      <div style="font-size:12px;margin-top:4px;">Ask Admin to load the 100+ Sabzi, Fruits & Juice Pack!</div>
-    </div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(([id, p]) => {
-    const oos = isProductOutOfStock(p);
+  document.getElementById('itemCount').textContent = `${list.length} items`;
+  document.getElementById('prodGrid').innerHTML = list.map(([id, p]) => {
     const qty = cart[id] || 0;
-    const price = Number(p.price) || 0;
-    const mrp = Number(p.mrp) || Math.round(price * 1.2);
-    const imgUrl = p.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80';
-    return `
-      <div class="p-card ${oos ? 'oos' : ''}">
-        <div class="p-img-box">
-          <img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80'">
-          <span class="p-eta-tag">⚡ 10 MINS</span>
-          ${oos ? '<div class="p-oos-badge">Out of Stock</div>' : ''}
+    const imgUrl = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
+    return `<div class="card">
+      <img src="${imgUrl}" alt="">
+      <div style="font-size:13px;font-weight:700;min-height:34px;">${p.name}</div>
+      <div style="font-size:11px;color:#64748B;margin:3px 0 8px;">${p.unit || ''}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+        <div>
+          <strong style="font-size:14px;">₹${p.price}</strong>
+          ${p.mrp > p.price ? `<span style="font-size:11px;color:#94A3B8;text-decoration:line-through;margin-left:4px;">₹${p.mrp}</span>` : ''}
         </div>
-        <div class="p-name">${escapeHtml(p.name)}</div>
-        <div class="p-unit">${escapeHtml(p.unit || '500 g')}</div>
-        <div class="p-bottom">
-          <div>
-            <span class="p-price">₹${price}</span>
-            ${mrp > price ? `<span class="p-mrp">₹${mrp}</span>` : ''}
-          </div>
-          ${oos
-            ? `<button class="add-btn" disabled>OOS</button>`
-            : (qty > 0
-              ? `<div class="stepper">
-                   <button onclick="updateQty('${id}', -1)">−</button>
-                   <span>${qty}</span>
-                   <button onclick="updateQty('${id}', 1)">+</button>
-                 </div>`
-              : `<button class="add-btn" onclick="updateQty('${id}', 1)">ADD</button>`)
-          }
-        </div>
+        ${qty === 0
+          ? `<button class="btn-add" onclick="changeQty('${id}',1)">ADD</button>`
+          : `<div class="step"><button onclick="changeQty('${id}',-1)">−</button><span>${qty}</span><button onclick="changeQty('${id}',1)">+</button></div>`
+        }
       </div>
-    `;
+    </div>`;
   }).join('');
 }
 
-function updateQty(prodId, delta) {
-  if (!selectedStoreId && Object.keys(storesMap).length > 0) {
-    pickFallbackStore();
-  }
-  if (Object.keys(storesMap).length === 0) {
-    showToast('No dark stores open yet. Please check back soon!', 'error');
-    return;
-  }
-  const prod = productsMap[prodId];
-  if (!prod || isProductOutOfStock(prod)) {
-    showToast('This item is currently out of stock at your store.', 'error');
-    return;
-  }
-  const next = (cart[prodId] || 0) + delta;
-  if (next <= 0) {
-    delete cart[prodId];
-  } else {
-    cart[prodId] = next;
-  }
+function changeQty(id, delta) {
+  const next = (cart[id] || 0) + delta;
+  if (next <= 0) delete cart[id];
+  else cart[id] = next;
   localStorage.setItem('jhatpat_cart', JSON.stringify(cart));
   renderProducts();
   updateCartUI();
 }
 
-function getCartSummary() {
-  let itemCount = 0;
-  let itemTotal = 0;
-  const items = [];
+function getTotals() {
+  let sub = 0, count = 0;
   Object.entries(cart).forEach(([id, qty]) => {
-    const p = productsMap[id];
-    if (p && !isProductOutOfStock(p) && qty > 0) {
-      const price = Number(p.price) || 0;
-      itemCount += qty;
-      itemTotal += price * qty;
-      items.push({ id, name: p.name, unit: p.unit || '1 unit', price, qty, subtotal: price * qty });
+    if (products[id]) {
+      sub += Number(products[id].price) * qty;
+      count += qty;
     }
   });
-  const deliveryFee = itemTotal >= 199 || itemTotal === 0 ? 0 : 7;
-  let discount = 0;
-  if (appliedCoupon && itemTotal > 0) {
-    if (itemTotal >= (Number(appliedCoupon.minOrder) || 0)) {
-      if (appliedCoupon.type === 'PERCENT') {
-        discount = Math.min(Math.round(itemTotal * (Number(appliedCoupon.value) / 100)), Number(appliedCoupon.maxDisc) || 999);
-      } else {
-        discount = Math.min(Number(appliedCoupon.value) || 0, itemTotal);
-      }
-    } else {
-      appliedCoupon = null;
-      document.getElementById('appliedCouponMsg').textContent = '';
-    }
+  const del = sub >= 199 || sub === 0 ? 0 : 7;
+  let disc = 0;
+  if (appliedCoupon && sub >= (appliedCoupon.minOrder || 0)) {
+    disc = appliedCoupon.type === 'FLAT'
+      ? Number(appliedCoupon.value)
+      : Math.min(Math.round(sub * Number(appliedCoupon.value) / 100), Number(appliedCoupon.maxDiscount || 999));
   }
-  const grandTotal = Math.max(0, itemTotal + deliveryFee - discount);
-  return { itemCount, itemTotal, deliveryFee, discount, grandTotal, items };
+  const grand = Math.max(0, sub + del - disc);
+  return { sub, count, del, disc, grand };
 }
 
 function updateCartUI() {
-  const sum = getCartSummary();
-  const bar = document.getElementById('floatingCart');
-  if (sum.itemCount > 0) {
-    bar.style.display = 'flex';
-    document.getElementById('floatItemCount').textContent = `${sum.itemCount} ITEM${sum.itemCount > 1 ? 'S' : ''}`;
-    document.getElementById('floatTotalAmount').textContent = `₹${sum.grandTotal}`;
-  } else {
+  const { sub, count, del, disc, grand } = getTotals();
+  const bar = document.getElementById('cartBar');
+  if (count === 0) {
     bar.style.display = 'none';
+    return;
   }
+  bar.style.display = 'flex';
+  document.getElementById('barQty').textContent = `${count} ITEM${count > 1 ? 'S' : ''}`;
+  document.getElementById('barTotal').textContent = `₹${grand}`;
 
-  // Update Free Delivery Progress Bar (FREE above ₹199, ₹7 fee below ₹199)
-  const freeBox = document.getElementById('freeDelBox');
-  const freeTxt = document.getElementById('freeDelText');
-  const freeFill = document.getElementById('freeDelFill');
-  if (sum.itemTotal >= 199) {
-    freeBox.classList.add('unlocked');
-    freeTxt.textContent = '🎉 Yay! You unlocked FREE Delivery (Saved ₹7)';
-    freeFill.style.width = '100%';
-  } else {
-    freeBox.classList.remove('unlocked');
-    const rem = 199 - sum.itemTotal;
-    freeTxt.textContent = `Add ₹${rem} more for FREE Delivery`;
-    freeFill.style.width = `${Math.min(100, (sum.itemTotal / 199) * 100)}%`;
-  }
+  document.getElementById('freeDelBanner').textContent = sub >= 199
+    ? '🎉 You unlocked FREE Delivery!'
+    : `Add ₹${199 - sub} more for FREE Delivery`;
 
-  // Render Cart Items inside Drawer
-  const container = document.getElementById('cartItemsContainer');
-  if (sum.items.length === 0) {
-    container.innerHTML = '<div class="empty-state" style="padding:20px;">Your cart is empty.</div>';
-  } else {
-    container.innerHTML = sum.items.map(it => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;">
-        <div style="max-width:58%;">
-          <div style="font-size:13px;font-weight:700;">${escapeHtml(it.name)}</div>
-          <div style="font-size:11px;color:#64748B;">${escapeHtml(it.unit)} • ₹${it.price}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="stepper" style="height:28px;min-width:68px;">
-            <button onclick="updateQty('${it.id}', -1)">−</button>
-            <span>${it.qty}</span>
-            <button onclick="updateQty('${it.id}', 1)">+</button>
-          </div>
-          <div style="font-size:13px;font-weight:800;min-width:44px;text-align:right;">₹${it.subtotal}</div>
-        </div>
-      </div>
-    `).join('');
-  }
+  document.getElementById('bSub').textContent = `₹${sub}`;
+  document.getElementById('bDel').textContent = del === 0 ? 'FREE' : `₹${del}`;
+  document.getElementById('bDiscRow').style.display = disc > 0 ? 'flex' : 'none';
+  document.getElementById('bDisc').textContent = `-₹${disc}`;
+  document.getElementById('bGrand').textContent = `₹${grand}`;
 
-  document.getElementById('billItemTotal').textContent = `₹${sum.itemTotal}`;
-  document.getElementById('billDeliveryFee').textContent = sum.deliveryFee === 0 ? 'FREE' : `₹${sum.deliveryFee}`;
-  if (sum.discount > 0) {
-    document.getElementById('billDiscountRow').style.display = 'flex';
-    document.getElementById('billDiscount').textContent = `-₹${sum.discount}`;
-  } else {
-    document.getElementById('billDiscountRow').style.display = 'none';
-  }
-  document.getElementById('billGrandTotal').textContent = `₹${sum.grandTotal}`;
-  refreshUpiQR(sum.grandTotal);
+  document.getElementById('cartList').innerHTML = Object.entries(cart).map(([id, qty]) => {
+    const p = products[id];
+    if (!p) return '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;">
+      <div><strong>${p.name}</strong><div style="font-size:11px;color:#64748B;">${p.unit} • ₹${p.price}</div></div>
+      <div class="step"><button onclick="changeQty('${id}',-1);openCart();">−</button><span>${qty}</span><button onclick="changeQty('${id}',1);openCart();">+</button></div>
+    </div>`;
+  }).join('');
 }
 
 function applyCoupon() {
-  const code = document.getElementById('couponInput').value.trim().toUpperCase();
-  if (!code) return;
-  const c = couponsMap[code];
-  const sum = getCartSummary();
-  if (!c || c.active === false) {
-    showToast('Invalid or expired coupon code', 'error');
-    return;
+  const code = document.getElementById('cpInput').value.trim().toUpperCase();
+  if (!coupons[code]) {
+    appliedCoupon = null;
+    document.getElementById('cpMsg').textContent = '❌ Invalid Coupon Code';
+  } else {
+    appliedCoupon = coupons[code];
+    document.getElementById('cpMsg').textContent = `✅ Coupon ${code} Applied!`;
   }
-  if (sum.itemTotal < (Number(c.minOrder) || 0)) {
-    showToast(`Minimum order ₹${c.minOrder} required for ${code}`, 'error');
-    return;
-  }
-  appliedCoupon = { code, ...c };
-  document.getElementById('appliedCouponMsg').textContent = `✅ Coupon ${code} applied!`;
   updateCartUI();
-  showToast(`Coupon ${code} applied!`, 'success');
 }
 
-function selectPayment(method) {
-  paymentMethod = method;
-  document.getElementById('payOptUpi').classList.toggle('active', method === 'UPI');
-  document.getElementById('payOptCod').classList.toggle('active', method === 'COD');
-  document.getElementById('upiSection').style.display = method === 'UPI' ? 'block' : 'none';
-  document.getElementById('payOptUpi').querySelector('span').textContent = method === 'UPI' ? '●' : '○';
-  document.getElementById('payOptCod').querySelector('span').textContent = method === 'COD' ? '●' : '○';
-}
-
-function refreshUpiQR(amount) {
-  const amt = Number(amount || 0).toFixed(2);
-  const upiUrl = `upi://pay?pa=8305530240@kotakbank&pn=Jhatpat&am=${amt}&cu=INR`;
-  document.getElementById('upiDeepLink').href = upiUrl;
-  const qrBox = document.getElementById('qrcode');
-  qrBox.innerHTML = '';
-  if (typeof QRCode !== 'undefined') {
-    new QRCode(qrBox, {
-      text: upiUrl,
-      width: 140,
-      height: 140
-    });
+function toggleUpiBox() {
+  const mode = document.getElementById('payMode').value;
+  const box = document.getElementById('upiBox');
+  if (mode === 'UPI') {
+    box.style.display = 'block';
+    const { grand } = getTotals();
+    const qrDiv = document.getElementById('qrcode');
+    qrDiv.innerHTML = '';
+    new QRCode(qrDiv, { text: `upi://pay?pa=8305530240@kotakbank&pn=Jhatpat&am=${grand}&cu=INR`, width: 150, height: 150 });
+  } else {
+    box.style.display = 'none';
   }
 }
 
-function openCartDrawer() {
+function openCart() {
   updateCartUI();
+  toggleUpiBox();
   openModal('cartModal');
 }
 
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'ordersModal') loadMyOrders();
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
 function placeOrder() {
-  const sum = getCartSummary();
-  if (sum.items.length === 0) {
-    showToast('Your cart is empty!', 'error');
-    return;
-  }
-  if (!selectedStoreId || !storesMap[selectedStoreId]) {
-    showToast('Please select a delivery store first.', 'error');
-    return;
-  }
-  const store = storesMap[selectedStoreId];
-  if (store.isOpen === false) {
-    showToast('This dark store is currently closed.', 'error');
-    return;
-  }
-  const name = document.getElementById('custName').value.trim();
-  const phone = document.getElementById('custPhone').value.trim();
-  const address = document.getElementById('custAddress').value.trim();
-  if (!name || phone.length < 10 || !address) {
-    showToast('Please enter valid Name, 10-digit Phone & Address.', 'error');
-    return;
-  }
+  const name = document.getElementById('cName').value.trim();
+  const phone = document.getElementById('cPhone').value.trim();
+  const addr = document.getElementById('cAddr').value.trim();
+  const payMode = document.getElementById('payMode').value;
+  const { sub, count, del, disc, grand } = getTotals();
 
-  localStorage.setItem('jhatpat_cust_profile', JSON.stringify({ name, phone, address }));
+  if (count === 0) return alert('Cart khaali hai!');
+  if (!name || phone.length < 10 || !addr) return alert('Apna Naam, 10-digit Mobile Number aur Poora Address dalein!');
 
-  const orderId = 'JHAT' + Date.now().toString().slice(-6);
+  localStorage.setItem('jhatpat_cname', name);
+  localStorage.setItem('jhatpat_cphone', phone);
+  localStorage.setItem('jhatpat_caddr', addr);
+
+  const btn = document.getElementById('placeOrderBtn');
+  btn.disabled = true;
+  btn.textContent = 'Placing Order...';
+
+  const items = Object.entries(cart).filter(([id]) => products[id]).map(([id, qty]) => ({
+    id, name: products[id].name, unit: products[id].unit || '', price: Number(products[id].price), qty
+  }));
+
+  const orderId = 'JHT' + Math.floor(100000 + Math.random() * 900000);
   const orderData = {
     orderId,
-    storeId: selectedStoreId,
-    storeName: store.name,
-    city: store.city,
+    storeId: 'MAIN_STORE',
+    city: 'Dombivli',
     customerName: name,
     customerPhone: phone,
-    customerAddress: address,
-    items: sum.items,
-    itemTotal: sum.itemTotal,
-    deliveryFee: sum.deliveryFee,
-    discount: sum.discount,
-    couponCode: appliedCoupon ? appliedCoupon.code : '',
-    totalAmount: sum.grandTotal,
-    paymentMethod,
-    paymentStatus: paymentMethod === 'UPI' ? 'UPI Initiated (8305530240@kotakbank)' : 'COD Pending',
+    customerAddress: addr,
+    items,
+    itemTotal: sub,
+    deliveryFee: del,
+    discount: disc,
+    totalAmount: grand,
+    paymentMethod: payMode,
     status: 'PLACED',
     createdAt: Date.now()
   };
 
   db.ref('orders/' + orderId).set(orderData)
     .then(() => {
-      // Upsert Customer CRM profile
-      db.ref('customers/' + phone).once('value', snap => {
-        const prev = snap.val() || { totalOrders: 0, totalSpend: 0 };
-        db.ref('customers/' + phone).set({
-          name,
-          phone,
-          address,
-          city: store.city,
-          lastStoreId: selectedStoreId,
-          totalOrders: (Number(prev.totalOrders) || 0) + 1,
-          totalSpend: (Number(prev.totalSpend) || 0) + sum.grandTotal,
-          lastOrderAt: Date.now()
-        });
-      });
-
-      const myOrders = JSON.parse(localStorage.getItem('jhatpat_my_orders') || '[]');
-      myOrders.push(orderId);
-      localStorage.setItem('jhatpat_my_orders', JSON.stringify(myOrders));
-
       cart = {};
-      appliedCoupon = null;
       localStorage.removeItem('jhatpat_cart');
+      localStorage.setItem('jhatpat_last_order', orderId);
+      btn.disabled = false;
+      btn.textContent = 'Place Order Now ▸';
       closeModal('cartModal');
       renderProducts();
       updateCartUI();
-      showToast(`Order #${orderId} placed! Arriving in 10 mins ⚡`, 'success');
+      watchLiveOrder(orderId);
+      alert('🎉 Order Placed Successfully! Order ID: #' + orderId);
     })
-    .catch(err => showToast('Order failed: ' + err.message, 'error'));
+    .catch(err => {
+      btn.disabled = false;
+      btn.textContent = 'Place Order Now ▸';
+      alert('Error: ' + err.message);
+    });
 }
 
-function renderLiveTracker(myOrders) {
-  const banner = document.getElementById('liveTrackerBanner');
-  const active = myOrders.find(o => o.status !== 'DELIVERED' && o.status !== 'CANCELLED');
-  if (!active) {
-    banner.style.display = 'none';
-    return;
-  }
-  banner.style.display = 'block';
-  const statusLabels = {
-    PLACED: '🕒 Order Placed — Store Assigning',
-    PACKING: '📦 Packing your fresh items at Dark Store',
-    OUT_FOR_DELIVERY: '🛵 Rider is on the way (Arriving in mins!)'
-  };
-  document.getElementById('trackerStatusTitle').textContent = statusLabels[active.status] || active.status;
-  document.getElementById('trackerOrderId').textContent = '#' + active.orderId;
-
-  const stepMap = { PLACED: 1, PACKING: 2, OUT_FOR_DELIVERY: 3, DELIVERED: 4 };
-  const currentStep = stepMap[active.status] || 1;
-  const segs = document.getElementById('trackerSteps').children;
-  for (let i = 0; i < segs.length; i++) {
-    segs[i].classList.toggle('done', i < currentStep);
-  }
-}
-
-function renderMyOrdersModal(myOrders) {
-  const list = document.getElementById('myOrdersList');
-  if (!myOrders || myOrders.length === 0) {
-    list.innerHTML = '<div class="empty-state">No orders yet. Place your first 10-minute order!</div>';
-    return;
-  }
-  list.innerHTML = myOrders.map(o => `
-    <div style="border:1px solid #E2E8F0;border-radius:14px;padding:12px;margin-bottom:10px;background:#fff;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong>#${escapeHtml(o.orderId)}</strong>
-        <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:${o.status === 'DELIVERED' ? '#DCFCE7' : '#FEF3C7'};color:${o.status === 'DELIVERED' ? '#166534' : '#92400E'};">
-          ${escapeHtml(o.status)}
-        </span>
-      </div>
-      <div style="font-size:12px;color:#64748B;margin:4px 0;">${escapeHtml(o.storeName)} • ${new Date(o.createdAt).toLocaleString()}</div>
-      <div style="font-size:12px;margin:6px 0;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed #E2E8F0;">
-        <strong>₹${o.totalAmount} (${escapeHtml(o.paymentMethod)})</strong>
-        <button class="reorder-btn" style="width:auto;padding:5px 12px;" onclick="reorderFromId('${o.orderId}')">🔄 Reorder</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function renderOrderAgain(myOrders) {
-  const sec = document.getElementById('orderAgainSection');
-  const row = document.getElementById('reorderRow');
-  if (!myOrders || myOrders.length === 0) {
-    sec.style.display = 'none';
-    return;
-  }
-  sec.style.display = 'block';
-  window._cachedMyOrders = myOrders;
-  row.innerHTML = myOrders.slice(0, 5).map(o => `
-    <div class="reorder-card">
-      <div>
-        <div style="font-size:11px;color:#64748B;font-weight:700;">#${escapeHtml(o.orderId)} • ₹${o.totalAmount}</div>
-        <div style="font-size:12px;font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-          ${(o.items || []).map(i => i.name).join(', ')}
-        </div>
-      </div>
-      <button class="reorder-btn" onclick="reorderFromId('${o.orderId}')">⚡ 1-Tap Reorder</button>
-    </div>
-  `).join('');
-}
-
-function reorderFromId(orderId) {
-  const order = (window._cachedMyOrders || []).find(o => o.orderId === orderId);
-  if (!order || !order.items) return;
-  order.items.forEach(it => {
-    if (productsMap[it.id] && !isProductOutOfStock(productsMap[it.id])) {
-      cart[it.id] = (cart[it.id] || 0) + it.qty;
-    }
+function watchLiveOrder(orderId) {
+  if (!orderId) return;
+  db.ref('orders/' + orderId).on('value', snap => {
+    const o = snap.val();
+    if (!o) return;
+    document.getElementById('liveTracker').style.display = 'block';
+    document.getElementById('trkId').textContent = '#' + o.orderId;
+    document.getElementById('trkStatus').textContent = o.status.replace(/_/g, ' ');
   });
-  localStorage.setItem('jhatpat_cart', JSON.stringify(cart));
-  renderProducts();
-  updateCartUI();
-  closeModal('ordersModal');
-  openCartDrawer();
-  showToast('Items added to cart!', 'success');
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+const lastOrd = localStorage.getItem('jhatpat_last_order');
+if (lastOrd) watchLiveOrder(lastOrd);
+
+function loadMyOrders() {
+  const phone = localStorage.getItem('jhatpat_cphone') || '';
+  const box = document.getElementById('myOrdersList');
+  if (!phone) {
+    box.innerHTML = '<p style="color:#64748B;font-size:13px;">Abhi tak koi order place nahi kiya gaya hai.</p>';
+    return;
+  }
+  db.ref('orders').orderByChild('customerPhone').equalTo(phone).once('value', snap => {
+    const list = Object.values(snap.val() || {}).sort((a, b) => b.createdAt - a.createdAt);
+    if (!list.length) {
+      box.innerHTML = '<p style="color:#64748B;font-size:13px;">Koi order nahi mila.</p>';
+      return;
+    }
+    box.innerHTML = list.map(o => `<div style="border:1px solid #E2E8F0;border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;"><strong>#${o.orderId}</strong><span style="color:#0C831F;font-weight:800;font-size:12px;">${o.status}</span></div>
+      <div style="font-size:12px;color:#64748B;margin:4px 0;">${(o.items || []).map(i => `${i.name} x${i.qty}`).join(', ')}</div>
+      <div style="font-size:13px;font-weight:800;">Total: ₹${o.totalAmount} (${o.paymentMethod})</div>
+    </div>`).join('');
+  });
+}
 </script>
 </body>
 </html>
