@@ -1,422 +1,731 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jhatpat - Fresh Groceries & Produce in Minutes</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat | Groceries, Fresh Sabzi, Fruits & Juices in 10 Minutes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #f7f8fa; }
+    .blinkit-yellow { background-color: #F8CB46; }
+    .blinkit-green { background-color: #0C831F; }
+    .blinkit-green-text { color: #0C831F; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-900 pb-24">
+<body class="text-slate-800 pb-24">
 
-    <!-- Blinkit Yellow Header -->
-    <header class="bg-yellow-400 sticky top-0 z-40 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 pt-3 pb-2 flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-                <div class="bg-slate-950 text-yellow-400 font-black px-2.5 py-1.5 rounded-xl text-lg tracking-tighter">
-                    jhatpat
-                </div>
-                <div class="border-l border-yellow-500 pl-2.5">
-                    <p class="text-[11px] font-extrabold uppercase text-slate-800 leading-none">Delivery in 12 mins</p>
-                    <button onclick="detectNearestStore()" class="text-xs font-semibold text-slate-900 flex items-center mt-0.5">
-                        <span id="nearest-store-label">Detecting nearest dark store...</span>
-                        <i class="fa-solid fa-location-crosshairs ml-1.5 text-emerald-800"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="openTracker()" class="bg-white/90 hover:bg-white text-slate-900 px-3 py-2 rounded-xl text-xs font-bold shadow-sm">
-                    <i class="fa-solid fa-clock-rotate-left text-emerald-700 mr-1"></i> Orders
-                </button>
-            </div>
+  <!-- STICKY BLINKIT-STYLE HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand + Nearest Dark Store Selector -->
+      <div class="flex items-center gap-4">
+        <a href="#" class="flex items-center gap-1.5">
+          <span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#F8CB46] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]">jhat</span><span class="text-2xl sm:text-3xl font-black tracking-tighter text-[#0C831F] -ml-1.5">pat</span>
+        </a>
+
+        <div class="h-8 w-[1px] bg-slate-200 hidden sm:block"></div>
+
+        <!-- Nearest Store / Pincode Picker -->
+        <div onclick="openStoreModal()" class="cursor-pointer group">
+          <div class="flex items-center gap-1 text-xs sm:text-sm font-extrabold text-slate-900">
+            <span class="text-[#0C831F]"><i class="fa-solid fa-bolt"></i> Delivery in 10 mins</span>
+          </div>
+          <div class="flex items-center gap-1 text-xs text-slate-600 group-hover:text-slate-900">
+            <span id="nearestStoreLabel" class="font-semibold truncate max-w-[180px] sm:max-w-[260px]">Detecting nearest store...</span>
+            <i class="fa-solid fa-caret-down text-slate-500"></i>
+          </div>
         </div>
+      </div>
 
-        <!-- Live Search -->
-        <div class="max-w-5xl mx-auto px-4 pb-3">
-            <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                <input type="text" id="live-search" oninput="renderCatalog()" placeholder='Search "alphonso mango", "onion", "coriander"...' 
-                    class="w-full bg-white pl-10 pr-4 py-2.5 rounded-xl text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
-            </div>
+      <!-- Search Bar -->
+      <div class="order-3 md:order-2 w-full md:w-auto md:flex-1 max-w-xl">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input id="searchInput" type="text" placeholder='Search "alphonso mango", "bhindi", "orange juice"...'
+            oninput="renderCatalog()"
+            class="w-full bg-slate-100 border border-slate-200 focus:bg-white focus:border-[#0C831F] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none transition" />
         </div>
-    </header>
+      </div>
 
-    <main class="max-w-5xl mx-auto px-4 pt-4 space-y-6">
-        <!-- Sponsored Bestsellers Banner Section -->
-        <section id="sponsored-section" class="hidden">
-            <div class="flex items-center justify-between mb-2.5">
-                <h2 class="font-extrabold text-base text-slate-900 flex items-center">
-                    <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded mr-2">SPONSORED</span>
-                    Bestsellers Near You
-                </h2>
-            </div>
-            <div id="sponsored-grid" class="flex space-x-3 overflow-x-auto no-scrollbar pb-2"></div>
-        </section>
-
-        <!-- Category Filter Pills -->
-        <div class="flex space-x-2 overflow-x-auto no-scrollbar">
-            <button onclick="setCat('All')" class="cat-pill bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">All Produce</button>
-            <button onclick="setCat('Vegetables')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Fresh Vegetables</button>
-            <button onclick="setCat('Fruits')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Fresh Fruits</button>
-            <button onclick="setCat('Leafy & Herbs')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Leafy & Herbs</button>
-            <button onclick="setCat('Exotic & Organic')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Exotic & Organic</button>
-        </div>
-
-        <!-- Main Product Grid -->
-        <section>
-            <h2 class="font-extrabold text-base text-slate-900 mb-3">Shop Fresh Daily</h2>
-            <div id="main-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5"></div>
-        </section>
-    </main>
-
-    <!-- Blinkit Green Floating Cart Bar -->
-    <div id="floating-cart" class="hidden fixed bottom-4 inset-x-4 max-w-2xl mx-auto bg-emerald-600 text-white rounded-2xl p-3.5 shadow-2xl z-40 flex items-center justify-between cursor-pointer" onclick="openCart()">
-        <div class="flex items-center space-x-3">
-            <div class="bg-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center font-bold">
-                <i class="fa-solid fa-bag-shopping"></i>
-            </div>
-            <div>
-                <p class="text-xs font-bold" id="bar-items">0 ITEMS</p>
-                <p class="text-base font-black leading-tight" id="bar-total">₹0</p>
-            </div>
-        </div>
-        <div class="font-extrabold text-sm flex items-center">
-            View Cart <i class="fa-solid fa-caret-right ml-2"></i>
-        </div>
+      <!-- Right Actions: Cart & WhatsApp Support -->
+      <div class="order-2 md:order-3 flex items-center gap-2">
+        <button onclick="openTrackOrderModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700">
+          <i class="fa-solid fa-box text-[#0C831F]"></i> My Orders
+        </button>
+        <button onclick="openCartDrawer()"
+          class="blinkit-green hover:bg-green-800 text-white px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 shadow-md transition">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span id="headerCartSummary">My Cart</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Checkout Drawer Modal -->
-    <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center">
-        <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3">
-                <div>
-                    <h3 class="font-extrabold text-base">Delivery in 12 minutes</h3>
-                    <p class="text-[11px] text-emerald-700 font-semibold" id="checkout-store-tag">Fulfilled by Nearest Dark Store</p>
-                </div>
-                <button onclick="closeCart()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">&times;</button>
-            </div>
+    <!-- FREE DELIVERY PROGRESS BAR (₹199 THRESHOLD) -->
+    <div id="freeDeliveryStrip" class="bg-green-50 border-t border-green-100 px-4 py-1.5 text-center text-xs font-semibold text-green-900">
+      Add items worth <span class="font-extrabold">₹199</span> for <span class="font-extrabold text-[#0C831F]">FREE Delivery</span> (Flat ₹7 below ₹199)
+    </div>
+  </header>
 
-            <div id="cart-items-box" class="divide-y my-3 max-h-52 overflow-y-auto"></div>
+  <!-- MAIN CONTENT -->
+  <main class="max-w-7xl mx-auto px-4 py-5 space-y-6">
 
-            <div class="bg-slate-50 p-3.5 rounded-2xl text-xs space-y-1.5 mb-4 border">
-                <div class="flex justify-between"><span>Item Total</span><span id="bill-sub">₹0</span></div>
-                <div class="flex justify-between"><span>Handling & Delivery</span><span class="text-emerald-600 font-bold">FREE</span></div>
-                <div class="flex justify-between font-black text-sm border-t pt-1.5"><span>Grand Total</span><span id="bill-grand">₹0</span></div>
-            </div>
-
-            <form onsubmit="submitOrder(event)" class="space-y-3">
-                <input type="text" id="c-name" required placeholder="Your Full Name" class="w-full border rounded-xl px-3.5 py-2.5 text-sm">
-                <input type="tel" id="c-phone" required pattern="[0-9]{10}" placeholder="10-Digit Mobile Number" class="w-full border rounded-xl px-3.5 py-2.5 text-sm">
-                <textarea id="c-addr" required rows="2" placeholder="House / Flat No, Building, Landmark" class="w-full border rounded-xl px-3.5 py-2.5 text-sm"></textarea>
-                <select id="c-pay" class="w-full border rounded-xl px-3.5 py-2.5 text-sm font-semibold">
-                    <option value="UPI">Instant UPI on Delivery</option>
-                    <option value="COD">Cash on Delivery (COD)</option>
-                </select>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-lg">
-                    Place Jhatpat Order
-                </button>
-            </form>
+    <!-- PROMO BANNERS -->
+    <div id="bannerContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="rounded-2xl p-6 bg-gradient-to-r from-[#0C831F] to-emerald-700 text-white shadow-sm flex items-center justify-between">
+        <div>
+          <span class="bg-[#F8CB46] text-slate-900 text-[10px] font-black uppercase px-2.5 py-1 rounded-full">10-Min Express</span>
+          <h2 class="text-xl sm:text-2xl font-black mt-2">Fresh Mumbai Sabzi, Fruits & Cold-Pressed Juices</h2>
+          <p class="text-xs text-green-100 mt-1">FREE delivery on orders ₹199+ • Only ₹7 delivery below ₹199</p>
         </div>
+        <i class="fa-solid fa-basket-shopping text-5xl text-white/25 hidden sm:block"></i>
+      </div>
+
+      <div class="rounded-2xl p-6 bg-gradient-to-r from-amber-400 to-[#F8CB46] text-slate-900 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="bg-slate-900 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full">Instant UPI & COD</span>
+          <h2 class="text-xl sm:text-2xl font-black mt-2">Farm-Fresh Stock Live From Your Nearest Dark Store</h2>
+          <p class="text-xs text-slate-800 mt-1">Real-time store inventory sync • 1-Click WhatsApp order tracking</p>
+        </div>
+        <i class="fa-solid fa-bolt text-5xl text-slate-900/20 hidden sm:block"></i>
+      </div>
     </div>
 
-    <!-- Real-Time Order Tracker Modal -->
-    <div id="tracker-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3 mb-3">
-                <h3 class="font-extrabold text-base">Live Order Tracker</h3>
-                <button onclick="closeTracker()" class="w-8 h-8 rounded-full bg-slate-100 font-bold">&times;</button>
-            </div>
-            <div class="flex gap-2 mb-4">
-                <input type="tel" id="track-mobile" placeholder="Enter 10-digit mobile" class="flex-1 border rounded-xl px-3 py-2 text-sm">
-                <button onclick="trackByPhone()" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Track</button>
-            </div>
-            <div id="tracker-results" class="space-y-3"></div>
-        </div>
+    <!-- CATEGORY PILLS -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1" id="categoryPills"></div>
+
+    <!-- STORE STOCK NOTICE -->
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h3 id="catalogHeading" class="font-extrabold text-lg text-slate-900">Fresh Groceries & Essentials</h3>
+        <p id="storeSyncSub" class="text-xs text-slate-500">Showing live stock for your selected dark store</p>
+      </div>
+      <label class="flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+        <input id="hideOutOfStockChk" type="checkbox" onchange="renderCatalog()" class="rounded text-[#0C831F]" />
+        Hide Out of Stock items
+      </label>
     </div>
 
-    <script type="module">
-        
+    <!-- PRODUCT GRID -->
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"></div>
+  </main>
+
+  <!-- FLOATING MOBILE CART BAR -->
+  <div id="floatingCartBar" onclick="openCartDrawer()"
+    class="fixed bottom-4 left-4 right-4 max-w-xl mx-auto blinkit-green text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer z-30 hidden">
+    <div class="flex items-center gap-3">
+      <div class="bg-white/20 w-9 h-9 rounded-xl flex items-center justify-center font-extrabold text-sm" id="floatCount">0</div>
+      <div>
+        <div class="text-xs font-bold" id="floatTotal">₹0</div>
+        <div class="text-[10px] text-green-100" id="floatDelNote">Plus ₹7 delivery</div>
+      </div>
+    </div>
+    <div class="font-extrabold text-sm flex items-center gap-1">
+      View Cart <i class="fa-solid fa-chevron-right text-xs"></i>
+    </div>
+  </div>
+
+  <!-- NEAREST DARK STORE SELECTOR MODAL -->
+  <div id="storeModal" class="fixed inset-0 bg-slate-900/70 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-lg text-slate-900"><i class="fa-solid fa-location-dot text-[#0C831F] mr-1"></i> Select Your Nearest Dark Store</h3>
+        <button onclick="closeStoreModal()" class="text-slate-400 hover:text-slate-700 text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-600 mb-1">Enter Pincode for Auto-Match</label>
+        <div class="flex gap-2">
+          <input id="pincodeInput" type="text" maxlength="6" placeholder="e.g., 400053, 421301..."
+            class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold" />
+          <button onclick="matchStoreByPincode()" class="blinkit-green text-white font-bold text-xs px-4 py-2 rounded-xl">
+            Find Store
+          </button>
+        </div>
+      </div>
+      <div class="border-t border-slate-100 pt-3">
+        <p class="text-xs font-bold text-slate-500 mb-2">Or choose directly from active Dark Stores:</p>
+        <div id="storeListModalBody" class="space-y-2 max-h-64 overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART & CHECKOUT DRAWER -->
+  <div id="cartDrawer" class="fixed inset-0 bg-slate-900/70 z-50 hidden flex justify-end">
+    <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+      <!-- Drawer Header -->
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="font-extrabold text-base text-slate-900">My Cart</h3>
+          <p id="cartStoreSub" class="text-[11px] text-[#0C831F] font-semibold">Fulfilled by Nearest Hub</p>
+        </div>
+        <button onclick="closeCartDrawer()" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Free Delivery Meter inside Cart -->
+      <div id="cartFreeDelBanner" class="px-4 py-2 bg-amber-50 border-b border-amber-100 text-xs font-bold text-amber-900"></div>
+
+      <!-- Cart Body -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div id="cartItemsList" class="space-y-3"></div>
+
+        <!-- Bill Details -->
+        <div id="billDetailsBox" class="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2 text-xs hidden">
+          <h4 class="font-extrabold text-slate-900 text-sm mb-1">Bill Details</h4>
+          <div class="flex justify-between text-slate-600">
+            <span>Items Total</span>
+            <span id="billSubtotal" class="font-bold text-slate-900">₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Delivery Charge <span class="text-[10px] text-slate-400">(Free on ₹199+)</span></span>
+            <span id="billDelivery" class="font-bold">₹7</span>
+          </div>
+          <div class="border-t border-slate-200 pt-2 flex justify-between text-sm font-black text-slate-900">
+            <span>Grand Total</span>
+            <span id="billGrandTotal">₹0</span>
+          </div>
+        </div>
+
+        <!-- Customer Delivery & Payment Form -->
+        <div id="checkoutFormBox" class="space-y-3 pt-2 hidden">
+          <h4 class="font-extrabold text-sm text-slate-900">Delivery Details</h4>
+          <input id="custName" type="text" placeholder="Your Full Name *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs" />
+          <input id="custPhone" type="tel" maxlength="10" placeholder="10-Digit Mobile / WhatsApp Number *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs" />
+          <textarea id="custAddress" rows="2" placeholder="Flat / Building / Wing / Landmark *" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs"></textarea>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Payment Mode</label>
+            <div class="grid grid-cols-2 gap-2">
+              <label class="border border-slate-300 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer text-xs font-bold has-[:checked]:border-[#0C831F] has-[:checked]:bg-green-50">
+                <input type="radio" name="payMode" value="UPI" checked onchange="toggleUpiBox()" />
+                <span>Kotak UPI / QR</span>
+              </label>
+              <label class="border border-slate-300 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer text-xs font-bold has-[:checked]:border-[#0C831F] has-[:checked]:bg-green-50">
+                <input type="radio" name="payMode" value="COD" onchange="toggleUpiBox()" />
+                <span>Cash on Delivery</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- KOTAK UPI BOX -->
+          <div id="kotakUpiBox" class="bg-purple-50 border border-purple-200 rounded-2xl p-3.5 text-center space-y-2">
+            <div class="text-[11px] font-bold text-purple-900">Pay via Kotak UPI (<span id="upiPayeeDisplay">Jhatpat</span>)</div>
+            <img id="upiQrImg" src="" alt="Kotak UPI QR" class="w-36 h-36 mx-auto rounded-xl bg-white p-1.5 border border-purple-200 shadow-sm" />
+            <div class="text-xs font-mono font-bold text-slate-800" id="upiIdDisplay">8305530240@kotakbank</div>
+            <a id="upiDeepLinkBtn" href="#"
+              class="inline-block w-full bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs py-2 rounded-xl">
+              <i class="fa-solid fa-mobile-screen-button mr-1"></i> Pay Now in GPay / PhonePe / Paytm
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drawer Footer -->
+      <div id="cartFooter" class="p-4 border-t border-slate-200 bg-white hidden">
+        <button onclick="placeOrder()"
+          class="w-full blinkit-green hover:bg-green-800 text-white font-extrabold py-3.5 rounded-xl shadow-lg flex items-center justify-between px-5 text-sm">
+          <span id="footerPayAmount">₹0</span>
+          <span>Place Order & WhatsApp <i class="fa-brands fa-whatsapp ml-1"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS + 1-CLICK WHATSAPP MODAL -->
+  <div id="orderSuccessModal" class="fixed inset-0 bg-slate-900/75 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl">
+      <div class="w-16 h-16 bg-green-100 text-[#0C831F] rounded-full mx-auto flex items-center justify-center text-3xl">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h3 class="text-xl font-black text-slate-900">Order Placed Successfully!</h3>
+      <p id="orderSuccessDetails" class="text-xs text-slate-600"></p>
+      <a id="whatsappOrderConfirmBtn" href="#" target="_blank"
+        class="block w-full bg-[#0C831F] hover:bg-green-800 text-white font-extrabold py-3 rounded-xl text-sm shadow">
+        <i class="fa-brands fa-whatsapp mr-1"></i> Send Order Receipt on WhatsApp
+      </a>
+      <button onclick="document.getElementById('orderSuccessModal').classList.add('hidden')"
+        class="w-full bg-slate-100 text-slate-700 font-bold py-2.5 rounded-xl text-xs">
+        Continue Shopping
+      </button>
+    </div>
+  </div>
+
+  <!-- TRACK MY ORDERS MODAL -->
+  <div id="trackModal" class="fixed inset-0 bg-slate-900/70 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base text-slate-900">Track My Orders</h3>
+        <button onclick="document.getElementById('trackModal').classList.add('hidden')" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="flex gap-2">
+        <input id="trackPhoneInput" type="tel" maxlength="10" placeholder="Enter your 10-digit mobile number"
+          class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+        <button onclick="lookupMyOrders()" class="blinkit-green text-white font-bold text-xs px-4 py-2 rounded-xl">Search</button>
+      </div>
+      <div id="myOrdersList" class="space-y-2 max-h-64 overflow-y-auto text-xs"></div>
+    </div>
+  </div>
+
+  <!-- FIREBASE + STOREFRONT LOGIC -->
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-        getDatabase, ref, set, push, update, remove, onValue, get 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
-        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
-        authDomain: "jhatpat-22aa8.firebaseapp.com",
-        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-        projectId: "jhatpat-22aa8",
-        storageBucket: "jhatpat-22aa8.appspot.com",
-        messagingSenderId: "000000000000",
-        appId: "1:000000000000:web:jhatpat22aa8app"
+      databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    let storesMap = {};
+    let productsMap = {};
+    let ordersMap = {};
+    let bannersMap = {};
+    let settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat" };
+    let selectedStoreId = localStorage.getItem("jhatpat_selected_store") || "";
+    let selectedCategory = "ALL";
+    let cart = JSON.parse(localStorage.getItem("jhatpat_cart") || "{}");
 
-        let products = [];
-        let stores = [];
-        let activeStore = { code: 'KYN01', name: 'Kalyan Central Hub', distance: 1.2 };
-        let userCoords = { lat: 19.2403, lng: 73.1305 };
-        let cart = JSON.parse(localStorage.getItem('jhatpat_v2_cart') || '{}');
-        let selectedCat = 'All';
+    window.fallbackImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
 
-        // Haversine Formula for Nearest Dark Store Detection
-        function haversineKm(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-        }
+    // Realtime Firebase Listeners
+    onValue(ref(db, "settings"), (snap) => {
+      if (snap.exists()) {
+        settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat", ...snap.val() };
+      }
+      updateCartUI();
+    });
 
-        window.detectNearestStore = () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                    computeClosestHub();
-                }, () => computeClosestHub());
-            } else {
-                computeClosestHub();
-            }
-        };
+    onValue(ref(db, "stores"), (snap) => {
+      storesMap = snap.val() || {};
+      const storeIds = Object.keys(storesMap);
+      if (storeIds.length && (!selectedStoreId || !storesMap[selectedStoreId])) {
+        selectedStoreId = storeIds[0];
+        localStorage.setItem("jhatpat_selected_store", selectedStoreId);
+      }
+      updateNearestStoreHeader();
+      renderStoreModalList();
+      renderCatalog();
+      updateCartUI();
+    });
 
-        function computeClosestHub() {
-            if (stores.length === 0) {
-                document.getElementById('nearest-store-label').innerText = `${activeStore.name} (${activeStore.distance} km)`;
-                return;
-            }
-            let best = null;
-            let minDist = Infinity;
-            stores.forEach(s => {
-                const d = haversineKm(userCoords.lat, userCoords.lng, Number(s.lat), Number(s.lng));
-                if (d < minDist) {
-                    minDist = d;
-                    best = { ...s, distance: d.toFixed(1) };
-                }
-            });
-            if (best) {
-                activeStore = best;
-                document.getElementById('nearest-store-label').innerText = `${best.name} (${best.distance} km)`;
-                document.getElementById('checkout-store-tag').innerText = `Fulfilled by ${best.name} (${best.code})`;
-            }
-        }
+    onValue(ref(db, "products"), (snap) => {
+      productsMap = snap.val() || {};
+      renderCategoryPills();
+      renderCatalog();
+      updateCartUI();
+    });
 
-        onValue(ref(db, 'stores'), snap => {
-            stores = Object.values(snap.val() || {});
-            detectNearestStore();
-        });
+    onValue(ref(db, "orders"), (snap) => {
+      ordersMap = snap.val() || {};
+    });
 
-        onValue(ref(db, 'products'), snap => {
-            const raw = snap.val() || {};
-            products = Object.entries(raw)
-                .map(([id, val]) => ({ id, ...val }))
-                .filter(p => p.inStock !== false);
-            renderCatalog();
-            syncCartBar();
-        });
+    onValue(ref(db, "banners"), (snap) => {
+      bannersMap = snap.val() || {};
+      renderBanners();
+    });
 
-        window.setCat = (cat) => {
-            selectedCat = cat;
-            document.querySelectorAll('.cat-pill').forEach(el => {
-                el.className = (el.innerText.includes(cat) || (cat === 'All' && el.innerText === 'All Produce'))
-                    ? 'cat-pill bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap'
-                    : 'cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap';
-            });
-            renderCatalog();
-        };
+    // Store Selection & Stock Sync Helper
+    function isProductInStockAtStore(product, storeId) {
+      if (product.inStock === false) return false;
+      if (storeId && product.storeStock && product.storeStock[storeId] !== undefined) {
+        return Boolean(product.storeStock[storeId]);
+      }
+      return true;
+    }
 
-        function buildCard(p, isHorizontal = false) {
-            const qty = cart[p.id]?.qty || 0;
-            const off = p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
-            const widthClass = isHorizontal ? 'min-w-[165px] max-w-[165px]' : '';
-            return `
-                <div class="${widthClass} bg-white border border-slate-200/80 rounded-2xl p-3 flex flex-col justify-between relative shadow-sm">
-                    ${p.sponsored ? `<span class="absolute top-2 left-2 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">AD</span>` : ''}
-                    ${off > 0 ? `<span class="absolute top-2 right-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">${off}% OFF</span>` : ''}
-                    <div>
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-28 object-cover rounded-xl mb-2 bg-slate-100">
-                        <div class="inline-flex items-center bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-600">
-                            <i class="fa-solid fa-stopwatch text-emerald-600 mr-1"></i> 12 MINS
-                        </div>
-                        <h3 class="font-bold text-xs text-slate-800 mt-1 line-clamp-2 leading-snug">${p.name}</h3>
-                        <p class="text-[11px] text-slate-500 mt-0.5">${p.unit}</p>
-                    </div>
-                    <div class="flex items-center justify-between mt-3 pt-1">
-                        <div>
-                            <span class="font-extrabold text-sm text-slate-900">₹${p.price}</span>
-                            ${p.mrp > p.price ? `<span class="text-[10px] text-slate-400 line-through block leading-none">₹${p.mrp}</span>` : ''}
-                        </div>
-                        ${qty === 0 ? `
-                            <button onclick="stepQty('${p.id}', 1)" class="border border-emerald-600 text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition">
-                                ADD
-                            </button>
-                        ` : `
-                            <div class="flex items-center bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm">
-                                <button onclick="stepQty('${p.id}', -1)" class="px-2.5 py-1.5">-</button>
-                                <span class="px-1">${qty}</span>
-                                <button onclick="stepQty('${p.id}', 1)" class="px-2.5 py-1.5">+</button>
-                            </div>
-                        `}
-                    </div>
+    function updateNearestStoreHeader() {
+      const st = storesMap[selectedStoreId];
+      if (st) {
+        document.getElementById("nearestStoreLabel").textContent = `${st.name} (${st.area})`;
+        document.getElementById("storeSyncSub").textContent = `Live inventory synced with ${st.name}`;
+        document.getElementById("cartStoreSub").textContent = `Fulfilled by ${st.name}`;
+      } else {
+        document.getElementById("nearestStoreLabel").textContent = "Select Mumbai Dark Store";
+      }
+    }
+
+    window.openStoreModal = () => document.getElementById("storeModal").classList.remove("hidden");
+    window.closeStoreModal = () => document.getElementById("storeModal").classList.add("hidden");
+
+    function renderStoreModalList() {
+      const el = document.getElementById("storeListModalBody");
+      el.innerHTML = Object.values(storesMap).map(st => `
+        <div onclick="selectCustomerStore('${st.id}')"
+          class="p-3 rounded-xl border cursor-pointer flex justify-between items-center ${
+            st.id === selectedStoreId ? 'border-[#0C831F] bg-green-50' : 'border-slate-200 hover:bg-slate-50'
+          }">
+          <div>
+            <div class="font-bold text-xs text-slate-900">${st.name}</div>
+            <div class="text-[11px] text-slate-500">${st.area} • Pincodes: ${st.pincodes}</div>
+          </div>
+          <span class="text-[11px] font-bold text-[#0C831F]">${st.id === selectedStoreId ? 'Active ✓' : 'Select'}</span>
+        </div>
+      `).join("");
+    }
+
+    window.selectCustomerStore = (stId) => {
+      selectedStoreId = stId;
+      localStorage.setItem("jhatpat_selected_store", stId);
+      updateNearestStoreHeader();
+      renderStoreModalList();
+      renderCatalog();
+      updateCartUI();
+      closeStoreModal();
+    };
+
+    window.matchStoreByPincode = () => {
+      const pin = document.getElementById("pincodeInput").value.trim();
+      if (pin.length < 6) return alert("Enter a valid 6-digit pincode.");
+      const match = Object.values(storesMap).find(st => (st.pincodes || "").includes(pin));
+      if (match) {
+        selectCustomerStore(match.id);
+      } else {
+        alert("No exact pincode match found; please pick your nearest hub from the list below.");
+      }
+    };
+
+    // Banners
+    function renderBanners() {
+      const list = Object.values(bannersMap).filter(b => b.active !== false);
+      if (!list.length) return;
+      document.getElementById("bannerContainer").innerHTML = list.map(b => `
+        <div class="rounded-2xl p-6 bg-gradient-to-r from-[#0C831F] to-emerald-700 text-white shadow-sm flex items-center justify-between overflow-hidden relative">
+          <div class="z-10">
+            <span class="bg-[#F8CB46] text-slate-900 text-[10px] font-black uppercase px-2.5 py-1 rounded-full">Jhatpat Special</span>
+            <h2 class="text-xl font-black mt-2">${b.title}</h2>
+            <p class="text-xs text-green-100 mt-1">${b.subtitle || ""}</p>
+          </div>
+          ${b.image ? `<img src="${b.image}" class="w-24 h-24 rounded-xl object-cover shadow" />` : ""}
+        </div>
+      `).join("");
+    }
+
+    // Categories
+    function renderCategoryPills() {
+      const cats = ["ALL", ...new Set(Object.values(productsMap).map(p => p.category).filter(Boolean))];
+      document.getElementById("categoryPills").innerHTML = cats.map(c => `
+        <button onclick="setCategory('${c}')"
+          class="px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition ${
+            selectedCategory === c
+              ? 'bg-[#0C831F] text-white border-[#0C831F] shadow-sm'
+              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+          }">
+          ${c === "ALL" ? "All Items" : c}
+        </button>
+      `).join("");
+    }
+
+    window.setCategory = (c) => {
+      selectedCategory = c;
+      document.getElementById("catalogHeading").textContent = c === "ALL" ? "Fresh Groceries & Essentials" : c;
+      renderCategoryPills();
+      renderCatalog();
+    };
+
+    // Catalog Grid (Store-Wise Stock Synced)
+    window.renderCatalog = () => {
+      const q = (document.getElementById("searchInput").value || "").toLowerCase();
+      const hideOos = document.getElementById("hideOutOfStockChk").checked;
+      const grid = document.getElementById("productGrid");
+
+      let items = Object.values(productsMap).filter(p => {
+        const matchQ = !q || (p.name || "").toLowerCase().includes(q) || (p.category || "").toLowerCase().includes(q);
+        const matchCat = selectedCategory === "ALL" || p.category === selectedCategory;
+        const inStock = isProductInStockAtStore(p, selectedStoreId);
+        if (hideOos && !inStock) return false;
+        return matchQ && matchCat;
+      });
+
+      if (!items.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">No products match your search or selected store stock.</div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(p => {
+        const inStock = isProductInStockAtStore(p, selectedStoreId);
+        const qty = inStock ? (cart[p.id] || 0) : 0;
+        const discount = (p.mrp && p.mrp > p.price) ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200 p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition relative ${!inStock ? 'opacity-75' : ''}">
+            ${discount > 0 && inStock ? `<span class="absolute top-2 left-2 bg-blue-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md z-10">${discount}% OFF</span>` : ''}
+            ${!inStock ? `<span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md z-10">OUT OF STOCK</span>` : ''}
+
+            <div>
+              <div class="w-full h-32 sm:h-36 rounded-xl bg-slate-50 overflow-hidden mb-2.5 flex items-center justify-center">
+                <img src="${p.image || window.fallbackImg}" onerror="this.src=window.fallbackImg"
+                  class="w-full h-full object-cover ${!inStock ? 'grayscale' : ''}" />
+              </div>
+              <div class="flex items-center gap-1 text-[10px] font-bold text-slate-500 bg-slate-100 w-fit px-1.5 py-0.5 rounded">
+                <i class="fa-solid fa-clock text-[#0C831F]"></i> 10 MINS
+              </div>
+              <h4 class="font-bold text-xs sm:text-sm text-slate-900 mt-1.5 line-clamp-2 leading-snug">${p.name}</h4>
+              <p class="text-[11px] text-slate-500 mt-0.5">${p.unit || "1 pc"}</p>
+            </div>
+
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+              <div>
+                <div class="font-extrabold text-sm text-slate-900">₹${p.price}</div>
+                ${p.mrp && p.mrp > p.price ? `<div class="text-[11px] text-slate-400 line-through">₹${p.mrp}</div>` : ''}
+              </div>
+
+              ${!inStock ? `
+                <button disabled class="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-500 text-[11px] font-extrabold cursor-not-allowed">
+                  Out of Stock
+                </button>
+              ` : qty === 0 ? `
+                <button onclick="changeCartQty('${p.id}', 1)"
+                  class="px-4 py-1.5 rounded-xl border border-[#0C831F] bg-green-50 hover:bg-[#0C831F] text-[#0C831F] hover:text-white font-extrabold text-xs transition">
+                  ADD
+                </button>
+              ` : `
+                <div class="flex items-center bg-[#0C831F] text-white rounded-xl overflow-hidden font-extrabold text-xs shadow-sm">
+                  <button onclick="changeCartQty('${p.id}', -1)" class="px-2.5 py-1.5 hover:bg-green-800">-</button>
+                  <span class="px-2">${qty}</span>
+                  <button onclick="changeCartQty('${p.id}', 1)" class="px-2.5 py-1.5 hover:bg-green-800">+</button>
                 </div>
-            `;
+              `}
+            </div>
+          </div>
+        `;
+      }).join("");
+    };
+
+    // Cart & Automatic Delivery Fee Logic (₹7 below ₹199, FREE ₹199+)
+    window.changeCartQty = (prodId, delta) => {
+      const p = productsMap[prodId];
+      if (!p || !isProductInStockAtStore(p, selectedStoreId)) {
+        delete cart[prodId];
+        saveCart();
+        return;
+      }
+      const next = (cart[prodId] || 0) + delta;
+      if (next <= 0) delete cart[prodId];
+      else cart[prodId] = next;
+      saveCart();
+    };
+
+    function saveCart() {
+      localStorage.setItem("jhatpat_cart", JSON.stringify(cart));
+      renderCatalog();
+      updateCartUI();
+    }
+
+    function calculateBill() {
+      let itemCount = 0;
+      let subtotal = 0;
+      const validItems = [];
+
+      Object.entries(cart).forEach(([pid, qty]) => {
+        const p = productsMap[pid];
+        if (p && qty > 0 && isProductInStockAtStore(p, selectedStoreId)) {
+          itemCount += qty;
+          subtotal += Number(p.price) * qty;
+          validItems.push({ id: pid, name: p.name, unit: p.unit, price: Number(p.price), qty });
         }
+      });
 
-        window.renderCatalog = () => {
-            const query = document.getElementById('live-search').value.toLowerCase();
-            const sponsored = products.filter(p => p.sponsored && p.name.toLowerCase().includes(query));
-            const spSec = document.getElementById('sponsored-section');
-            if (sponsored.length > 0) {
-                spSec.classList.remove('hidden');
-                document.getElementById('sponsored-grid').innerHTML = sponsored.map(p => buildCard(p, true)).join('');
-            } else {
-                spSec.classList.add('hidden');
-            }
+      const fee = Number(settings.deliveryFee ?? 7);
+      const threshold = Number(settings.freeThreshold ?? 199);
+      const deliveryFee = subtotal === 0 ? 0 : (subtotal >= threshold ? 0 : fee);
+      const grandTotal = subtotal + deliveryFee;
+      const remainingForFree = Math.max(0, threshold - subtotal);
 
-            const filtered = products.filter(p => {
-                const catOk = selectedCat === 'All' || p.category === selectedCat;
-                const searchOk = p.name.toLowerCase().includes(query);
-                return catOk && searchOk;
-            });
+      return { itemCount, subtotal, deliveryFee, grandTotal, remainingForFree, threshold, fee, validItems };
+    }
 
-            document.getElementById('main-grid').innerHTML = filtered.length === 0
-                ? `<p class="col-span-full text-center text-xs text-slate-400 py-10">No produce items matched your search.</p>`
-                : filtered.map(p => buildCard(p, false)).join('');
-        };
+    function updateCartUI() {
+      const bill = calculateBill();
 
-        window.stepQty = (id, delta) => {
-            const prod = products.find(p => p.id === id);
-            if (!prod) return;
-            if (!cart[id]) cart[id] = { id: prod.id, name: prod.name, price: Number(prod.price), unit: prod.unit, qty: 0 };
-            cart[id].qty += delta;
-            if (cart[id].qty <= 0) delete cart[id];
-            localStorage.setItem('jhatpat_v2_cart', JSON.stringify(cart));
-            renderCatalog();
-            syncCartBar();
-        };
+      // Header Free Delivery Strip
+      const topStrip = document.getElementById("freeDeliveryStrip");
+      if (bill.subtotal === 0) {
+        topStrip.innerHTML = `Add items worth <span class="font-extrabold">₹${bill.threshold}</span> for <span class="font-extrabold text-[#0C831F]">FREE Delivery</span> (Flat ₹${bill.fee} below ₹${bill.threshold})`;
+      } else if (bill.remainingForFree > 0) {
+        topStrip.innerHTML = `Add <span class="font-extrabold text-amber-800">₹${bill.remainingForFree}</span> more to unlock <span class="font-extrabold text-[#0C831F]">FREE Delivery</span> (Currently ₹${bill.fee} delivery)`;
+      } else {
+        topStrip.innerHTML = `🎉 Yay! You unlocked <span class="font-extrabold text-[#0C831F]">FREE Delivery</span> on this order!`;
+      }
 
-        function syncCartBar() {
-            const list = Object.values(cart);
-            const count = list.reduce((s, i) => s + i.qty, 0);
-            const total = list.reduce((s, i) => s + (i.price * i.qty), 0);
+      // Header Cart Button & Floating Mobile Bar
+      const floatBar = document.getElementById("floatingCartBar");
+      if (bill.itemCount > 0) {
+        document.getElementById("headerCartSummary").textContent = `${bill.itemCount} items • ₹${bill.grandTotal}`;
+        floatBar.classList.remove("hidden");
+        document.getElementById("floatCount").textContent = bill.itemCount;
+        document.getElementById("floatTotal").textContent = `₹${bill.grandTotal}`;
+        document.getElementById("floatDelNote").textContent = bill.deliveryFee === 0 ? "FREE Delivery Unlocked" : `Includes ₹${bill.deliveryFee} delivery`;
+      } else {
+        document.getElementById("headerCartSummary").textContent = "My Cart";
+        floatBar.classList.add("hidden");
+      }
 
-            document.getElementById('floating-cart').classList.toggle('hidden', count === 0);
-            document.getElementById('bar-items').innerText = `${count} ITEM${count > 1 ? 'S' : ''}`;
-            document.getElementById('bar-total').innerText = '₹' + total;
-            document.getElementById('bill-sub').innerText = '₹' + total;
-            document.getElementById('bill-grand').innerText = '₹' + total;
+      // Cart Drawer Content
+      const listEl = document.getElementById("cartItemsList");
+      const cartFreeBanner = document.getElementById("cartFreeDelBanner");
 
-            document.getElementById('cart-items-box').innerHTML = list.map(i => `
-                <div class="py-2.5 flex justify-between items-center text-xs">
-                    <div>
-                        <p class="font-bold text-slate-800">${i.name}</p>
-                        <p class="text-slate-500">${i.unit} × ₹${i.price}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="flex items-center bg-emerald-600 text-white rounded-lg font-bold">
-                            <button onclick="stepQty('${i.id}', -1)" class="px-2 py-1">-</button>
-                            <span class="px-1.5">${i.qty}</span>
-                            <button onclick="stepQty('${i.id}', 1)" class="px-2 py-1">+</button>
-                        </div>
-                        <span class="font-extrabold w-12 text-right">₹${i.price * i.qty}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
+      if (bill.itemCount === 0) {
+        listEl.innerHTML = `<div class="text-center py-12 text-slate-400 text-xs">Your Jhatpat cart is empty.<br/>Add fresh sabzi, fruits or juices!</div>`;
+        document.getElementById("billDetailsBox").classList.add("hidden");
+        document.getElementById("checkoutFormBox").classList.add("hidden");
+        document.getElementById("cartFooter").classList.add("hidden");
+        cartFreeBanner.textContent = `Free delivery on orders ₹${bill.threshold} and above!`;
+        return;
+      }
 
-        window.openCart = () => document.getElementById('cart-modal').classList.remove('hidden');
-        window.closeCart = () => document.getElementById('cart-modal').classList.add('hidden');
-        window.openTracker = () => {
-            document.getElementById('tracker-modal').classList.remove('hidden');
-            const saved = localStorage.getItem('jhatpat_user_phone');
-            if (saved) {
-                document.getElementById('track-mobile').value = saved;
-                trackByPhone();
-            }
-        };
-        window.closeTracker = () => document.getElementById('tracker-modal').classList.add('hidden');
+      cartFreeBanner.innerHTML = bill.remainingForFree > 0
+        ? `Add ₹${bill.remainingForFree} more to save ₹${bill.fee} delivery fee!`
+        : `🎉 FREE Delivery applied (You saved ₹${bill.fee}!)`;
 
-        window.submitOrder = async (e) => {
-            e.preventDefault();
-            const items = Object.values(cart);
-            if (items.length === 0) return;
+      listEl.innerHTML = bill.validItems.map(item => `
+        <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200">
+          <div>
+            <div class="font-bold text-xs text-slate-900">${item.name}</div>
+            <div class="text-[11px] text-slate-500">${item.unit} • ₹${item.price} each</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center bg-[#0C831F] text-white rounded-lg font-bold text-xs">
+              <button onclick="changeCartQty('${item.id}', -1)" class="px-2 py-1">-</button>
+              <span class="px-2">${item.qty}</span>
+              <button onclick="changeCartQty('${item.id}', 1)" class="px-2 py-1">+</button>
+            </div>
+            <div class="font-extrabold text-xs w-12 text-right">₹${item.price * item.qty}</div>
+          </div>
+        </div>
+      `).join("");
 
-            const customerPhone = document.getElementById('c-phone').value.trim();
-            const totalAmount = items.reduce((s, i) => s + (i.price * i.qty), 0);
+      document.getElementById("billDetailsBox").classList.remove("hidden");
+      document.getElementById("checkoutFormBox").classList.remove("hidden");
+      document.getElementById("cartFooter").classList.remove("hidden");
 
-            await set(push(ref(db, 'orders')), {
-                storeCode: activeStore.code,
-                storeName: activeStore.name,
-                customerName: document.getElementById('c-name').value.trim(),
-                customerPhone,
-                customerAddress: document.getElementById('c-addr').value.trim(),
-                customerLat: userCoords.lat,
-                customerLng: userCoords.lng,
-                paymentMode: document.getElementById('c-pay').value,
-                items,
-                totalAmount,
-                status: 'Placed',
-                riderName: '',
-                riderPhone: '',
-                createdAt: Date.now()
-            });
+      document.getElementById("billSubtotal").textContent = `₹${bill.subtotal}`;
+      document.getElementById("billDelivery").innerHTML = bill.deliveryFee === 0
+        ? `<span class="text-[#0C831F]">FREE</span>`
+        : `₹${bill.deliveryFee}`;
+      document.getElementById("billGrandTotal").textContent = `₹${bill.grandTotal}`;
+      document.getElementById("footerPayAmount").textContent = `₹${bill.grandTotal} Total`;
 
-            localStorage.setItem('jhatpat_user_phone', customerPhone);
-            cart = {};
-            localStorage.removeItem('jhatpat_v2_cart');
-            syncCartBar();
-            renderCatalog();
-            closeCart();
-            openTracker();
-        };
+      // Update Kotak UPI QR & Deep Link dynamically with Grand Total
+      const upiId = settings.upiId || "8305530240@kotakbank";
+      const payee = settings.payeeName || "Jhatpat";
+      const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payee)}&am=${bill.grandTotal}&cu=INR&tn=${encodeURIComponent("Jhatpat Order")}`;
+      document.getElementById("upiIdDisplay").textContent = upiId;
+      document.getElementById("upiPayeeDisplay").textContent = payee;
+      document.getElementById("upiDeepLinkBtn").href = upiUri;
+      document.getElementById("upiQrImg").src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUri)}`;
+    }
 
-        window.trackByPhone = () => {
-            const phone = document.getElementById('track-mobile').value.trim();
-            if (!phone) return;
-            onValue(ref(db, 'orders'), snap => {
-                const all = snap.val() || {};
-                const mine = Object.entries(all)
-                    .map(([id, val]) => ({ id, ...val }))
-                    .filter(o => o.customerPhone === phone)
-                    .reverse();
+    window.openCartDrawer = () => {
+      updateCartUI();
+      document.getElementById("cartDrawer").classList.remove("hidden");
+    };
+    window.closeCartDrawer = () => document.getElementById("cartDrawer").classList.add("hidden");
 
-                const steps = ['Placed', 'Packing', 'Ready for Pickup', 'Out for Delivery', 'Delivered'];
-                document.getElementById('tracker-results').innerHTML = mine.length === 0
-                    ? `<p class="text-xs text-center text-slate-400 py-4">No orders found for ${phone}.</p>`
-                    : mine.map(o => {
-                        const idx = steps.indexOf(o.status);
-                        const pct = Math.max(15, ((idx + 1) / steps.length) * 100);
-                        return `
-                            <div class="border rounded-2xl p-4 bg-slate-50">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-mono text-[11px] font-bold text-slate-500">#${o.id.slice(-5).toUpperCase()} • ${o.storeCode}</span>
-                                    <span class="bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">${o.status}</span>
-                                </div>
-                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden my-2">
-                                    <div class="bg-emerald-600 h-full transition-all duration-500" style="width:${pct}%"></div>
-                                </div>
-                                <p class="text-xs font-bold">${(o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ')}</p>
-                                <div class="flex justify-between items-center mt-2 pt-2 border-t text-[11px] text-slate-600">
-                                    <span>Paid: <strong>₹${o.totalAmount}</strong> (${o.paymentMode})</span>
-                                    ${o.riderName ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-motorcycle"></i> ${o.riderName} (${o.riderPhone})</span>` : ''}
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-            });
-        };
-    </script>
+    window.toggleUpiBox = () => {
+      const mode = document.querySelector('input[name="payMode"]:checked').value;
+      document.getElementById("kotakUpiBox").classList.toggle("hidden", mode !== "UPI");
+    };
+
+    // Place Order to Firebase RTDB + 1-Click WhatsApp Receipt
+    window.placeOrder = async () => {
+      const bill = calculateBill();
+      if (!bill.validItems.length) return alert("Your cart has no in-stock items.");
+
+      const name = document.getElementById("custName").value.trim();
+      const phone = document.getElementById("custPhone").value.trim().replace(/\D/g, "");
+      const address = document.getElementById("custAddress").value.trim();
+      const paymentMethod = document.querySelector('input[name="payMode"]:checked').value;
+
+      if (!name || phone.length < 10 || !address) {
+        alert("Please enter your Name, 10-digit WhatsApp Mobile Number, and Delivery Address.");
+        return;
+      }
+
+      const st = storesMap[selectedStoreId] || { id: selectedStoreId || "DS_DEFAULT", name: "Jhatpat Mumbai Hub", pincodes: "400001" };
+      const orderId = "ORD_" + Date.now();
+
+      const orderPayload = {
+        id: orderId,
+        storeId: st.id,
+        storeName: st.name,
+        pincode: (st.pincodes || "").split(",")[0].trim(),
+        customerName: name,
+        customerPhone: phone,
+        address,
+        items: bill.validItems,
+        subtotal: bill.subtotal,
+        deliveryFee: bill.deliveryFee,
+        totalAmount: bill.grandTotal,
+        paymentMethod,
+        status: "Placed",
+        createdAt: Date.now()
+      };
+
+      await set(ref(db, `orders/${orderId}`), orderPayload);
+
+      // Build 1-Click WhatsApp Message
+      const itemLines = bill.validItems.map(i => `• ${i.name} (${i.unit}) x${i.qty} = ₹${i.price * i.qty}`).join("
+");
+      const waText = encodeURIComponent(
+        `*JHATPAT ORDER #${orderId.slice(-6).toUpperCase()}*
+` +
+        `Store: ${st.name}
+` +
+        `Customer: ${name} (${phone})
+` +
+        `Address: ${address}
+
+` +
+        `*Items:*
+${itemLines}
+
+` +
+        `Items Total: ₹${bill.subtotal}
+` +
+        `Delivery Fee: ${bill.deliveryFee === 0 ? 'FREE' : '₹' + bill.deliveryFee}
+` +
+        `*Grand Total: ₹${bill.grandTotal}* (${paymentMethod})`
+      );
+
+      document.getElementById("whatsappOrderConfirmBtn").href = `https://wa.me/918305530240?text=${waText}`;
+      document.getElementById("orderSuccessDetails").textContent =
+        `Order #${orderId.slice(-6).toUpperCase()} • ₹${bill.grandTotal} (${bill.deliveryFee === 0 ? 'FREE Delivery' : 'Includes ₹' + bill.deliveryFee + ' Delivery'}) dispatched to ${st.name}.`;
+
+      cart = {};
+      saveCart();
+      closeCartDrawer();
+      document.getElementById("orderSuccessModal").classList.remove("hidden");
+    };
+
+    // Track Orders
+    window.openTrackOrderModal = () => document.getElementById("trackModal").classList.remove("hidden");
+    window.lookupMyOrders = () => {
+      const ph = document.getElementById("trackPhoneInput").value.trim().replace(/\D/g, "");
+      const list = Object.values(ordersMap)
+        .filter(o => (o.customerPhone || "").includes(ph) && ph.length >= 10)
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      const el = document.getElementById("myOrdersList");
+      if (!list.length) {
+        el.innerHTML = `<p class="text-slate-400 text-center py-4">No orders found for this mobile number.</p>`;
+        return;
+      }
+      el.innerHTML = list.map(o => `
+        <div class="p-3 border border-slate-200 rounded-xl bg-slate-50">
+          <div class="flex justify-between font-bold">
+            <span>#${o.id.slice(-6).toUpperCase()} • ₹${o.totalAmount}</span>
+            <span class="text-[#0C831F]">${o.status}</span>
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1">${o.storeName} • Delivery: ${o.deliveryFee === 0 ? 'FREE' : '₹' + o.deliveryFee}</div>
+        </div>
+      `).join("");
+    };
+  </script>
 </body>
 </html>

@@ -1,1405 +1,1508 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jhatpat HQ Super Admin | jhatpat-22aa8</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Admin | Dark Store & Quick Commerce Command Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #f4f6f8; }
+    .blinkit-yellow { background-color: #F8CB46; }
+    .blinkit-green { background-color: #0C831F; }
+    .blinkit-green-text { color: #0C831F; }
+    .tab-active { border-bottom: 3px solid #0C831F; color: #0C831F; font-weight: 700; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800">
+<body class="text-slate-800">
 
-    <!-- Login Gate (MOHIT@001) -->
-    <div id="login-gate" class="min-h-screen flex items-center justify-center bg-slate-950 p-4">
-        <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm border-t-4 border-yellow-400">
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-yellow-400 text-slate-950 text-2xl font-black mb-3 shadow">
-                    <i class="fa-solid fa-bolt"></i>
-                </div>
-                <h1 class="text-2xl font-black text-slate-900 tracking-tight">Jhatpat HQ</h1>
-                <p class="text-xs text-slate-500 mt-1 font-medium">RTDB: jhatpat-22aa8 • Super Admin</p>
-            </div>
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-600">Admin Password</label>
-                    <input type="password" id="admin-pass" required placeholder="Enter password"
-                        class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mt-1 text-sm focus:ring-2 focus:ring-yellow-400 focus:outline-none">
-                </div>
-                <p id="auth-error" class="text-xs text-red-600 font-bold hidden">Incorrect password. Access denied.</p>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl shadow transition">
-                    Unlock HQ Console
-                </button>
-            </form>
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center border-t-8 border-[#F8CB46]">
+      <div class="w-16 h-16 blinkit-yellow rounded-2xl mx-auto flex items-center justify-center mb-4 shadow">
+        <i class="fa-solid fa-bolt text-3xl text-slate-900"></i>
+      </div>
+      <h1 class="text-2xl font-extrabold text-slate-900">Jhatpat <span class="blinkit-green-text">Admin</span></h1>
+      <p class="text-xs text-slate-500 mt-1 mb-6">Multi-Store Dark Store & Operations Console</p>
+      <input id="adminPassInput" type="password" placeholder="Enter Admin Password"
+        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0C831F] mb-3 text-center font-semibold tracking-widest"
+        onkeydown="if(event.key==='Enter') verifyLogin()" />
+      <button onclick="verifyLogin()"
+        class="w-full blinkit-green hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-md">
+        Unlock Command Center
+      </button>
+      <p id="loginErr" class="text-red-600 text-xs mt-3 hidden font-semibold">Invalid password. Please try again.</p>
+    </div>
+  </div>
+
+  <!-- TOP HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 blinkit-yellow rounded-xl flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-bolt text-xl text-slate-900"></i>
         </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-xl tracking-tight text-slate-900">jhatpat</span>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.0</span>
+          </div>
+          <p class="text-[11px] text-slate-500">RTDB: <span class="font-mono">jhatpat-22aa8</span> • UPI: <span class="font-mono">8305530240@kotakbank</span></p>
+        </div>
+      </div>
+
+      <!-- STORE-WISE ANALYTICS FILTER -->
+      <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+        <label class="text-xs font-bold text-slate-600 pl-2 flex items-center gap-1">
+          <i class="fa-solid fa-store text-[#0C831F]"></i> Store Filter:
+        </label>
+        <select id="globalStoreFilter" onchange="onStoreFilterChange()"
+          class="bg-white border border-slate-300 text-slate-800 text-xs font-bold rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0C831F]">
+          <option value="ALL">All Dark Stores (Combined)</option>
+        </select>
+        <button onclick="logoutAdmin()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
     </div>
 
-    <!-- Super Admin HQ Console -->
-    <div id="hq-app" class="hidden min-h-screen pb-14">
-        <header class="bg-slate-950 text-white px-4 sm:px-6 py-3.5 flex flex-wrap justify-between items-center gap-3 sticky top-0 z-40 border-b border-slate-800 shadow-lg">
-            <div class="flex items-center space-x-3">
-                <span class="bg-yellow-400 text-slate-950 font-black px-2.5 py-1 rounded-lg text-xs tracking-tight">JHATPAT HQ</span>
-                <div>
-                    <h1 class="font-extrabold text-sm sm:text-base leading-none">Blinkit-Style Super Admin Control</h1>
-                    <p class="text-[11px] text-emerald-400 mt-0.5 font-medium">Firebase RTDB: jhatpat-22aa8 • CRM & WhatsApp Active</p>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="loadMumbai100Pack()" class="bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-black shadow transition">
-                    <i class="fa-solid fa-bolt mr-1"></i> Load Mumbai 100+ Sabzi, Fruits & Juice Pack
-                </button>
-                <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold">
-                    Logout
-                </button>
-            </div>
-        </header>
-
-        <div class="max-w-7xl mx-auto p-4 sm:p-6">
-            <!-- Top KPI Strip -->
-            <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-6">
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Customers</p>
-                    <p id="kpi-customers" class="text-xl font-black text-emerald-700 mt-0.5">0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Live Products</p>
-                    <p id="kpi-products" class="text-xl font-black text-slate-900 mt-0.5">0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Dark Stores</p>
-                    <p id="kpi-stores" class="text-xl font-black text-emerald-600 mt-0.5">0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Total Orders</p>
-                    <p id="kpi-orders" class="text-xl font-black text-indigo-600 mt-0.5">0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Gross GMV</p>
-                    <p id="kpi-gmv" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
-                </div>
-                <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                    <p class="text-[10px] font-bold uppercase text-slate-400">Admin Comm (12%)</p>
-                    <p id="kpi-comm" class="text-xl font-black text-amber-600 mt-0.5">₹0</p>
-                </div>
-            </div>
-
-            <!-- HQ Navigation Tabs -->
-            <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-3 mb-6 border-b">
-                <button onclick="switchHQTab('orders')" id="nav-orders" class="hq-nav bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-truck-fast mr-1.5"></i> Live Order Override & UTR
-                </button>
-                <button onclick="switchHQTab('customers')" id="nav-customers" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-users mr-1.5"></i> Customers CRM
-                </button>
-                <button onclick="switchHQTab('products')" id="nav-products" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Products, Rates & Store Mapping
-                </button>
-                <button onclick="switchHQTab('stores')" id="nav-stores" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-store mr-1.5"></i> Dark Stores & Full Edit
-                </button>
-                <button onclick="switchHQTab('pricing')" id="nav-pricing" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-percent mr-1.5"></i> Delivery Fee & Coupons
-                </button>
-                <button onclick="switchHQTab('banners')" id="nav-banners" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-images mr-1.5"></i> Promo Banners
-                </button>
-                <button onclick="switchHQTab('kyc')" id="nav-kyc" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-id-card mr-1.5"></i> Seller KYC <span id="kyc-count" class="ml-1 bg-amber-500 text-white px-1.5 py-0.2 rounded-full text-[10px]">0</span>
-                </button>
-                <button onclick="switchHQTab('ledger')" id="nav-ledger" class="hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap">
-                    <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> 12% / 88% Payout Ledger
-                </button>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 1. LIVE ORDER OVERRIDE & UPI UTR + 1-CLICK WHATSAPP        -->
-            <!-- ========================================================= -->
-            <div id="sec-orders" class="hq-sec space-y-4">
-                <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                    <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-                        <div>
-                            <h2 class="font-black text-base text-slate-900">Live Order Override & Payment UTR Inspector</h2>
-                            <p class="text-xs text-slate-500">Manually override any order stage, verify UPI UTR, or send 1-click WhatsApp updates</p>
-                        </div>
-                        <select id="filter-order-status" onchange="renderOrdersOverride()" class="border rounded-xl px-3 py-2 text-xs font-bold bg-slate-50">
-                            <option value="ALL">All Order Statuses</option>
-                            <option value="New">New</option>
-                            <option value="Placed">Placed</option>
-                            <option value="Packing">Packing</option>
-                            <option value="Ready">Ready</option>
-                            <option value="Ready for Pickup">Ready for Pickup</option>
-                            <option value="Out for Delivery">Out for Delivery</option>
-                            <option value="Delivered">Delivered</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div id="orders-override-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 1B. CUSTOMER CRM & 1-CLICK JHATPAT WHATSAPP                -->
-            <!-- ========================================================= -->
-            <div id="sec-customers" class="hq-sec hidden space-y-4">
-                <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                    <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-                        <div>
-                            <h2 class="font-black text-base text-slate-900">Customer CRM Directory</h2>
-                            <p class="text-xs text-slate-500">Aggregated from live Firebase RTDB orders • View full history & 1-click WhatsApp outreach</p>
-                        </div>
-                        <input type="text" id="crm-search" oninput="renderCustomersCRM()" placeholder="Search name, phone, or area..."
-                            class="border rounded-xl px-3.5 py-2 text-xs font-semibold w-full sm:w-64">
-                    </div>
-                    <div id="customers-crm-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 2. PRODUCTS, RATE/DETAILS EDIT + STORE ASSIGNMENT          -->
-            <!-- ========================================================= -->
-            <div id="sec-products" class="hq-sec hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 bg-white p-5 rounded-2xl border shadow-sm h-fit">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 id="prod-form-title" class="font-black text-base text-slate-900">Add New Product</h2>
-                        <button type="button" onclick="resetProductForm()" class="text-xs font-bold text-emerald-700 hover:underline">+ Reset / New</button>
-                    </div>
-                    <form onsubmit="saveProductHQ(event)" class="space-y-3">
-                        <input type="hidden" id="edit-prod-id">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Product Name</label>
-                            <input type="text" id="p-name" oninput="refreshCardPreview()" required placeholder="e.g., Fresh Palak (Spinach)" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Rate / Price (₹)</label>
-                                <input type="number" step="0.5" id="p-price" oninput="refreshCardPreview()" required placeholder="22" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">MRP (₹)</label>
-                                <input type="number" step="0.5" id="p-mrp" oninput="refreshCardPreview()" required placeholder="30" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Unit / Pack</label>
-                                <input type="text" id="p-unit" oninput="refreshCardPreview()" required placeholder="250 g" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Category</label>
-                                <select id="p-cat" onchange="refreshCardPreview()" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                                    <option value="Vegetables">Vegetables</option>
-                                    <option value="Fruits">Fruits</option>
-                                    <option value="Leafy & Herbs">Leafy & Herbs</option>
-                                    <option value="Cold-Pressed Juices">Cold-Pressed Juices</option>
-                                    <option value="Exotic & Organic">Exotic & Organic</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Assign Dark Store</label>
-                                <select id="p-store" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                                    <option value="ALL">All Dark Stores</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Gallery Upload or Image URL</label>
-                            <input type="file" id="p-file" accept="image/*" onchange="handleProdFile(event)" class="w-full text-xs border rounded-xl p-2 mt-1 bg-slate-50">
-                            <input type="url" id="p-img-url" oninput="refreshCardPreview()" placeholder="https://..." class="w-full border rounded-xl px-3 py-2 text-xs mt-1.5">
-                        </div>
-                        <div class="flex items-center justify-between bg-amber-50 border border-amber-200 p-3 rounded-xl">
-                            <div>
-                                <p class="text-xs font-bold text-slate-900">Sponsored Ad Placement</p>
-                                <p class="text-[11px] text-slate-500">Highlight in Sponsored Bestsellers</p>
-                            </div>
-                            <input type="checkbox" id="p-sponsored" onchange="refreshCardPreview()" class="w-5 h-5 accent-emerald-600">
-                        </div>
-                        <button type="submit" id="prod-submit-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-sm shadow">
-                            Save Product to RTDB
-                        </button>
-                    </form>
-                </div>
-
-                <div class="lg:col-span-7 space-y-5">
-                    <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div>
-                            <h3 class="text-xs font-black uppercase text-slate-400">Live Blinkit Card Preview</h3>
-                            <p class="text-xs text-slate-500 mt-1">Updates live as you edit rates, unit, image, or sponsored status.</p>
-                        </div>
-                        <div class="w-48 bg-white border border-slate-200 rounded-2xl p-2.5 shadow-sm relative shrink-0">
-                            <span id="cp-ad" class="hidden absolute top-2 left-2 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">AD</span>
-                            <span id="cp-off" class="absolute top-2 right-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">27% OFF</span>
-                            <img id="cp-img" src="https://placehold.co/240x160/dcfce7/15803d?text=Jhatpat" class="w-full h-24 object-cover rounded-xl mb-1.5">
-                            <h4 id="cp-name" class="font-bold text-xs text-slate-800 truncate">Fresh Palak (Spinach)</h4>
-                            <p id="cp-unit" class="text-[10px] text-slate-500">250 g</p>
-                            <div class="flex items-center justify-between mt-2">
-                                <div>
-                                    <span id="cp-price" class="font-black text-xs text-slate-900">₹22</span>
-                                    <span id="cp-mrp" class="text-[10px] text-slate-400 line-through ml-1">₹30</span>
-                                </div>
-                                <span class="border border-emerald-600 text-emerald-600 text-[10px] font-extrabold px-2.5 py-0.5 rounded-lg">ADD</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                        <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
-                            <h3 class="font-black text-sm text-slate-900">Catalog Inventory (<span id="cat-count">0</span>)</h3>
-                            <input type="text" id="admin-prod-search" oninput="renderAdminProducts()" placeholder="Search product or store..." class="border rounded-xl px-3 py-1.5 text-xs">
-                        </div>
-                        <div id="admin-products-list" class="divide-y max-h-[520px] overflow-y-auto"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 3. MULTI-DARK STORE MANAGER + FULL EDIT MODAL          -->
-            <!-- ========================================================= -->
-            <div id="sec-stores" class="hq-sec hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-4 bg-white p-5 rounded-2xl border shadow-sm h-fit">
-                    <h2 class="font-black text-base text-slate-900 mb-3">Add New Dark Store</h2>
-                    <form onsubmit="createNewStore(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Store Name</label>
-                            <input type="text" id="ns-name" required placeholder="e.g., Jhatpat Kalyan West Hub" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Store Code</label>
-                                <input type="text" id="ns-code" required placeholder="KYN01" class="w-full border rounded-xl px-3 py-2 text-sm mt-1 uppercase">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Area / Zone</label>
-                                <input type="text" id="ns-area" required placeholder="Kalyan West" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Full Store Address</label>
-                            <input type="text" id="ns-addr" required placeholder="Shop 4, Station Road, Kalyan" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600">Latitude</label>
-                                <input type="number" step="any" id="ns-lat" required placeholder="19.2403" class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600">Longitude</label>
-                                <input type="number" step="any" id="ns-lng" required placeholder="73.1305" class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                            </div>
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-600">Radius (KM)</label>
-                                <input type="number" step="0.5" id="ns-rad" required value="5" class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Manager Name</label>
-                                <input type="text" id="ns-mgr" required placeholder="Vikram Patil" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-600">Manager Phone</label>
-                                <input type="tel" id="ns-phone" required placeholder="9876543210" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between bg-slate-50 border p-2.5 rounded-xl">
-                            <span class="text-xs font-bold text-slate-700">Store Status</span>
-                            <select id="ns-status" class="border rounded-lg px-2.5 py-1 text-xs font-bold bg-white">
-                                <option value="Open">Open</option>
-                                <option value="Closed">Closed</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-sm shadow">
-                            Create Dark Store
-                        </button>
-                    </form>
-                </div>
-
-                <div class="lg:col-span-8 bg-white p-5 rounded-2xl border shadow-sm">
-                    <h2 class="font-black text-base text-slate-900 mb-4">All Dark Stores (Click "Edit Store" for Full Control)</h2>
-                    <div id="hq-stores-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 4. DELIVERY FEE & COUPON MANAGER                          -->
-            <!-- ========================================================= -->
-            <div id="sec-pricing" class="hq-sec hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 bg-white p-5 rounded-2xl border shadow-sm h-fit">
-                    <h2 class="font-black text-base text-slate-900 mb-3">Global Delivery Fee Rules</h2>
-                    <form onsubmit="saveDeliveryConfig(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Standard Delivery Fee (₹)</label>
-                            <input type="number" id="cfg-del-fee" required value="25" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Free Delivery Above Cart Value (₹)</label>
-                            <input type="number" id="cfg-free-above" required value="199" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-sm">
-                            Update Delivery Rules
-                        </button>
-                    </form>
-                </div>
-
-                <div class="lg:col-span-7 bg-white p-5 rounded-2xl border shadow-sm">
-                    <h2 class="font-black text-base text-slate-900 mb-3">Promo Coupons Manager</h2>
-                    <form onsubmit="addCoupon(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-2 mb-4">
-                        <input type="text" id="cpn-code" required placeholder="CODE (e.g. FRESH50)" class="border rounded-xl px-3 py-2 text-xs font-bold uppercase">
-                        <input type="number" id="cpn-disc" required placeholder="Discount ₹" class="border rounded-xl px-3 py-2 text-xs">
-                        <input type="number" id="cpn-min" required placeholder="Min Cart ₹" class="border rounded-xl px-3 py-2 text-xs">
-                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-yellow-400 font-extrabold rounded-xl text-xs py-2">
-                            + Add Coupon
-                        </button>
-                    </form>
-                    <div id="coupons-list" class="divide-y"></div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 5. PROMO BANNER MANAGER                                   -->
-            <!-- ========================================================= -->
-            <div id="sec-banners" class="hq-sec hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div class="lg:col-span-5 bg-white p-5 rounded-2xl border shadow-sm h-fit">
-                    <h2 class="font-black text-base text-slate-900 mb-3">Create Promotional Banner</h2>
-                    <form onsubmit="addBanner(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Banner Headline</label>
-                            <input type="text" id="bn-title" required placeholder="e.g., Fresh Sabzi, Fruits & Cold-Pressed Juices in 12 Mins" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Subtitle / Offer Tag</label>
-                            <input type="text" id="bn-sub" required placeholder="Up to 30% OFF • Farm Direct" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600">Banner Image URL</label>
-                            <input type="url" id="bn-img" required placeholder="https://..." class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                        </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-sm">
-                            Publish Banner
-                        </button>
-                    </form>
-                </div>
-                <div class="lg:col-span-7 bg-white p-5 rounded-2xl border shadow-sm">
-                    <h2 class="font-black text-base text-slate-900 mb-3">Active Promo Banners</h2>
-                    <div id="banners-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 6. SELLER KYC APPROVALS                                     -->
-            <!-- ========================================================= -->
-            <div id="sec-kyc" class="hq-sec hidden bg-white p-5 rounded-2xl border shadow-sm">
-                <h2 class="font-black text-base text-slate-900 mb-4">Seller & Dark Store KYC Approvals</h2>
-                <div id="hq-kyc-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
-
-            <!-- ========================================================= -->
-            <!-- 7. 12% COMMISSION / 88% PAYOUT LEDGER                     -->
-            <!-- ========================================================= -->
-            <div id="sec-ledger" class="hq-sec hidden space-y-5">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                        <p class="text-xs font-bold uppercase text-slate-400">Total Gross Order Value</p>
-                        <p id="lg-gross" class="text-2xl font-black text-slate-900 mt-1">₹0</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                        <p class="text-xs font-bold uppercase text-emerald-700">HQ Commission (12%)</p>
-                        <p id="lg-comm" class="text-2xl font-black text-emerald-600 mt-1">₹0</p>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
-                        <p class="text-xs font-bold uppercase text-indigo-700">Seller Net Payout (88%)</p>
-                        <p id="lg-payout" class="text-2xl font-black text-indigo-600 mt-1">₹0</p>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border shadow-sm overflow-x-auto">
-                    <h3 class="font-black text-sm mb-3">Settlement Breakdown per Order</h3>
-                    <table class="w-full text-left text-xs border-collapse">
-                        <thead>
-                            <tr class="border-b text-slate-400 uppercase">
-                                <th class="py-2.5">Order</th>
-                                <th class="py-2.5">Store</th>
-                                <th class="py-2.5">Customer</th>
-                                <th class="py-2.5">Order Amt</th>
-                                <th class="py-2.5">12% HQ Comm</th>
-                                <th class="py-2.5">88% Seller Payout</th>
-                                <th class="py-2.5">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="hq-ledger-tbody" class="divide-y"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <!-- NAV TABS -->
+    <div class="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto text-sm font-medium text-slate-600 border-t border-slate-100">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="py-3 whitespace-nowrap tab-active">
+        <i class="fa-solid fa-chart-line mr-1"></i> Dashboard & Orders
+      </button>
+      <button onclick="switchTab('products')" id="tab-products" class="py-3 whitespace-nowrap">
+        <i class="fa-solid fa-basket-shopping mr-1"></i> Catalog & Store Stock
+      </button>
+      <button onclick="switchTab('stores')" id="tab-stores" class="py-3 whitespace-nowrap">
+        <i class="fa-solid fa-warehouse mr-1"></i> Dark Stores & KYC
+      </button>
+      <button onclick="switchTab('customers')" id="tab-customers" class="py-3 whitespace-nowrap">
+        <i class="fa-solid fa-users mr-1"></i> Customer CRM & WhatsApp
+      </button>
+      <button onclick="switchTab('settings')" id="tab-settings" class="py-3 whitespace-nowrap">
+        <i class="fa-solid fa-sliders mr-1"></i> Delivery Fees, Banners & UPI
+      </button>
     </div>
+  </header>
 
-    <!-- ============================================================= -->
-    <!-- CUSTOMER FULL DETAILS & WHATSAPP MODAL                        -->
-    <!-- ============================================================= -->
-    <div id="customer-details-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <div>
-                    <h3 id="cd-name" class="font-black text-lg text-slate-900">Customer Profile</h3>
-                    <p id="cd-phone-sub" class="text-xs font-semibold text-slate-500"></p>
-                </div>
-                <button onclick="closeCustomerModal()" class="w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-600">&times;</button>
-            </div>
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-6">
 
-            <div class="grid grid-cols-2 gap-3 mb-4">
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5">
-                    <p class="text-[10px] font-bold uppercase text-emerald-700">Total Orders</p>
-                    <p id="cd-total-orders" class="text-xl font-black text-emerald-900 mt-0.5">0</p>
-                </div>
-                <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5">
-                    <p class="text-[10px] font-bold uppercase text-indigo-700">Total Spend</p>
-                    <p id="cd-total-spend" class="text-xl font-black text-indigo-900 mt-0.5">₹0</p>
-                </div>
-            </div>
-
-            <div class="bg-slate-50 border rounded-2xl p-3.5 mb-4">
-                <p class="text-[10px] font-bold uppercase text-slate-400">Latest Delivery Address</p>
-                <p id="cd-address" class="text-xs font-semibold text-slate-800 mt-1"></p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 mb-5" id="cd-wa-actions"></div>
-
-            <h4 class="font-extrabold text-xs uppercase text-slate-500 mb-2.5">Complete Order History</h4>
-            <div id="cd-history-list" class="space-y-2.5"></div>
+    <!-- ================= TAB 1: DASHBOARD & ORDERS ================= -->
+    <section id="sec-dashboard" class="space-y-6">
+      <!-- Selected Store Banner -->
+      <div id="activeStoreAnalyticsBanner" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow">
+        <div>
+          <span class="text-[11px] uppercase tracking-wider text-[#F8CB46] font-bold">Store-Wise Performance View</span>
+          <h2 id="analyticsStoreTitle" class="text-lg font-extrabold">All Dark Stores (Network Overview)</h2>
+          <p id="analyticsStoreMeta" class="text-xs text-slate-300">Showing combined orders, gross sales, platform commission & net store payouts.</p>
         </div>
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- FULL DARK STORE EDIT MODAL                                    -->
-    <!-- ============================================================= -->
-    <div id="edit-store-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <div>
-                    <h3 class="font-black text-lg text-slate-900">Edit Dark Store Details</h3>
-                    <p class="text-xs text-slate-500">Changes sync immediately to customer Haversine routing & store app</p>
-                </div>
-                <button onclick="closeEditStoreModal()" class="w-8 h-8 rounded-full bg-slate-100 font-bold text-slate-600">&times;</button>
-            </div>
-            <form onsubmit="updateStoreHQ(event)" class="space-y-3">
-                <input type="hidden" id="es-original-key">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Store Name</label>
-                        <input type="text" id="es-name" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Store Code</label>
-                        <input type="text" id="es-code" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1 uppercase font-bold">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Area</label>
-                        <input type="text" id="es-area" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Open / Closed Status</label>
-                        <select id="es-status" class="w-full border rounded-xl px-3 py-2 text-sm mt-1 font-bold">
-                            <option value="Open">Open</option>
-                            <option value="Closed">Closed</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600">Full Address</label>
-                    <input type="text" id="es-addr" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600">Latitude</label>
-                        <input type="number" step="any" id="es-lat" required class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600">Longitude</label>
-                        <input type="number" step="any" id="es-lng" required class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600">Radius (KM)</label>
-                        <input type="number" step="0.5" id="es-rad" required class="w-full border rounded-xl px-2.5 py-2 text-xs mt-1">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Manager Name</label>
-                        <input type="text" id="es-mgr" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600">Manager Phone</label>
-                        <input type="tel" id="es-phone" required class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeEditStoreModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm">Cancel</button>
-                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-2.5 rounded-xl text-sm shadow">Save Store Changes</button>
-                </div>
-            </form>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-[11px] text-slate-400">Commission Rate</div>
+            <div id="analyticsCommRate" class="text-sm font-bold text-[#F8CB46]">12% Platform Fee</div>
+          </div>
+          <button onclick="exportOrdersCSV()" class="bg-[#0C831F] hover:bg-green-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+            <i class="fa-solid fa-file-csv mr-1"></i> Export Report
+          </button>
         </div>
-    </div>
+      </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import {
-            getDatabase, ref, set, push, update, remove, onValue
-        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+      <!-- KPI CARDS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Total Orders</p>
+              <h3 id="kpiOrders" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
+            </div>
+            <span class="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><i class="fa-solid fa-bag-shopping"></i></span>
+          </div>
+          <p id="kpiOrdersSub" class="text-xs text-slate-500 mt-2">Delivered & Active</p>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
-            authDomain: "jhatpat-22aa8.firebaseapp.com",
-            databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-            projectId: "jhatpat-22aa8",
-            storageBucket: "jhatpat-22aa8.appspot.com",
-            messagingSenderId: "000000000000",
-            appId: "1:000000000000:web:jhatpat22aa8app"
-        };
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Gross Sales</p>
+              <h3 id="kpiSales" class="text-2xl font-extrabold text-slate-900 mt-1">₹0</h3>
+            </div>
+            <span class="p-2.5 bg-green-50 text-[#0C831F] rounded-xl"><i class="fa-solid fa-indian-rupee-sign"></i></span>
+          </div>
+          <p id="kpiSalesSub" class="text-xs text-green-700 mt-2 font-medium">Includes ₹7 delivery on &lt;₹199</p>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Platform Commission</p>
+              <h3 id="kpiCommission" class="text-2xl font-extrabold text-amber-600 mt-1">₹0</h3>
+            </div>
+            <span class="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-percent"></i></span>
+          </div>
+          <p id="kpiCommSub" class="text-xs text-slate-500 mt-2">Jhatpat Admin Earnings</p>
+        </div>
 
-        const JHATPAT_APP_URL = "https://jhatpat-three.vercel.app";
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase">Store Net Payout</p>
+              <h3 id="kpiPayout" class="text-2xl font-extrabold text-purple-700 mt-1">₹0</h3>
+            </div>
+            <span class="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><i class="fa-solid fa-wallet"></i></span>
+          </div>
+          <p id="kpiPayoutSub" class="text-xs text-slate-500 mt-2">Payable to Dark Store Partner</p>
+        </div>
+      </div>
 
-        let allProducts = {};
-        let allStores = {};
-        let allOrders = {};
-        let customersMap = {};
-        let prodUploadedBase64 = "";
+      <!-- STORE-WISE BREAKDOWN TABLE -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-chart-pie text-[#0C831F] mr-2"></i>Store-Wise Financial Breakdown</h3>
+          <span class="text-xs text-slate-500">Click any store row to filter dashboard</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3">Dark Store</th>
+                <th class="px-4 py-3">Area / Pincode</th>
+                <th class="px-4 py-3 text-right">Orders</th>
+                <th class="px-4 py-3 text-right">Gross Sales</th>
+                <th class="px-4 py-3 text-right">Commission</th>
+                <th class="px-4 py-3 text-right">Net Payout</th>
+                <th class="px-4 py-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="storeBreakdownBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
 
-        if (sessionStorage.getItem('jhatpat_hq_auth') === 'MOHIT@001') {
-            unlockHQ();
+      <!-- LIVE ORDERS TABLE -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-receipt text-[#0C831F] mr-2"></i>Live Orders (Filtered by Store)</h3>
+          <div class="flex gap-2">
+            <select id="orderStatusFilter" onchange="renderOrders()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+              <option value="ALL">All Statuses</option>
+              <option value="Placed">Placed</option>
+              <option value="Packed">Packed</option>
+              <option value="Out for Delivery">Out for Delivery</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3">Order ID</th>
+                <th class="px-4 py-3">Customer</th>
+                <th class="px-4 py-3">Assigned Dark Store</th>
+                <th class="px-4 py-3">Items</th>
+                <th class="px-4 py-3">Bill (Subtotal + Del)</th>
+                <th class="px-4 py-3">Payment</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3 text-center">1-Click WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: CATALOG & STORE-WISE STOCK ================= -->
+    <section id="sec-products" class="hidden space-y-6">
+      <!-- Top Action Bar -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="font-extrabold text-lg text-slate-900">Product Catalog & Store-Wise Inventory</h2>
+          <p class="text-xs text-slate-500">Auto-HD photo fetch, 1-click publish to all stores, rate editor & per-store stock toggle.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="loadMumbai100Pack()"
+            class="bg-[#F8CB46] hover:bg-yellow-400 text-slate-900 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-leaf text-[#0C831F]"></i> Load Mumbai 100+ Sabzi, Fruits & Juice Pack
+          </button>
+          <button onclick="publishAllProductsToAllStores()"
+            class="bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-globe"></i> 1-Click Publish All to ALL Stores
+          </button>
+        </div>
+      </div>
+
+      <!-- ADD / EDIT PRODUCT FORM WITH AUTO-HD PHOTO FETCH -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 id="productFormTitle" class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-[#0C831F]"></i> Add New Product (with Auto-HD Photo Fetch)
+        </h3>
+        <input type="hidden" id="editProductId" />
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left & Middle Inputs -->
+          <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Product Name *</label>
+              <input id="prodName" type="text" placeholder="e.g., Fresh Alphonso Mango, Amul Taaza Milk..."
+                oninput="debouncedAutoFetchHDPhoto(this.value)"
+                class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0C831F] focus:outline-none" />
+              <p class="text-[11px] text-green-700 mt-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Type product name to auto-fetch HD photo</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
+              <select id="prodCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0C831F]">
+                <option value="Vegetables & Fruits">Vegetables & Fruits</option>
+                <option value="Fresh Juices & Shakes">Fresh Juices & Shakes</option>
+                <option value="Dairy, Bread & Eggs">Dairy, Bread & Eggs</option>
+                <option value="Munchies & Cold Drinks">Munchies & Cold Drinks</option>
+                <option value="Atta, Rice & Dal">Atta, Rice & Dal</option>
+                <option value="Masala, Oil & More">Masala, Oil & More</option>
+                <option value="Tea, Coffee & Health">Tea, Coffee & Health</option>
+                <option value="Personal Care & Home">Personal Care & Home</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Pack Size / Unit *</label>
+              <input id="prodUnit" type="text" placeholder="e.g., 500 g, 1 kg, 1 L, 250 ml"
+                class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">MRP (₹) *</label>
+                <input id="prodMrp" type="number" placeholder="60"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Selling Price (₹) *</label>
+                <input id="prodPrice" type="number" placeholder="45"
+                  class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-[#0C831F]" />
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Image URL (Auto-filled or Paste Custom URL)</label>
+              <input id="prodImage" type="text" placeholder="https://..."
+                oninput="document.getElementById('prodPreviewImg').src = this.value || fallbackImg"
+                class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono" />
+            </div>
+
+            <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-1">
+              <button onclick="saveProduct(true)"
+                class="bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs px-5 py-3 rounded-xl shadow flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> Save & 1-Click Publish to ALL Stores
+              </button>
+              <button onclick="saveProduct(false)"
+                class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-3 rounded-xl">
+                Save Product Only
+              </button>
+              <button onclick="resetProductForm()"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-3 rounded-xl">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: HD Photo Preview + Cycle + Gallery Upload -->
+          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-between">
+            <div class="w-full flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-slate-600">HD Photo Preview</span>
+              <span id="photoFetchBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold">Ready</span>
+            </div>
+            <div class="w-40 h-40 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center shadow-inner">
+              <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80"
+                alt="Preview" class="w-full h-full object-cover" />
+            </div>
+            <div class="w-full grid grid-cols-2 gap-2 mt-3">
+              <button type="button" onclick="cycleNextHDPhoto()"
+                class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold py-2 px-2 rounded-lg flex items-center justify-center gap-1">
+                <i class="fa-solid fa-rotate text-[#0C831F]"></i> Next HD Photo
+              </button>
+              <label class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold py-2 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-image text-blue-600"></i> Upload Gallery
+                <input type="file" accept="image/*" class="hidden" onchange="handleGalleryUpload(event)" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOG LIST WITH QUICK RATE EDIT & STORE-WISE STOCK TOGGLE -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-slate-800">All Products (<span id="productCountLabel">0</span>)</h3>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <input id="catalogSearch" type="text" placeholder="Search product or category..." oninput="renderProducts()"
+              class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs w-60" />
+            <select id="catalogCategoryFilter" onchange="renderProducts()" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold">
+              <option value="ALL">All Categories</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3">Product</th>
+                <th class="px-4 py-3">Category & Unit</th>
+                <th class="px-4 py-3">Quick Rate Edit (₹)</th>
+                <th class="px-4 py-3">Store-Wise Stock Toggle (Click Store Chip to Toggle In/Out)</th>
+                <th class="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: DARK STORES & KYC ================= -->
+    <section id="sec-stores" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h3 class="font-bold text-base text-slate-900 mb-4"><i class="fa-solid fa-store text-[#0C831F] mr-2"></i>Add / Edit Dark Store & Partner KYC</h3>
+        <input type="hidden" id="editStoreId" />
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Store Name *</label>
+            <input id="storeName" type="text" placeholder="e.g., Jhatpat Andheri West Hub" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Area / Locality *</label>
+            <input id="storeArea" type="text" placeholder="e.g., Andheri West, Mumbai" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Service Pincodes (comma separated) *</label>
+            <input id="storePincodes" type="text" placeholder="400053, 400058, 400061" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Manager Name & Phone</label>
+            <input id="storeManager" type="text" placeholder="Rajesh Sharma - 9876543210" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Commission %</label>
+            <input id="storeComm" type="number" value="12" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">KYC Status (FSSAI / GST / PAN)</label>
+            <select id="storeKyc" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold">
+              <option value="Verified">Verified (FSSAI + GST + PAN)</option>
+              <option value="Pending">Pending Verification</option>
+              <option value="Rejected">Rejected / Incomplete</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">FSSAI License No.</label>
+            <input id="storeFssai" type="text" placeholder="11524001000892" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Partner UPI / Bank A/C</label>
+            <input id="storeUpi" type="text" placeholder="partner@kotakbank" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
+          </div>
+          <div class="flex items-end gap-2">
+            <button onclick="saveDarkStore()" class="w-full bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow">
+              Save Dark Store
+            </button>
+            <button onclick="resetStoreForm()" class="bg-slate-100 text-slate-700 font-semibold text-xs py-2.5 px-3 rounded-xl">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DARK STORES LIST -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+          <h3 class="font-bold text-slate-800">Active Dark Stores (<span id="storeCountLabel">0</span>)</h3>
+          <button onclick="seed10MumbaiStores()" class="text-xs font-bold text-[#0C831F] hover:underline">
+            + Restore 10 Default Mumbai Dark Stores
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3">Store ID & Name</th>
+                <th class="px-4 py-3">Area & Pincodes</th>
+                <th class="px-4 py-3">Manager</th>
+                <th class="px-4 py-3">KYC & FSSAI</th>
+                <th class="px-4 py-3">Comm %</th>
+                <th class="px-4 py-3 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="storesTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: CUSTOMER CRM & 1-CLICK WHATSAPP ================= -->
+    <section id="sec-customers" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+          <div>
+            <h3 class="font-bold text-lg text-slate-900"><i class="fa-brands fa-whatsapp text-[#0C831F] mr-2"></i>Customer CRM & 1-Click WhatsApp</h3>
+            <p class="text-xs text-slate-500">Send instant order updates, coupon codes, or payment links on WhatsApp in 1 click.</p>
+          </div>
+          <input id="crmSearch" type="text" placeholder="Search name, phone, area..." oninput="renderCustomers()"
+            class="border border-slate-300 rounded-xl px-3 py-2 text-xs w-64" />
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+              <tr>
+                <th class="px-4 py-3">Customer Name</th>
+                <th class="px-4 py-3">Phone</th>
+                <th class="px-4 py-3">Address / Nearest Store</th>
+                <th class="px-4 py-3 text-right">Orders</th>
+                <th class="px-4 py-3 text-right">Total Spend</th>
+                <th class="px-4 py-3 text-center">1-Click WhatsApp Actions</th>
+              </tr>
+            </thead>
+            <tbody id="crmTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: DELIVERY FEES, BANNERS & KOTAK UPI ================= -->
+    <section id="sec-settings" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Delivery & UPI Settings -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-truck-fast text-[#0C831F] mr-2"></i>Delivery Fee & Kotak UPI Settings</h3>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Standard Delivery Fee (₹) — Default ₹7</label>
+            <input id="cfgDeliveryFee" type="number" value="7" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Free Delivery Threshold (₹) — Default ₹199</label>
+            <input id="cfgFreeThreshold" type="number" value="199" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-[#0C831F]" />
+            <p class="text-[11px] text-slate-500 mt-1">Orders below this amount automatically pay ₹7 delivery; orders ≥ ₹199 get FREE delivery.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kotak Merchant UPI ID</label>
+            <input id="cfgUpiId" type="text" value="8305530240@kotakbank" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Merchant Payee Name</label>
+            <input id="cfgPayeeName" type="text" value="Jhatpat" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold" />
+          </div>
+          <button onclick="saveGlobalSettings()" class="w-full bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs py-3 rounded-xl shadow">
+            Save Delivery & Payment Settings
+          </button>
+        </div>
+
+        <!-- Banner Manager -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+          <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-panorama text-[#0C831F] mr-2"></i>Storefront Banner Manager</h3>
+          <div class="grid grid-cols-1 gap-3">
+            <input id="bannerTitle" type="text" placeholder="Banner Headline (e.g., Fresh Mumbai Sabzi in 10 Mins!)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            <input id="bannerSubtitle" type="text" placeholder="Subtitle (e.g., Free Delivery on orders ₹199+)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            <input id="bannerImage" type="text" placeholder="Banner Image URL (optional)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono" />
+            <button onclick="addBanner()" class="bg-[#F8CB46] hover:bg-yellow-400 text-slate-900 font-extrabold text-xs py-2.5 rounded-xl">
+              + Publish Banner to Storefront
+            </button>
+          </div>
+          <div id="bannersList" class="space-y-2 max-h-60 overflow-y-auto pt-2"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl hidden z-50"></div>
+
+  <!-- FIREBASE + APPLICATION SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, update, push, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // State
+    let storesMap = {};
+    let productsMap = {};
+    let ordersMap = {};
+    let bannersMap = {};
+    let settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat" };
+    let selectedStoreFilter = "ALL";
+    let hdPhotoCandidates = [];
+    let hdPhotoIndex = 0;
+    let photoDebounceTimer = null;
+
+    window.fallbackImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
+
+    // Toast helper
+    window.showToast = (msg) => {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.remove("hidden");
+      clearTimeout(window._toastT);
+      window._toastT = setTimeout(() => t.classList.add("hidden"), 3000);
+    };
+
+    // Auth
+    window.verifyLogin = () => {
+      const val = document.getElementById("adminPassInput").value.trim();
+      if (val === "MOHIT@001") {
+        sessionStorage.setItem("jhatpat_admin_auth", "1");
+        document.getElementById("loginOverlay").classList.add("hidden");
+        initRealtimeListeners();
+      } else {
+        document.getElementById("loginErr").classList.remove("hidden");
+      }
+    };
+
+    window.logoutAdmin = () => {
+      sessionStorage.removeItem("jhatpat_admin_auth");
+      location.reload();
+    };
+
+    if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
+      document.getElementById("loginOverlay").classList.add("hidden");
+      initRealtimeListeners();
+    }
+
+    // Navigation
+    window.switchTab = (tab) => {
+      ["dashboard", "products", "stores", "customers", "settings"].forEach(t => {
+        document.getElementById("sec-" + t).classList.toggle("hidden", t !== tab);
+        document.getElementById("tab-" + t).classList.toggle("tab-active", t === tab);
+      });
+    };
+
+    // Default 10+ Mumbai Dark Stores
+    const DEFAULT_STORES = {
+      "DS_ANDHERI": { id: "DS_ANDHERI", name: "Jhatpat Andheri West Hub", area: "Andheri West, Mumbai", pincodes: "400053, 400058, 400061", manager: "Rohan Desai - 9820112233", commission: 12, kyc: "Verified", fssai: "11524001001101", upi: "andheri@kotakbank" },
+      "DS_BANDRA": { id: "DS_BANDRA", name: "Jhatpat Bandra Linking Hub", area: "Bandra West, Mumbai", pincodes: "400050, 400051, 400052", manager: "Farhan Shaikh - 9820112234", commission: 12, kyc: "Verified", fssai: "11524001001102", upi: "bandra@kotakbank" },
+      "DS_DADAR": { id: "DS_DADAR", name: "Jhatpat Dadar Central Hub", area: "Dadar East, Mumbai", pincodes: "400014, 400028, 400019", manager: "Suresh Patil - 9820112235", commission: 12, kyc: "Verified", fssai: "11524001001103", upi: "dadar@kotakbank" },
+      "DS_POWAI": { id: "DS_POWAI", name: "Jhatpat Powai Hiranandani Hub", area: "Powai, Mumbai", pincodes: "400076, 400072, 400087", manager: "Amit Verma - 9820112236", commission: 12, kyc: "Verified", fssai: "11524001001104", upi: "powai@kotakbank" },
+      "DS_THANE": { id: "DS_THANE", name: "Jhatpat Thane Ghodbunder Hub", area: "Thane West", pincodes: "400601, 400607, 400615", manager: "Nitin Joshi - 9820112237", commission: 10, kyc: "Verified", fssai: "11524001001105", upi: "thane@kotakbank" },
+      "DS_KALYAN": { id: "DS_KALYAN", name: "Jhatpat Kalyan Khadakpada Hub", area: "Kalyan West", pincodes: "421301, 421306, 421201", manager: "Mohit Hub - 8305530240", commission: 10, kyc: "Verified", fssai: "11524001001106", upi: "8305530240@kotakbank" },
+      "DS_BORIVALI": { id: "DS_BORIVALI", name: "Jhatpat Borivali IC Colony Hub", area: "Borivali West, Mumbai", pincodes: "400092, 400103, 400066", manager: "Kiran Shah - 9820112238", commission: 12, kyc: "Verified", fssai: "11524001001107", upi: "borivali@kotakbank" },
+      "DS_MALAD": { id: "DS_MALAD", name: "Jhatpat Malad Mindspace Hub", area: "Malad West, Mumbai", pincodes: "400064, 400095, 400097", manager: "Deepak Nair - 9820112239", commission: 12, kyc: "Verified", fssai: "11524001001108", upi: "malad@kotakbank" },
+      "DS_GHATKOPAR": { id: "DS_GHATKOPAR", name: "Jhatpat Ghatkopar R-City Hub", area: "Ghatkopar West, Mumbai", pincodes: "400086, 400077, 400075", manager: "Prashant More - 9820112240", commission: 12, kyc: "Verified", fssai: "11524001001109", upi: "ghatkopar@kotakbank" },
+      "DS_NAVI": { id: "DS_NAVI", name: "Jhatpat Vashi Palm Beach Hub", area: "Vashi, Navi Mumbai", pincodes: "400703, 400705, 400706", manager: "Siddharth Kulkarni - 9820112241", commission: 11, kyc: "Verified", fssai: "11524001001110", upi: "vashi@kotakbank" },
+      "DS_LOWERPAREL": { id: "DS_LOWERPAREL", name: "Jhatpat Lower Parel Worli Hub", area: "Lower Parel, Mumbai", pincodes: "400013, 400018, 400011", manager: "Vikram Mehta - 9820112242", commission: 12, kyc: "Verified", fssai: "11524001001111", upi: "lowerparel@kotakbank" }
+    };
+
+    window.seed10MumbaiStores = async () => {
+      await update(ref(db, "stores"), DEFAULT_STORES);
+      showToast("11 Mumbai Dark Stores loaded into Firebase!");
+    };
+
+    // Init Firebase Listeners
+    async function initRealtimeListeners() {
+      // Ensure default settings (₹7 delivery, ₹199 free threshold)
+      const cfgSnap = await get(ref(db, "settings"));
+      if (!cfgSnap.exists()) {
+        await set(ref(db, "settings"), settings);
+      }
+
+      // Ensure stores exist
+      const storeSnap = await get(ref(db, "stores"));
+      if (!storeSnap.exists()) {
+        await set(ref(db, "stores"), DEFAULT_STORES);
+      }
+
+      onValue(ref(db, "settings"), (snap) => {
+        if (snap.exists()) {
+          settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat", ...snap.val() };
+          document.getElementById("cfgDeliveryFee").value = settings.deliveryFee;
+          document.getElementById("cfgFreeThreshold").value = settings.freeThreshold;
+          document.getElementById("cfgUpiId").value = settings.upiId;
+          document.getElementById("cfgPayeeName").value = settings.payeeName;
         }
+      });
 
-        window.handleAdminLogin = (e) => {
-            e.preventDefault();
-            if (document.getElementById('admin-pass').value === 'MOHIT@001') {
-                sessionStorage.setItem('jhatpat_hq_auth', 'MOHIT@001');
-                unlockHQ();
-            } else {
-                document.getElementById('auth-error').classList.remove('hidden');
-            }
-        };
+      onValue(ref(db, "stores"), (snap) => {
+        storesMap = snap.val() || {};
+        populateStoreFilterDropdown();
+        renderStoresTable();
+        renderDashboard();
+        renderProducts();
+      });
 
-        window.logout = () => {
-            sessionStorage.removeItem('jhatpat_hq_auth');
-            location.reload();
-        };
+      onValue(ref(db, "products"), (snap) => {
+        productsMap = snap.val() || {};
+        populateCategoryDropdown();
+        renderProducts();
+      });
 
-        function unlockHQ() {
-            document.getElementById('login-gate').classList.add('hidden');
-            document.getElementById('hq-app').classList.remove('hidden');
-            startHQListeners();
+      onValue(ref(db, "orders"), (snap) => {
+        ordersMap = snap.val() || {};
+        renderDashboard();
+        renderCustomers();
+      });
+
+      onValue(ref(db, "banners"), (snap) => {
+        bannersMap = snap.val() || {};
+        renderBanners();
+      });
+    }
+
+    // ================= STORE-WISE ANALYTICS FILTER =================
+    function populateStoreFilterDropdown() {
+      const sel = document.getElementById("globalStoreFilter");
+      const current = sel.value || selectedStoreFilter;
+      sel.innerHTML = `<option value="ALL">All Dark Stores (${Object.keys(storesMap).length} Stores)</option>`;
+      Object.values(storesMap).forEach(st => {
+        const opt = document.createElement("option");
+        opt.value = st.id;
+        opt.textContent = `${st.name} (${st.area})`;
+        sel.appendChild(opt);
+      });
+      sel.value = storesMap[current] ? current : "ALL";
+      selectedStoreFilter = sel.value;
+    }
+
+    window.onStoreFilterChange = () => {
+      selectedStoreFilter = document.getElementById("globalStoreFilter").value;
+      renderDashboard();
+    };
+
+    window.selectStoreFromTable = (storeId) => {
+      selectedStoreFilter = storeId;
+      document.getElementById("globalStoreFilter").value = storeId;
+      renderDashboard();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    function renderDashboard() {
+      const allOrders = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }));
+      const filteredOrders = selectedStoreFilter === "ALL"
+        ? allOrders
+        : allOrders.filter(o => o.storeId === selectedStoreFilter);
+
+      // Update Banner Header
+      if (selectedStoreFilter === "ALL") {
+        document.getElementById("analyticsStoreTitle").textContent = `All Dark Stores (${Object.keys(storesMap).length} Stores Combined)`;
+        document.getElementById("analyticsStoreMeta").textContent = "Network-wide live orders, gross sales, platform commission & store payouts";
+        document.getElementById("analyticsCommRate").textContent = "Avg 11.8% Commission";
+      } else {
+        const st = storesMap[selectedStoreFilter] || {};
+        document.getElementById("analyticsStoreTitle").textContent = st.name || selectedStoreFilter;
+        document.getElementById("analyticsStoreMeta").textContent = `Area: ${st.area || "-"} • Pincodes: ${st.pincodes || "-"} • Manager: ${st.manager || "-"}`;
+        document.getElementById("analyticsCommRate").textContent = `${st.commission || 12}% Store Commission`;
+      }
+
+      // Compute KPIs (excluding Cancelled from Sales/Commission/Payout)
+      let totalOrders = filteredOrders.length;
+      let grossSales = 0;
+      let totalCommission = 0;
+      let totalPayout = 0;
+
+      filteredOrders.forEach(o => {
+        if (o.status !== "Cancelled") {
+          const amt = Number(o.totalAmount || o.grandTotal || 0);
+          const st = storesMap[o.storeId] || {};
+          const commPct = Number(st.commission || 12);
+          const commAmt = Math.round((amt * commPct) / 100);
+          grossSales += amt;
+          totalCommission += commAmt;
+          totalPayout += (amt - commAmt);
         }
+      });
 
-        window.switchHQTab = (tab) => {
-            ['orders', 'customers', 'products', 'stores', 'pricing', 'banners', 'kyc', 'ledger'].forEach(t => {
-                document.getElementById('sec-' + t).classList.toggle('hidden', t !== tab);
-                document.getElementById('nav-' + t).className = t === tab
-                    ? 'hq-nav bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap'
-                    : 'hq-nav bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap';
-            });
-        };
+      document.getElementById("kpiOrders").textContent = totalOrders;
+      document.getElementById("kpiSales").textContent = `₹${grossSales.toLocaleString("en-IN")}`;
+      document.getElementById("kpiCommission").textContent = `₹${totalCommission.toLocaleString("en-IN")}`;
+      document.getElementById("kpiPayout").textContent = `₹${totalPayout.toLocaleString("en-IN")}`;
 
-        // ---------------------------------------------------------
-        // WHATSAPP 1-CLICK HELPERS (https://wa.me...)
-        // ---------------------------------------------------------
-        function formatWaPhone(rawPhone) {
-            const digits = String(rawPhone || '').replace(/\D/g, '');
-            if (!digits) return '';
-            if (digits.length === 10) return '91' + digits;
-            return digits;
+      // Store-Wise Breakdown Table
+      const breakdownBody = document.getElementById("storeBreakdownBody");
+      breakdownBody.innerHTML = "";
+      Object.values(storesMap).forEach(st => {
+        const stOrders = allOrders.filter(o => o.storeId === st.id && o.status !== "Cancelled");
+        const stSales = stOrders.reduce((s, o) => s + Number(o.totalAmount || o.grandTotal || 0), 0);
+        const commPct = Number(st.commission || 12);
+        const stComm = Math.round((stSales * commPct) / 100);
+        const stPay = stSales - stComm;
+        const isSelected = selectedStoreFilter === st.id;
+
+        breakdownBody.innerHTML += `
+          <tr class="${isSelected ? 'bg-green-50/80 font-semibold' : 'hover:bg-slate-50'}">
+            <td class="px-4 py-3 font-bold text-slate-900">${st.name}</td>
+            <td class="px-4 py-3 text-slate-600">${st.area} <span class="text-[10px] text-slate-400">(${st.pincodes})</span></td>
+            <td class="px-4 py-3 text-right font-bold">${stOrders.length}</td>
+            <td class="px-4 py-3 text-right font-bold text-slate-900">₹${stSales.toLocaleString("en-IN")}</td>
+            <td class="px-4 py-3 text-right text-amber-700 font-semibold">₹${stComm.toLocaleString("en-IN")} (${commPct}%)</td>
+            <td class="px-4 py-3 text-right text-purple-700 font-bold">₹${stPay.toLocaleString("en-IN")}</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="selectStoreFromTable('${st.id}')"
+                class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${isSelected ? 'bg-[#0C831F] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+                ${isSelected ? 'Selected' : 'View Store'}
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      renderOrders();
+    }
+
+    window.renderOrders = () => {
+      const statusFilter = document.getElementById("orderStatusFilter").value;
+      const tbody = document.getElementById("ordersTableBody");
+      let list = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }));
+
+      if (selectedStoreFilter !== "ALL") {
+        list = list.filter(o => o.storeId === selectedStoreFilter);
+      }
+      if (statusFilter !== "ALL") {
+        list = list.filter(o => o.status === statusFilter);
+      }
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">No orders found for this filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(o => {
+        const stName = (storesMap[o.storeId] && storesMap[o.storeId].name) || o.storeName || o.storeId || "Default Store";
+        const itemsText = (o.items || []).map(i => `${i.name} x${i.qty}`).join(", ");
+        const sub = Number(o.subtotal || 0);
+        const del = Number(o.deliveryFee ?? (sub >= 199 ? 0 : 7));
+        const tot = Number(o.totalAmount || (sub + del));
+        const phone = (o.customerPhone || "").replace(/\D/g, "");
+        const waMsg = encodeURIComponent(`Hi ${o.customerName || 'Customer'}, your Jhatpat order #${o.id.slice(-6).toUpperCase()} of ₹${tot} from ${stName} is currently *${o.status || 'Placed'}*. Thank you for ordering with Jhatpat!`);
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-mono font-bold text-slate-800">#${o.id.slice(-6).toUpperCase()}</td>
+            <td class="px-4 py-3">
+              <div class="font-bold text-slate-900">${o.customerName || "Guest"}</div>
+              <div class="text-[11px] text-slate-500">${o.customerPhone || "-"} • ${o.pincode || ""}</div>
+            </td>
+            <td class="px-4 py-3 font-semibold text-[#0C831F]">${stName}</td>
+            <td class="px-4 py-3 max-w-xs truncate" title="${itemsText}">${itemsText || "-"}</td>
+            <td class="px-4 py-3">
+              <div class="font-bold text-slate-900">₹${tot}</div>
+              <div class="text-[10px] text-slate-500">Items ₹${sub} + Del ${del === 0 ? 'FREE' : '₹' + del}</div>
+            </td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${o.paymentMethod === 'UPI' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">
+                ${o.paymentMethod || 'COD'}
+              </span>
+            </td>
+            <td class="px-4 py-3">
+              <select onchange="updateOrderStatus('${o.id}', this.value)"
+                class="border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-bold bg-white">
+                ${["Placed", "Packed", "Out for Delivery", "Delivered", "Cancelled"].map(s =>
+                  `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`
+                ).join("")}
+              </select>
+            </td>
+            <td class="px-4 py-3 text-center">
+              <a href="https://wa.me/91${phone}?text=${waMsg}" target="_blank"
+                class="inline-flex items-center gap-1 bg-[#0C831F] hover:bg-green-800 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
+                <i class="fa-brands fa-whatsapp"></i> Update
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    };
+
+    window.updateOrderStatus = async (orderId, newStatus) => {
+      await update(ref(db, `orders/${orderId}`), { status: newStatus });
+      showToast(`Order #${orderId.slice(-6).toUpperCase()} marked ${newStatus}`);
+    };
+
+    window.exportOrdersCSV = () => {
+      const list = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }))
+        .filter(o => selectedStoreFilter === "ALL" || o.storeId === selectedStoreFilter);
+      const rows = [["OrderID", "Store", "Customer", "Phone", "Subtotal", "DeliveryFee", "Total", "Status"]];
+      list.forEach(o => {
+        rows.push([o.id, o.storeId, o.customerName, o.customerPhone, o.subtotal, o.deliveryFee, o.totalAmount, o.status]);
+      });
+      const csv = rows.map(r => r.join(",")).join("
+");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `jhatpat_orders_${selectedStoreFilter}.csv`;
+      a.click();
+    };
+
+    // ================= AUTO-HD PHOTO FETCH + GALLERY UPLOAD =================
+    const CURATED_HD_KEYWORDS = {
+      mango: ["https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=85"],
+      banana: ["https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=600&q=85"],
+      apple: ["https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?auto=format&fit=crop&w=600&q=85"],
+      tomato: ["https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=600&q=85"],
+      potato: ["https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1508313880080-c4bef0730395?auto=format&fit=crop&w=600&q=85"],
+      onion: ["https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=600&q=85"],
+      milk: ["https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=85"],
+      juice: ["https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=600&q=85"],
+      orange: ["https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=600&q=85"],
+      spinach: ["https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85"],
+      palak: ["https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85"],
+      coriander: ["https://images.unsplash.com/photo-1588879460618-9249e7d947d1?auto=format&fit=crop&w=600&q=85"],
+      paneer: ["https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=85"],
+      bread: ["https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=85"],
+      egg: ["https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=600&q=85"]
+    };
+
+    window.debouncedAutoFetchHDPhoto = (query) => {
+      clearTimeout(photoDebounceTimer);
+      const q = query.trim();
+      if (q.length < 2) return;
+      document.getElementById("photoFetchBadge").textContent = "Fetching HD...";
+      photoDebounceTimer = setTimeout(() => fetchHDPhotosForProduct(q), 450);
+    };
+
+    async function fetchHDPhotosForProduct(query) {
+      const lower = query.toLowerCase();
+      let candidates = [];
+
+      // 1. Check curated high-res grocery matches first
+      for (const [key, urls] of Object.entries(CURATED_HD_KEYWORDS)) {
+        if (lower.includes(key)) {
+          candidates.push(...urls);
         }
+      }
 
-        function buildWhatsAppUrl(phone, text) {
-            const waPhone = formatWaPhone(phone);
-            const encoded = encodeURIComponent(text);
-            return waPhone ? `https://wa.me/${waPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+      // 2. Also build dynamic HD Unsplash & Wikimedia/OpenFoodFacts queries so any product name gets multiple crisp HD options
+      const cleanTerm = encodeURIComponent(query.replace(/[^a-zA-Z0-9 ]/g, " ").trim());
+      try {
+        const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${cleanTerm}&search_simple=1&action=process&json=1&page_size=6`);
+        if (res.ok) {
+          const data = await res.json();
+          (data.products || []).forEach(p => {
+            if (p.image_front_url) candidates.push(p.image_front_url);
+          });
         }
+      } catch (e) { /* fallback smoothly */ }
 
-        window.getOrderWhatsAppLink = (orderId, mode = 'confirmation') => {
-            const o = allOrders[orderId] || {};
-            const shortId = orderId.slice(-6).toUpperCase();
-            const name = o.customerName || 'Customer';
-            const amt = o.totalAmount || 0;
-            const status = o.status || 'Confirmed';
+      // Add high-resolution keyword image sources with distinct lock seeds for cycling
+      for (let i = 1; i <= 5; i++) {
+        candidates.push(`https://loremflickr.com/600/600/${cleanTerm},grocery,food/all?lock=${i * 17}`);
+      }
 
-            if (mode === 'delivery') {
-                const riderInfo = o.riderName ? ` by delivery partner ${o.riderName}` : '';
-                return buildWhatsAppUrl(
-                    o.customerPhone,
-                    `⚡ *Jhatpat Delivery Update*
-Hi ${name}, your Jhatpat order *#${shortId}* (₹${amt}) is *Out for Delivery*${riderInfo}!
-Track live here: ${JHATPAT_APP_URL}`
-                );
-            }
-            if (mode === 'offer') {
-                return buildWhatsAppUrl(
-                    o.customerPhone,
-                    `⚡ *Jhatpat Fresh Offer!*
-Hi ${name}, get farm-fresh sabzi, fruits & cold-pressed juices delivered in minutes on *Jhatpat*!
-Order now: ${JHATPAT_APP_URL}`
-                );
-            }
-            return buildWhatsAppUrl(
-                o.customerPhone,
-                `⚡ *Jhatpat Order Confirmed*
-Hi ${name}, thank you for ordering on *Jhatpat*! Order *#${shortId}* for *₹${amt}* is currently *${status}*.
-Track & shop fresh: ${JHATPAT_APP_URL}`
-            );
+      hdPhotoCandidates = [...new Set(candidates)];
+      hdPhotoIndex = 0;
+
+      if (hdPhotoCandidates.length > 0) {
+        applyHDPhoto(hdPhotoCandidates[0]);
+        document.getElementById("photoFetchBadge").textContent = `HD Found (1/${hdPhotoCandidates.length})`;
+      }
+    }
+
+    function applyHDPhoto(url) {
+      document.getElementById("prodImage").value = url;
+      document.getElementById("prodPreviewImg").src = url;
+    }
+
+    window.cycleNextHDPhoto = () => {
+      if (!hdPhotoCandidates.length) {
+        const name = document.getElementById("prodName").value.trim() || "fresh grocery";
+        fetchHDPhotosForProduct(name);
+        return;
+      }
+      hdPhotoIndex = (hdPhotoIndex + 1) % hdPhotoCandidates.length;
+      applyHDPhoto(hdPhotoCandidates[hdPhotoIndex]);
+      document.getElementById("photoFetchBadge").textContent = `HD (${hdPhotoIndex + 1}/${hdPhotoCandidates.length})`;
+    };
+
+    window.handleGalleryUpload = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        // Compress slightly via canvas so RTDB stays fast & light
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 600;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+          applyHDPhoto(dataUrl);
+          document.getElementById("photoFetchBadge").textContent = "Gallery Uploaded";
+          showToast("HD Photo uploaded from gallery!");
         };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
 
-        window.getCustomerPromoWaLink = (phoneKey) => {
-            const c = customersMap[phoneKey];
-            const name = c?.name || 'Customer';
-            return buildWhatsAppUrl(
-                c?.phone || phoneKey,
-                `⚡ *Jhatpat Fresh Deals for ${name}!*
-Fresh sabzi, seasonal fruits & cold-pressed juices are live at great rates on *Jhatpat*.
-Shop now: ${JHATPAT_APP_URL}`
-            );
-        };
+    // ================= PRODUCT SAVE, 1-CLICK PUBLISH ALL & STORE-WISE STOCK TOGGLE =================
+    window.saveProduct = async (publishToAllStores) => {
+      const editId = document.getElementById("editProductId").value;
+      const name = document.getElementById("prodName").value.trim();
+      const category = document.getElementById("prodCategory").value;
+      const unit = document.getElementById("prodUnit").value.trim() || "1 pc";
+      const mrp = Number(document.getElementById("prodMrp").value || 0);
+      const price = Number(document.getElementById("prodPrice").value || 0);
+      const image = document.getElementById("prodImage").value.trim() || window.fallbackImg;
 
-        // ---------------------------------------------------------
-        // CUSTOMER CRM AGGREGATION & FULL DETAILS MODAL
-        // ---------------------------------------------------------
-        function rebuildCustomersCRM() {
-            const map = {};
-            Object.entries(allOrders).forEach(([id, o]) => {
-                const rawPhone = String(o.customerPhone || '').trim();
-                const key = rawPhone || ('order_' + id);
-                if (!map[key]) {
-                    map[key] = {
-                        key,
-                        name: o.customerName || 'Guest Customer',
-                        phone: rawPhone || 'Not Provided',
-                        address: o.customerAddress || 'Not Provided',
-                        totalOrders: 0,
-                        totalSpend: 0,
-                        orders: []
-                    };
-                }
-                const amt = Number(o.totalAmount || 0);
-                map[key].totalOrders += 1;
-                if (o.status !== 'Cancelled') {
-                    map[key].totalSpend += amt;
-                }
-                if (o.customerName) map[key].name = o.customerName;
-                if (o.customerAddress) map[key].address = o.customerAddress;
-                map[key].orders.push({ id, ...o });
-            });
+      if (!name || !price) {
+        alert("Please enter Product Name and Selling Price.");
+        return;
+      }
 
-            Object.values(map).forEach(c => {
-                c.orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            });
+      const id = editId || ("PROD_" + Date.now());
+      const existing = productsMap[id] || {};
+      const storeStock = { ...(existing.storeStock || {}) };
 
-            customersMap = map;
-            document.getElementById('kpi-customers').innerText = Object.keys(customersMap).length;
-            renderCustomersCRM();
-        }
+      if (publishToAllStores) {
+        Object.keys(storesMap).forEach(stId => {
+          storeStock[stId] = true; // Published & In Stock in every store
+        });
+      }
 
-        window.renderCustomersCRM = () => {
-            const q = (document.getElementById('crm-search')?.value || '').toLowerCase().trim();
-            const container = document.getElementById('customers-crm-list');
-            const list = Object.values(customersMap)
-                .filter(c =>
-                    !q ||
-                    (c.name || '').toLowerCase().includes(q) ||
-                    (c.phone || '').toLowerCase().includes(q) ||
-                    (c.address || '').toLowerCase().includes(q)
-                )
-                .sort((a, b) => b.totalSpend - a.totalSpend);
+      const payload = {
+        id,
+        name,
+        category,
+        unit,
+        mrp: mrp || price,
+        price,
+        image,
+        inStock: true,
+        storeStock,
+        updatedAt: Date.now()
+      };
 
-            if (list.length === 0) {
-                container.innerHTML = `<p class="col-span-full text-xs text-slate-400 text-center py-8">No customers found.</p>`;
-                return;
-            }
+      await set(ref(db, `products/${id}`), payload);
+      resetProductForm();
+      showToast(publishToAllStores
+        ? `"${name}" published & marked IN STOCK across all ${Object.keys(storesMap).length} stores!`
+        : `"${name}" saved!`);
+    };
 
-            container.innerHTML = list.map(c => {
-                const waOffer = getCustomerPromoWaLink(c.key);
-                return `
-                    <div class="border rounded-2xl p-4 bg-slate-50 flex flex-col justify-between gap-3">
-                        <div>
-                            <div class="flex justify-between items-start gap-2">
-                                <div>
-                                    <h3 class="font-extrabold text-sm text-slate-900">${c.name}</h3>
-                                    <p class="text-xs font-mono text-slate-600 mt-0.5"><i class="fa-solid fa-phone text-[10px] mr-1 text-slate-400"></i>${c.phone}</p>
-                                </div>
-                                <span class="bg-emerald-100 text-emerald-800 text-[11px] font-black px-2.5 py-0.5 rounded-full">${c.totalOrders} Orders</span>
-                            </div>
-                            <p class="text-xs text-slate-600 mt-2 line-clamp-2"><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>${c.address}</p>
-                            <p class="text-xs font-extrabold text-indigo-700 mt-2">Total Spend: ₹${c.totalSpend}</p>
-                        </div>
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="openCustomerModal('${encodeURIComponent(c.key)}')" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-2 rounded-xl text-xs transition">
-                                View Full Details
-                            </button>
-                            <a href="${waOffer}" target="_blank" rel="noopener noreferrer" class="bg-green-600 hover:bg-green-700 text-white font-extrabold px-3 py-2 rounded-xl text-xs flex items-center justify-center transition" title="Send Jhatpat Offer on WhatsApp">
-                                <i class="fa-brands fa-whatsapp text-sm mr-1"></i> WhatsApp
-                            </a>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
+    window.resetProductForm = () => {
+      document.getElementById("editProductId").value = "";
+      document.getElementById("productFormTitle").innerHTML = `<i class="fa-solid fa-plus-circle text-[#0C831F]"></i> Add New Product (with Auto-HD Photo Fetch)`;
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodUnit").value = "";
+      document.getElementById("prodMrp").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodImage").value = "";
+      document.getElementById("prodPreviewImg").src = window.fallbackImg;
+      document.getElementById("photoFetchBadge").textContent = "Ready";
+      hdPhotoCandidates = [];
+    };
 
-        window.openCustomerModal = (encodedKey) => {
-            const key = decodeURIComponent(encodedKey);
-            const c = customersMap[key];
-            if (!c) return;
+    window.editProduct = (id) => {
+      const p = productsMap[id];
+      if (!p) return;
+      document.getElementById("editProductId").value = id;
+      document.getElementById("productFormTitle").innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-600"></i> Editing: ${p.name}`;
+      document.getElementById("prodName").value = p.name;
+      document.getElementById("prodCategory").value = p.category || "Vegetables & Fruits";
+      document.getElementById("prodUnit").value = p.unit || "";
+      document.getElementById("prodMrp").value = p.mrp || p.price;
+      document.getElementById("prodPrice").value = p.price;
+      document.getElementById("prodImage").value = p.image || "";
+      document.getElementById("prodPreviewImg").src = p.image || window.fallbackImg;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
-            document.getElementById('cd-name').innerText = c.name;
-            document.getElementById('cd-phone-sub').innerText = `Mobile: ${c.phone}`;
-            document.getElementById('cd-total-orders').innerText = c.totalOrders;
-            document.getElementById('cd-total-spend').innerText = '₹' + c.totalSpend;
-            document.getElementById('cd-address').innerText = c.address;
+    window.deleteProduct = async (id) => {
+      if (!confirm("Delete this product permanently?")) return;
+      await remove(ref(db, `products/${id}`));
+      showToast("Product removed.");
+    };
 
-            const waOffer = getCustomerPromoWaLink(c.key);
-            const waLatest = c.orders[0] ? getOrderWhatsAppLink(c.orders[0].id, 'confirmation') : waOffer;
+    window.quickUpdateRate = async (id, newPrice) => {
+      const val = Number(newPrice);
+      if (val <= 0) return;
+      await update(ref(db, `products/${id}`), { price: val });
+      showToast("Selling rate updated to ₹" + val);
+    };
 
-            document.getElementById('cd-wa-actions').innerHTML = `
-                <a href="${waLatest}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs text-center">
-                    <i class="fa-brands fa-whatsapp mr-1"></i> Order Status WhatsApp
-                </a>
-                <a href="${waOffer}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-2.5 px-3 rounded-xl text-xs text-center">
-                    <i class="fa-brands fa-whatsapp mr-1"></i> Promo Link WhatsApp
-                </a>
-            `;
+    window.toggleStoreStock = async (prodId, storeId) => {
+      const p = productsMap[prodId];
+      if (!p) return;
+      const current = (p.storeStock && p.storeStock[storeId] !== undefined) ? p.storeStock[storeId] : true;
+      const nextVal = !current;
+      await update(ref(db, `products/${prodId}/storeStock`), { [storeId]: nextVal });
+      const stName = (storesMap[storeId] && storesMap[storeId].name) || storeId;
+      showToast(`${p.name}: ${nextVal ? 'IN STOCK ✅' : 'OUT OF STOCK ❌'} at ${stName}`);
+    };
 
-            document.getElementById('cd-history-list').innerHTML = c.orders.map(o => `
-                <div class="border rounded-xl p-3 bg-white flex flex-col sm:flex-row justify-between gap-2">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-mono text-[11px] font-bold text-slate-500">#${o.id.slice(-6).toUpperCase()}</span>
-                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-800">${o.status || 'New'}</span>
-                            <span class="text-[10px] font-bold text-slate-400">${o.storeCode || 'ALL'}</span>
-                        </div>
-                        <p class="text-xs font-semibold text-slate-700 mt-1">${(o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ')}</p>
-                    </div>
-                    <div class="flex sm:flex-col items-end justify-between shrink-0">
-                        <span class="font-black text-xs text-slate-900">₹${o.totalAmount || 0}</span>
-                        <a href="${getOrderWhatsAppLink(o.id, o.status === 'Out for Delivery' ? 'delivery' : 'confirmation')}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-green-700 hover:underline mt-1">
-                            <i class="fa-brands fa-whatsapp"></i> Msg
-                        </a>
-                    </div>
+    window.publishSingleProductAllStores = async (prodId) => {
+      const allTrue = {};
+      Object.keys(storesMap).forEach(stId => { allTrue[stId] = true; });
+      await update(ref(db, `products/${prodId}`), { inStock: true, storeStock: allTrue });
+      showToast("Published IN STOCK to all stores!");
+    };
+
+    window.publishAllProductsToAllStores = async () => {
+      const storeIds = Object.keys(storesMap);
+      if (!storeIds.length) return alert("Add dark stores first.");
+      const updates = {};
+      Object.keys(productsMap).forEach(pId => {
+        updates[`products/${pId}/inStock`] = true;
+        storeIds.forEach(stId => {
+          updates[`products/${pId}/storeStock/${stId}`] = true;
+        });
+      });
+      await update(ref(db), updates);
+      showToast(`All ${Object.keys(productsMap).length} products published IN STOCK across ${storeIds.length} stores!`);
+    };
+
+    function populateCategoryDropdown() {
+      const sel = document.getElementById("catalogCategoryFilter");
+      const cur = sel.value;
+      const cats = [...new Set(Object.values(productsMap).map(p => p.category).filter(Boolean))];
+      sel.innerHTML = `<option value="ALL">All Categories (${cats.length})</option>` +
+        cats.map(c => `<option value="${c}">${c}</option>`).join("");
+      sel.value = cats.includes(cur) ? cur : "ALL";
+    }
+
+    window.renderProducts = () => {
+      const search = (document.getElementById("catalogSearch").value || "").toLowerCase();
+      const catFilter = document.getElementById("catalogCategoryFilter").value;
+      const tbody = document.getElementById("productsTableBody");
+      const storeList = Object.values(storesMap);
+
+      let list = Object.values(productsMap).filter(p => {
+        const matchSearch = !search || (p.name || "").toLowerCase().includes(search) || (p.category || "").toLowerCase().includes(search);
+        const matchCat = catFilter === "ALL" || p.category === catFilter;
+        return matchSearch && matchCat;
+      });
+
+      document.getElementById("productCountLabel").textContent = list.length;
+
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400">No products found. Click "Load Mumbai 100+ Sabzi, Fruits & Juice Pack" above to populate instantly!</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(p => {
+        const storeChips = storeList.map(st => {
+          const isInStock = (p.storeStock && p.storeStock[st.id] !== undefined) ? p.storeStock[st.id] : true;
+          const shortName = st.name.replace("Jhatpat ", "").replace(" Hub", "");
+          return `
+            <button onclick="toggleStoreStock('${p.id}', '${st.id}')"
+              title="Click to toggle stock for ${st.name}"
+              class="px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
+                isInStock
+                  ? 'bg-green-50 text-green-800 border-green-300 hover:bg-green-100'
+                  : 'bg-red-50 text-red-700 border-red-300 line-through hover:bg-red-100'
+              }">
+              ${shortName}: ${isInStock ? 'IN' : 'OUT'}
+            </button>
+          `;
+        }).join(" ");
+
+        return `
+          <tr class="hover:bg-slate-50 align-top">
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3">
+                <img src="${p.image || window.fallbackImg}" onerror="this.src=window.fallbackImg"
+                  class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
+                <div>
+                  <div class="font-bold text-slate-900">${p.name}</div>
+                  <div class="text-[10px] text-slate-400 font-mono">${p.id}</div>
                 </div>
-            `).join('');
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[11px]">${p.category}</span>
+              <div class="text-slate-500 mt-1 font-medium">${p.unit}</div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-1">
+                <span class="text-slate-400 line-through">₹${p.mrp || p.price}</span>
+                <input type="number" value="${p.price}" onchange="quickUpdateRate('${p.id}', this.value)"
+                  class="w-16 border border-slate-300 rounded-lg px-2 py-1 font-bold text-[#0C831F] text-xs" />
+              </div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap gap-1 max-w-md">${storeChips}</div>
+            </td>
+            <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
+              <button onclick="publishSingleProductAllStores('${p.id}')" title="1-Click Publish In Stock to All Stores"
+                class="px-2 py-1.5 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-bold text-[11px]">
+                All In
+              </button>
+              <button onclick="editProduct('${p.id}')" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-bold">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteProduct('${p.id}')" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    };
 
-            document.getElementById('customer-details-modal').classList.remove('hidden');
+    // ================= MUMBAI 100+ SABZI, FRUITS & JUICE PACK =================
+    window.loadMumbai100Pack = async () => {
+      const storeIds = Object.keys(storesMap);
+      const allInStock = {};
+      storeIds.forEach(s => allInStock[s] = true);
+
+      const IMG = {
+        veg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80",
+        leafy: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=80",
+        fruit: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=600&q=80",
+        juice: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80",
+        tomato: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80",
+        onion: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=80",
+        potato: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80",
+        mango: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=80",
+        banana: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80",
+        apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80"
+      };
+
+      const rawItems = [
+        // Mumbai Daily Sabzi (45 items)
+        ["Nashik Red Onion (Kanda)", "Vegetables & Fruits", "1 kg", 45, 34, IMG.onion],
+        ["Agra Jyoti Potato (Batata)", "Vegetables & Fruits", "1 kg", 40, 30, IMG.potato],
+        ["Hybrid Red Tomato (Tamatar)", "Vegetables & Fruits", "500 g", 30, 22, IMG.tomato],
+        ["Fresh Coriander (Kothimbir)", "Vegetables & Fruits", "100 g", 18, 12, IMG.leafy],
+        ["Fresh Mint Leaves (Pudina)", "Vegetables & Fruits", "100 g", 15, 10, IMG.leafy],
+        ["Curry Leaves (Kadi Patta)", "Vegetables & Fruits", "50 g", 12, 8, IMG.leafy],
+        ["Green Chilli (Hirvi Mirchi)", "Vegetables & Fruits", "100 g", 16, 11, IMG.veg],
+        ["Fresh Ginger (Adrak)", "Vegetables & Fruits", "100 g", 24, 18, IMG.veg],
+        ["Indian Garlic (Lasun)", "Vegetables & Fruits", "200 g", 48, 36, IMG.veg],
+        ["Seedless Lemon (Nimbu)", "Vegetables & Fruits", "250 g", 32, 24, IMG.fruit],
+        ["Lady Finger (Bhindi)", "Vegetables & Fruits", "500 g", 38, 28, IMG.veg],
+        ["Bottle Gourd (Dudhi / Lauki)", "Vegetables & Fruits", "1 pc (500g)", 34, 25, IMG.veg],
+        ["Ridge Gourd (Dodka / Turai)", "Vegetables & Fruits", "500 g", 42, 32, IMG.veg],
+        ["Bitter Gourd (Karela)", "Vegetables & Fruits", "500 g", 40, 30, IMG.veg],
+        ["Sponge Gourd (Ghosale)", "Vegetables & Fruits", "500 g", 38, 28, IMG.veg],
+        ["Snake Gourd (Padwal)", "Vegetables & Fruits", "500 g", 36, 26, IMG.veg],
+        ["Ivy Gourd (Tendli)", "Vegetables & Fruits", "250 g", 26, 19, IMG.veg],
+        ["Cluster Beans (Gavar)", "Vegetables & Fruits", "250 g", 30, 22, IMG.veg],
+        ["French Beans (Farasbi)", "Vegetables & Fruits", "250 g", 32, 24, IMG.veg],
+        ["Green Peas (Matar)", "Vegetables & Fruits", "500 g", 55, 42, IMG.veg],
+        ["Cauliflower (Flower)", "Vegetables & Fruits", "1 pc (500g)", 45, 34, IMG.veg],
+        ["Green Cabbage (Kobi)", "Vegetables & Fruits", "1 pc (500g)", 32, 24, IMG.veg],
+        ["Green Capsicum (Shimla Mirchi)", "Vegetables & Fruits", "250 g", 28, 21, IMG.veg],
+        ["Red & Yellow Bell Pepper Combo", "Vegetables & Fruits", "2 pcs", 85, 65, IMG.veg],
+        ["Small Purple Brinjal (Vangi)", "Vegetables & Fruits", "250 g", 26, 19, IMG.veg],
+        ["Big Bharta Brinjal", "Vegetables & Fruits", "500 g", 35, 26, IMG.veg],
+        ["Drumstick (Shevga)", "Vegetables & Fruits", "250 g", 34, 25, IMG.veg],
+        ["Fresh Spinach (Palak Bunch)", "Vegetables & Fruits", "250 g", 24, 18, IMG.leafy],
+        ["Fresh Fenugreek (Methi Bunch)", "Vegetables & Fruits", "250 g", 26, 19, IMG.leafy],
+        ["Red Amaranth (Lal Math)", "Vegetables & Fruits", "250 g", 24, 18, IMG.leafy],
+        ["Spring Onion (Kanda Pat)", "Vegetables & Fruits", "250 g", 25, 18, IMG.leafy],
+        ["Red Carrot (Gajar)", "Vegetables & Fruits", "500 g", 36, 27, IMG.veg],
+        ["Beetroot (Chukandar)", "Vegetables & Fruits", "500 g", 34, 25, IMG.veg],
+        ["White Radish (Mula)", "Vegetables & Fruits", "500 g", 28, 20, IMG.veg],
+        ["English Cucumber (Kakdi)", "Vegetables & Fruits", "500 g", 32, 24, IMG.veg],
+        ["Sweet Corn Cob (Bhutta)", "Vegetables & Fruits", "2 pcs", 40, 29, IMG.veg],
+        ["Sweet Corn Kernels Pack", "Vegetables & Fruits", "200 g", 45, 35, IMG.veg],
+        ["Button Mushroom Pack", "Vegetables & Fruits", "200 g", 65, 49, IMG.veg],
+        ["Broccoli Florets", "Vegetables & Fruits", "250 g", 75, 58, IMG.veg],
+        ["Baby Corn Peeled", "Vegetables & Fruits", "200 g", 55, 42, IMG.veg],
+        ["Raw Banana (Kachcha Kela)", "Vegetables & Fruits", "500 g", 34, 25, IMG.banana],
+        ["Elephant Foot Yam (Suran)", "Vegetables & Fruits", "500 g", 42, 32, IMG.veg],
+        ["Sweet Potato (Ratalu)", "Vegetables & Fruits", "500 g", 40, 30, IMG.potato],
+        ["Red Pumpkin (Bhopla)", "Vegetables & Fruits", "500 g", 28, 20, IMG.veg],
+        ["Fresh Grated Coconut", "Vegetables & Fruits", "200 g", 45, 35, IMG.fruit],
+
+        // Fresh Fruits (30 items)
+        ["Ratnagiri Alphonso Mango (Hapus)", "Vegetables & Fruits", "6 pcs", 599, 449, IMG.mango],
+        ["Kesar Mango Box", "Vegetables & Fruits", "1 kg", 220, 169, IMG.mango],
+        ["Elaichi Banana (Yelakki)", "Vegetables & Fruits", "500 g", 48, 36, IMG.banana],
+        ["Robusta Yellow Banana", "Vegetables & Fruits", "6 pcs", 42, 32, IMG.banana],
+        ["Shimla Royal Gala Apple", "Vegetables & Fruits", "4 pcs (500g)", 140, 109, IMG.apple],
+        ["Washington Red Apple", "Vegetables & Fruits", "4 pcs", 180, 145, IMG.apple],
+        ["Green Granny Smith Apple", "Vegetables & Fruits", "2 pcs", 110, 89, IMG.apple],
+        ["Bhagwa Pomegranate (Anar)", "Vegetables & Fruits", "500 g", 110, 85, IMG.fruit],
+        ["Nagpur Mandarin Orange", "Vegetables & Fruits", "500 g", 65, 49, IMG.fruit],
+        ["Imported Valencia Orange", "Vegetables & Fruits", "2 pcs", 90, 69, IMG.fruit],
+        ["Sweet Lime (Mosambi)", "Vegetables & Fruits", "1 kg", 85, 64, IMG.fruit],
+        ["Kiran Watermelon (Tarbuj)", "Vegetables & Fruits", "1 pc (2.5kg)", 95, 69, IMG.fruit],
+        ["Muskmelon (Kharbuja)", "Vegetables & Fruits", "1 pc (800g)", 65, 48, IMG.fruit],
+        ["Ripe Papaya (Papai)", "Vegetables & Fruits", "1 pc (1kg)", 68, 52, IMG.fruit],
+        ["Rani Pineapple (Ananas)", "Vegetables & Fruits", "1 pc", 80, 59, IMG.fruit],
+        ["Nashik Green Seedless Grapes", "Vegetables & Fruits", "500 g", 75, 56, IMG.fruit],
+        ["Black Seedless Grapes", "Vegetables & Fruits", "500 g", 90, 69, IMG.fruit],
+        ["Dahanu Chikoo (Sapota)", "Vegetables & Fruits", "500 g", 55, 42, IMG.fruit],
+        ["Allahabad Pink Guava (Peru)", "Vegetables & Fruits", "500 g", 52, 39, IMG.fruit],
+        ["Green Kiwi Pack", "Vegetables & Fruits", "3 pcs", 115, 89, IMG.fruit],
+        ["Dragon Fruit (Pitaya)", "Vegetables & Fruits", "1 pc", 95, 74, IMG.fruit],
+        ["Fresh Strawberry Punnet", "Vegetables & Fruits", "200 g", 99, 75, IMG.fruit],
+        ["Imported Blueberry Pack", "Vegetables & Fruits", "125 g", 240, 189, IMG.fruit],
+        ["Hass Avocado", "Vegetables & Fruits", "1 pc", 140, 109, IMG.fruit],
+        ["Tender Coconut (Nariyal Pani)", "Vegetables & Fruits", "1 pc", 65, 49, IMG.fruit],
+        ["Custard Apple (Sitaphal)", "Vegetables & Fruits", "500 g", 95, 72, IMG.fruit],
+        ["Indian Pear (Nashpati)", "Vegetables & Fruits", "500 g", 85, 64, IMG.fruit],
+        ["Red Plum (Aloobukhara)", "Vegetables & Fruits", "250 g", 90, 69, IMG.fruit],
+        ["Sweet Tamarind Box (Imli)", "Vegetables & Fruits", "250 g", 65, 49, IMG.fruit],
+        ["Cut Fruit Salad Bowl", "Vegetables & Fruits", "300 g", 89, 69, IMG.fruit],
+
+        // Fresh Juices & Shakes (30 items)
+        ["Cold-Pressed Valencia Orange Juice", "Fresh Juices & Shakes", "250 ml", 85, 65, IMG.juice],
+        ["Fresh Mosambi Juice (No Sugar)", "Fresh Juices & Shakes", "250 ml", 75, 55, IMG.juice],
+        ["Fresh Pomegranate (Anar) Juice", "Fresh Juices & Shakes", "250 ml", 99, 79, IMG.juice],
+        ["Watermelon Mint Cooler Juice", "Fresh Juices & Shakes", "300 ml", 65, 49, IMG.juice],
+        ["Pineapple Ginger Detox Juice", "Fresh Juices & Shakes", "250 ml", 75, 58, IMG.juice],
+        ["Sugarcane Lemon Ginger Juice", "Fresh Juices & Shakes", "300 ml", 55, 39, IMG.juice],
+        ["ABC (Apple Beetroot Carrot) Juice", "Fresh Juices & Shakes", "250 ml", 89, 69, IMG.juice],
+        ["Green Spinach Cucumber Detox", "Fresh Juices & Shakes", "250 ml", 85, 65, IMG.juice],
+        ["Alphonso Mango Thick Shake", "Fresh Juices & Shakes", "300 ml", 110, 85, IMG.juice],
+        ["Sitaphal Cream Thick Shake", "Fresh Juices & Shakes", "300 ml", 120, 95, IMG.juice],
+        ["Strawberry Milkshake", "Fresh Juices & Shakes", "300 ml", 105, 79, IMG.juice],
+        ["Chikoo Chocolate Shake", "Fresh Juices & Shakes", "300 ml", 95, 74, IMG.juice],
+        ["Dry Fruit Anjeer Badam Shake", "Fresh Juices & Shakes", "300 ml", 130, 99, IMG.juice],
+        ["Cold Coffee Frappe Bottle", "Fresh Juices & Shakes", "250 ml", 90, 69, IMG.juice],
+        ["Fresh Tender Coconut Water Bottle", "Fresh Juices & Shakes", "300 ml", 75, 59, IMG.juice],
+        ["Kokum Jeera Mumbai Cooler", "Fresh Juices & Shakes", "250 ml", 55, 42, IMG.juice],
+        ["Aam Panna Mint Refresher", "Fresh Juices & Shakes", "250 ml", 60, 45, IMG.juice],
+        ["Nimbu Pani Masala Shikanji", "Fresh Juices & Shakes", "300 ml", 45, 35, IMG.juice],
+        ["Jamun Shots Immunity Bottle", "Fresh Juices & Shakes", "200 ml", 85, 65, IMG.juice],
+        ["Amla Giloy Tulsi Wellness Shot", "Fresh Juices & Shakes", "100 ml", 45, 32, IMG.juice],
+        ["Wheatgrass Aloe Vera Shot", "Fresh Juices & Shakes", "100 ml", 50, 38, IMG.juice],
+        ["Mixed Berry Smoothie", "Fresh Juices & Shakes", "250 ml", 125, 95, IMG.juice],
+        ["Banana Peanut Butter Protein Shake", "Fresh Juices & Shakes", "300 ml", 115, 89, IMG.juice],
+        ["Rose Falooda Milk Bottle", "Fresh Juices & Shakes", "250 ml", 80, 62, IMG.juice],
+        ["Kesar Pista Badam Milk", "Fresh Juices & Shakes", "200 ml", 65, 49, IMG.juice],
+        ["Guava Chilli Masala Juice", "Fresh Juices & Shakes", "250 ml", 70, 54, IMG.juice],
+        ["Kiwi Apple Cold-Pressed Juice", "Fresh Juices & Shakes", "250 ml", 95, 74, IMG.juice],
+        ["Grape & Mint Sparkling Juice", "Fresh Juices & Shakes", "250 ml", 80, 59, IMG.juice],
+        ["Punjabi Sweet Lassi Cup", "Fresh Juices & Shakes", "250 ml", 50, 39, IMG.juice],
+        ["Masala Chaas (Spiced Buttermilk)", "Fresh Juices & Shakes", "250 ml", 35, 25, IMG.juice]
+      ];
+
+      const updates = {};
+      rawItems.forEach((item, idx) => {
+        const id = `MUM_PACK_${String(idx + 1).padStart(3, "0")}`;
+        updates[`products/${id}`] = {
+          id,
+          name: item[0],
+          category: item[1],
+          unit: item[2],
+          mrp: item[3],
+          price: item[4],
+          image: item[5],
+          inStock: true,
+          storeStock: { ...allInStock },
+          updatedAt: Date.now()
         };
+      });
 
-        window.closeCustomerModal = () => {
-            document.getElementById('customer-details-modal').classList.add('hidden');
-        };
+      await update(ref(db), updates);
+      showToast(`Loaded ${rawItems.length} Mumbai Sabzi, Fruits & Juice items across all stores!`);
+    };
 
-        // ---------------------------------------------------------
-        // 1. LIVE ORDER OVERRIDE & UPI UTR + 1-CLICK WHATSAPP
-        // ---------------------------------------------------------
-        window.overrideOrderStatus = async (orderId, newStatus) => {
-            await update(ref(db, 'orders/' + orderId), {
-                status: newStatus,
-                updatedByHQAt: Date.now()
-            });
-        };
+    // ================= DARK STORES & KYC =================
+    window.saveDarkStore = async () => {
+      const editId = document.getElementById("editStoreId").value;
+      const name = document.getElementById("storeName").value.trim();
+      const area = document.getElementById("storeArea").value.trim();
+      const pincodes = document.getElementById("storePincodes").value.trim();
+      const manager = document.getElementById("storeManager").value.trim();
+      const commission = Number(document.getElementById("storeComm").value || 12);
+      const kyc = document.getElementById("storeKyc").value;
+      const fssai = document.getElementById("storeFssai").value.trim();
+      const upi = document.getElementById("storeUpi").value.trim();
 
-        window.renderOrdersOverride = () => {
-            const filter = document.getElementById('filter-order-status').value;
-            const container = document.getElementById('orders-override-list');
-            const entries = Object.entries(allOrders)
-                .filter(([, o]) => filter === 'ALL' || o.status === filter)
-                .reverse();
+      if (!name || !area || !pincodes) {
+        alert("Store Name, Area, and Pincodes are required.");
+        return;
+      }
 
-            if (entries.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">No orders match the selected filter.</p>`;
-                return;
-            }
+      const id = editId || ("DS_" + Date.now());
+      await set(ref(db, `stores/${id}`), { id, name, area, pincodes, manager, commission, kyc, fssai, upi });
+      resetStoreForm();
+      showToast(`Dark Store "${name}" saved!`);
+    };
 
-            const statuses = ['New', 'Placed', 'Packing', 'Ready', 'Ready for Pickup', 'Out for Delivery', 'Delivered', 'Cancelled'];
-            container.innerHTML = entries.map(([id, o]) => {
-                const utr = o.upiUtr || o.utrNumber || o.utr || (o.paymentMode === 'UPI' ? 'Pending UTR Submission' : 'N/A (COD)');
-                const waMode = o.status === 'Out for Delivery' ? 'delivery' : 'confirmation';
-                const waUrl = getOrderWhatsAppLink(id, waMode);
-                return `
-                    <div class="border rounded-2xl p-4 bg-slate-50 flex flex-col lg:flex-row justify-between gap-4">
-                        <div class="space-y-1">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="font-mono text-xs font-black text-slate-700">#${id.slice(-6).toUpperCase()}</span>
-                                <span class="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full">${o.status || 'New'}</span>
-                                <span class="bg-slate-200 text-slate-700 text-[11px] font-bold px-2 py-0.5 rounded">Store: ${o.storeCode || 'ALL'}</span>
-                                <span class="bg-indigo-50 border border-indigo-200 text-indigo-800 text-[11px] font-bold px-2 py-0.5 rounded">
-                                    <i class="fa-solid fa-receipt mr-1"></i> ${o.paymentMode || 'UPI'} • UTR: <span class="font-mono">${utr}</span>
-                                </span>
-                            </div>
-                            <p class="font-extrabold text-sm text-slate-900 pt-1">${o.customerName || 'Customer'} • ${o.customerPhone || ''}</p>
-                            <p class="text-xs text-slate-600">${o.customerAddress || ''}</p>
-                            <p class="text-xs text-slate-700 font-medium">Items: ${(o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ')}</p>
-                        </div>
-                        <div class="flex flex-col justify-between items-start lg:items-end gap-2 shrink-0">
-                            <span class="font-black text-base text-slate-900">₹${o.totalAmount || 0}</span>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="bg-green-600 hover:bg-green-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs flex items-center transition">
-                                    <i class="fa-brands fa-whatsapp mr-1 text-sm"></i> WhatsApp
-                                </a>
-                                <select onchange="overrideOrderStatus('${id}', this.value)" class="border border-slate-300 bg-white rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800">
-                                    ${statuses.map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        };
+    window.editDarkStore = (id) => {
+      const s = storesMap[id];
+      if (!s) return;
+      document.getElementById("editStoreId").value = id;
+      document.getElementById("storeName").value = s.name;
+      document.getElementById("storeArea").value = s.area;
+      document.getElementById("storePincodes").value = s.pincodes;
+      document.getElementById("storeManager").value = s.manager || "";
+      document.getElementById("storeComm").value = s.commission || 12;
+      document.getElementById("storeKyc").value = s.kyc || "Verified";
+      document.getElementById("storeFssai").value = s.fssai || "";
+      document.getElementById("storeUpi").value = s.upi || "";
+    };
 
-        // ---------------------------------------------------------
-        // 2. PRODUCTS, RATE/DETAILS EDIT + MUMBAI 100+ PACK + STORE MAP
-        // ---------------------------------------------------------
-        window.handleProdFile = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const w = 360;
-                    canvas.width = w;
-                    canvas.height = img.height * (w / img.width);
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    prodUploadedBase64 = canvas.toDataURL('image/jpeg', 0.72);
-                    refreshCardPreview();
-                };
-                img.src = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-        };
+    window.resetStoreForm = () => {
+      document.getElementById("editStoreId").value = "";
+      ["storeName", "storeArea", "storePincodes", "storeManager", "storeFssai", "storeUpi"].forEach(i => document.getElementById(i).value = "");
+      document.getElementById("storeComm").value = 12;
+      document.getElementById("storeKyc").value = "Verified";
+    };
 
-        window.refreshCardPreview = () => {
-            const name = document.getElementById('p-name').value || 'Fresh Palak (Spinach)';
-            const price = Number(document.getElementById('p-price').value) || 22;
-            const mrp = Number(document.getElementById('p-mrp').value) || 30;
-            const unit = document.getElementById('p-unit').value || '250 g';
-            const ad = document.getElementById('p-sponsored').checked;
-            const img = prodUploadedBase64 || document.getElementById('p-img-url').value || 'https://placehold.co/240x160/dcfce7/15803d?text=' + encodeURIComponent(name);
-            const disc = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
+    window.deleteDarkStore = async (id) => {
+      if (!confirm("Remove this Dark Store?")) return;
+      await remove(ref(db, `stores/${id}`));
+      showToast("Dark store deleted.");
+    };
 
-            document.getElementById('cp-name').innerText = name;
-            document.getElementById('cp-price').innerText = '₹' + price;
-            document.getElementById('cp-mrp').innerText = '₹' + mrp;
-            document.getElementById('cp-unit').innerText = unit;
-            document.getElementById('cp-img').src = img;
-            document.getElementById('cp-off').innerText = disc + '% OFF';
-            document.getElementById('cp-ad').classList.toggle('hidden', !ad);
-        };
+    function renderStoresTable() {
+      const list = Object.values(storesMap);
+      document.getElementById("storeCountLabel").textContent = list.length;
+      const tbody = document.getElementById("storesTableBody");
+      tbody.innerHTML = list.map(s => `
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3">
+            <div class="font-bold text-slate-900">${s.name}</div>
+            <div class="text-[10px] font-mono text-slate-400">${s.id}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="font-semibold">${s.area}</div>
+            <div class="text-[11px] text-slate-500">Pincodes: ${s.pincodes}</div>
+          </td>
+          <td class="px-4 py-3">${s.manager || "-"}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              s.kyc === 'Verified' ? 'bg-green-100 text-green-800' : (s.kyc === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700')
+            }">${s.kyc || 'Verified'}</span>
+            <div class="text-[10px] font-mono text-slate-500 mt-1">FSSAI: ${s.fssai || 'N/A'}</div>
+          </td>
+          <td class="px-4 py-3 font-bold">${s.commission || 12}%</td>
+          <td class="px-4 py-3 text-center space-x-1">
+            <button onclick="editDarkStore('${s.id}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-bold"><i class="fa-solid fa-pen"></i></button>
+            <button onclick="deleteDarkStore('${s.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `).join("");
+    }
 
-        window.editProductHQ = (id) => {
-            const p = allProducts[id];
-            if (!p) return;
-            prodUploadedBase64 = "";
-            document.getElementById('edit-prod-id').value = id;
-            document.getElementById('prod-form-title').innerText = 'Edit Product: ' + p.name;
-            document.getElementById('prod-submit-btn').innerText = 'Update Product Rate & Details';
-            document.getElementById('p-name').value = p.name || '';
-            document.getElementById('p-price').value = p.price || 0;
-            document.getElementById('p-mrp').value = p.mrp || p.price || 0;
-            document.getElementById('p-unit').value = p.unit || '';
-            document.getElementById('p-cat').value = p.category || 'Vegetables';
-            document.getElementById('p-store').value = p.storeCode || 'ALL';
-            document.getElementById('p-img-url').value = (p.image || '').startsWith('data:') ? '' : (p.image || '');
-            if ((p.image || '').startsWith('data:')) prodUploadedBase64 = p.image;
-            document.getElementById('p-sponsored').checked = !!p.sponsored;
-            refreshCardPreview();
-            switchHQTab('products');
-        };
+    // ================= CUSTOMER CRM & 1-CLICK WHATSAPP =================
+    window.renderCustomers = () => {
+      const q = (document.getElementById("crmSearch").value || "").toLowerCase();
+      const custMap = {};
 
-        window.resetProductForm = () => {
-            prodUploadedBase64 = "";
-            document.getElementById('edit-prod-id').value = '';
-            document.getElementById('prod-form-title').innerText = 'Add New Product';
-            document.getElementById('prod-submit-btn').innerText = 'Save Product to RTDB';
-            document.getElementById('p-name').value = '';
-            document.getElementById('p-price').value = '';
-            document.getElementById('p-mrp').value = '';
-            document.getElementById('p-unit').value = '';
-            document.getElementById('p-img-url').value = '';
-            document.getElementById('p-file').value = '';
-            document.getElementById('p-sponsored').checked = false;
-            refreshCardPreview();
-        };
-
-        window.saveProductHQ = async (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('edit-prod-id').value;
-            const name = document.getElementById('p-name').value.trim();
-            const price = Number(document.getElementById('p-price').value);
-            const mrp = Number(document.getElementById('p-mrp').value);
-            const unit = document.getElementById('p-unit').value.trim();
-            const category = document.getElementById('p-cat').value;
-            const storeCode = document.getElementById('p-store').value;
-            const sponsored = document.getElementById('p-sponsored').checked;
-            const image = prodUploadedBase64 || document.getElementById('p-img-url').value.trim() || ('https://placehold.co/300x200/fef9c3/15803d?text=' + encodeURIComponent(name));
-
-            const payload = {
-                name, price, mrp, unit, category, storeCode, sponsored, image,
-                inStock: editId && allProducts[editId] ? allProducts[editId].inStock !== false : true,
-                updatedAt: Date.now()
-            };
-
-            if (editId) {
-                await update(ref(db, 'products/' + editId), payload);
-            } else {
-                await set(push(ref(db, 'products')), { ...payload, createdAt: Date.now() });
-            }
-            resetProductForm();
-        };
-
-        window.assignProductStore = async (prodId, storeCode) => {
-            await update(ref(db, 'products/' + prodId), { storeCode });
-        };
-
-        window.toggleProductStockHQ = async (prodId, current) => {
-            await update(ref(db, 'products/' + prodId), { inStock: !current });
-        };
-
-        window.deleteProductHQ = async (prodId) => {
-            if (confirm('Delete this product from catalog?')) {
-                await remove(ref(db, 'products/' + prodId));
-            }
-        };
-
-        window.renderAdminProducts = () => {
-            const q = (document.getElementById('admin-prod-search')?.value || '').toLowerCase();
-            const list = document.getElementById('admin-products-list');
-            const entries = Object.entries(allProducts).filter(([, p]) =>
-                (p.name || '').toLowerCase().includes(q) ||
-                (p.category || '').toLowerCase().includes(q) ||
-                (p.storeCode || 'ALL').toLowerCase().includes(q)
-            );
-            document.getElementById('cat-count').innerText = entries.length;
-
-            const storeOptions = `<option value="ALL">All Stores</option>` +
-                Object.values(allStores).map(s => `<option value="${s.code}">${s.code}</option>`).join('');
-
-            list.innerHTML = entries.map(([id, p]) => `
-                <div class="py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <img src="${p.image || 'https://placehold.co/80x80/e2e8f0/334155?text=Item'}" class="w-12 h-12 rounded-xl object-cover border shrink-0">
-                        <div class="min-w-0">
-                            <p class="font-bold text-xs text-slate-900 truncate">${p.name} <span class="text-slate-400 font-normal">(${p.unit})</span></p>
-                            <p class="text-xs font-extrabold text-emerald-700">₹${p.price} <span class="line-through text-slate-400 font-normal">₹${p.mrp || p.price}</span> • <span class="text-slate-500 font-medium">${p.category}</span></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <select onchange="assignProductStore('${id}', this.value)" class="border rounded-lg px-2 py-1 text-[11px] font-bold bg-slate-50">
-                            ${storeOptions.replace(`value="${p.storeCode || 'ALL'}"`, `value="${p.storeCode || 'ALL'}" selected`)}
-                        </select>
-                        <button onclick="toggleProductStockHQ('${id}', ${p.inStock !== false})" class="px-2 py-1 rounded-lg text-[10px] font-extrabold ${p.inStock !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
-                            ${p.inStock !== false ? 'In Stock' : 'Out'}
-                        </button>
-                        <button onclick="editProductHQ('${id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg text-[11px] font-extrabold">
-                            <i class="fa-solid fa-pen mr-1"></i> Edit
-                        </button>
-                        <button onclick="deleteProductHQ('${id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg text-xs">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        };
-
-        // Load Mumbai 100+ Sabzi, Fruits & Juice Pack
-        window.loadMumbai100Pack = async () => {
-            if (!confirm('Load Mumbai 100+ Sabzi, Fruits & Cold-Pressed Juice pack into jhatpat-22aa8?')) return;
-
-            const sabziItems = [
-                'Kanda (Nashik Onion)', 'Batata (Potato)', 'Tamatar (Desi Tomato)', 'Bhindi (Okra)', 'Gobi (Cauliflower)',
-                'Patta Gobi (Cabbage)', 'Baingan Bharta', 'Chota Baingan', 'Shimla Mirch (Green)', 'Yellow Bell Pepper',
-                'Red Bell Pepper', 'Gajar (Carrot)', 'Mooli (Radish)', 'Dudhi (Bottle Gourd)', 'Karela (Bitter Gourd)',
-                'Tinda (Apple Gourd)', 'Turai (Ridge Gourd)', 'Parwal (Pointed Gourd)', 'Surti Papdi', 'Valor Papdi',
-                'Ghevda (Cluster Beans)', 'Chawli (Long Beans)', 'Matar (Green Peas)', 'French Beans', 'Beetroot',
-                'Arbi (Colocasia)', 'Jimikand (Yam)', 'Raw Banana', 'Drumstick (Shevga)', 'Green Chilli',
-                'Ginger (Adrak)', 'Garlic (Lahsun)', 'Lemon (Nimbu)', 'Sweet Corn', 'Baby Corn',
-                'Mushroom Button', 'Zucchini Green', 'Broccoli Florets', 'Pumpkin (Red Kaddu)', 'Raw Papaya'
-            ];
-
-            const leafyItems = [
-                'Kothimbir (Coriander)', 'Pudina (Mint)', 'Palak (Spinach)', 'Methi (Fenugreek)', 'Curry Leaves (Kadi Patta)',
-                'Spring Onion (Kanda Pat)', 'Shepu (Dill Leaves)', 'Chukka (Sorrel Leaves)', 'Lal Math (Red Amaranth)', 'Iceberg Lettuce'
-            ];
-
-            const fruitItems = [
-                'Alphonso Mango (Hapus)', 'Kesar Mango', 'Banganapalli Mango', 'Robusta Banana', 'Elaichi Banana',
-                'Red Delicious Apple', 'Shimla Apple', 'Green Granny Smith Apple', 'Nagpur Santra (Orange)', 'Mosambi (Sweet Lime)',
-                'Kagzi Nimbu Pack', 'Anar (Pomegranate)', 'Papaya Ripe', 'Pineapple Queen', 'Watermelon Kiran',
-                'Muskmelon (Kharbooz)', 'Green Grapes (Sonaka)', 'Black Grapes (Sharad)', 'Sapota (Chikoo)', 'Guava (Amrood)',
-                'Kiwi Green', 'Dragon Fruit', 'Avocado Hass', 'Pear (Nashpati)', 'Plum',
-                'Peach', 'Strawberry Punnet', 'Blueberry Punnet', 'Tender Coconut (Nariyal)', 'Custard Apple (Sitaphal)',
-                'Fig (Anjeer)', 'Sweet Tamarind'
-            ];
-
-            const juiceItems = [
-                'Cold-Pressed Valencia Orange Juice', 'Cold-Pressed Pomegranate Juice', 'Cold-Pressed ABC (Apple Beetroot Carrot)',
-                'Cold-Pressed Green Detox Juice', 'Cold-Pressed Sugarcane & Ginger Shot', 'Cold-Pressed Pineapple Mint Cooler',
-                'Cold-Pressed Watermelon Lime', 'Cold-Pressed Mosambi Fresh Juice', 'Cold-Pressed Mango Nectar', 'Cold-Pressed Guava Chilli Juice',
-                'Cold-Pressed Amla Tulsi Wellness Shot', 'Cold-Pressed Ginger Turmeric Immunity Shot', 'Cold-Pressed Cucumber Mint Splash',
-                'Cold-Pressed Carrot Orange Ginger', 'Cold-Pressed Grape Apple Blend', 'Cold-Pressed Tender Coconut Water',
-                'Cold-Pressed Litchi Cooler', 'Cold-Pressed Kiwi Spinach Juice'
-            ];
-
-            const pack = [];
-            sabziItems.forEach((name, idx) => {
-                const price = 20 + ((idx * 7) % 55);
-                pack.push({ name, price, mrp: price + 10, unit: idx % 3 === 0 ? '1 kg' : '500 g', category: 'Vegetables', sponsored: idx < 3 });
-            });
-            leafyItems.forEach((name, idx) => {
-                const price = 12 + ((idx * 5) % 25);
-                pack.push({ name, price, mrp: price + 8, unit: idx === 4 ? '100 g' : '250 g', category: 'Leafy & Herbs', sponsored: idx === 0 });
-            });
-            fruitItems.forEach((name, idx) => {
-                const price = 45 + ((idx * 19) % 180);
-                pack.push({ name, price, mrp: price + 25, unit: idx < 3 ? '6 pcs' : '500 g', category: 'Fruits', sponsored: idx < 2 });
-            });
-            juiceItems.forEach((name, idx) => {
-                const price = 65 + ((idx * 15) % 85);
-                pack.push({ name, price, mrp: price + 20, unit: '250 ml', category: 'Cold-Pressed Juices', sponsored: idx < 2 });
-            });
-
-            for (const item of pack) {
-                const imgUrl = 'https://placehold.co/300x200/ecfdf5/047857?text=' + encodeURIComponent(item.name.split('(')[0].trim());
-                await set(push(ref(db, 'products')), {
-                    ...item,
-                    storeCode: 'ALL',
-                    inStock: true,
-                    image: imgUrl,
-                    createdAt: Date.now()
-                });
-            }
-            alert(`Loaded ${pack.length} Mumbai Sabzi, Fruits, Leafy & Cold-Pressed Juice items!`);
-        };
-
-        // ---------------------------------------------------------
-        // 3. MULTI-DARK STORE + FULL EDIT MODAL
-        // ---------------------------------------------------------
-        window.createNewStore = async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('ns-code').value.trim().toUpperCase();
-            await set(ref(db, 'stores/' + code), {
-                code,
-                name: document.getElementById('ns-name').value.trim(),
-                area: document.getElementById('ns-area').value.trim(),
-                address: document.getElementById('ns-addr').value.trim(),
-                lat: Number(document.getElementById('ns-lat').value),
-                lng: Number(document.getElementById('ns-lng').value),
-                radius: Number(document.getElementById('ns-rad').value),
-                managerName: document.getElementById('ns-mgr').value.trim(),
-                managerPhone: document.getElementById('ns-phone').value.trim(),
-                status: document.getElementById('ns-status').value,
-                active: document.getElementById('ns-status').value === 'Open'
-            });
-            e.target.reset();
-        };
-
-        window.openEditStoreModal = (storeKey) => {
-            const s = allStores[storeKey];
-            if (!s) return;
-            document.getElementById('es-original-key').value = storeKey;
-            document.getElementById('es-name').value = s.name || '';
-            document.getElementById('es-code').value = s.code || storeKey;
-            document.getElementById('es-area').value = s.area || '';
-            document.getElementById('es-addr').value = s.address || '';
-            document.getElementById('es-lat').value = s.lat ?? 19.2403;
-            document.getElementById('es-lng').value = s.lng ?? 73.1305;
-            document.getElementById('es-rad').value = s.radius ?? 5;
-            document.getElementById('es-mgr').value = s.managerName || s.owner || '';
-            document.getElementById('es-phone').value = s.managerPhone || s.phone || '';
-            const currentSt = s.status || (s.active === false ? 'Closed' : 'Open');
-            document.getElementById('es-status').value = currentSt;
-            document.getElementById('edit-store-modal').classList.remove('hidden');
-        };
-
-        window.closeEditStoreModal = () => {
-            document.getElementById('edit-store-modal').classList.add('hidden');
-        };
-
-        window.updateStoreHQ = async (e) => {
-            e.preventDefault();
-            const origKey = document.getElementById('es-original-key').value;
-            const newCode = document.getElementById('es-code').value.trim().toUpperCase();
-            const statusVal = document.getElementById('es-status').value;
-
-            const updatedData = {
-                name: document.getElementById('es-name').value.trim(),
-                code: newCode,
-                area: document.getElementById('es-area').value.trim(),
-                address: document.getElementById('es-addr').value.trim(),
-                lat: Number(document.getElementById('es-lat').value),
-                lng: Number(document.getElementById('es-lng').value),
-                radius: Number(document.getElementById('es-rad').value),
-                managerName: document.getElementById('es-mgr').value.trim(),
-                managerPhone: document.getElementById('es-phone').value.trim(),
-                status: statusVal,
-                active: statusVal === 'Open'
-            };
-
-            if (origKey && origKey !== newCode) {
-                await remove(ref(db, 'stores/' + origKey));
-            }
-            await set(ref(db, 'stores/' + newCode), updatedData);
-            closeEditStoreModal();
-        };
-
-        function renderHQStores() {
-            const grid = document.getElementById('hq-stores-grid');
-            const pSel = document.getElementById('p-store');
-            const entries = Object.entries(allStores);
-
-            pSel.innerHTML = `<option value="ALL">All Dark Stores</option>` +
-                entries.map(([, s]) => `<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-
-            if (entries.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-xs text-slate-400 text-center py-8">No dark stores configured yet.</p>`;
-                return;
-            }
-
-            grid.innerHTML = entries.map(([key, s]) => {
-                const st = s.status || (s.active === false ? 'Closed' : 'Open');
-                return `
-                    <div class="border rounded-2xl p-4 bg-slate-50 flex flex-col justify-between gap-3">
-                        <div>
-                            <div class="flex justify-between items-center mb-1.5">
-                                <span class="bg-slate-900 text-yellow-400 text-[10px] font-black px-2 py-0.5 rounded">${s.code || key}</span>
-                                <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${st === 'Open' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">${st}</span>
-                            </div>
-                            <h3 class="font-extrabold text-sm text-slate-900">${s.name}</h3>
-                            <p class="text-xs font-semibold text-slate-600">${s.area || 'Area not set'}</p>
-                            <p class="text-[11px] text-slate-500 mt-0.5">${s.address || 'Address not set'}</p>
-                            <div class="text-[11px] text-slate-600 mt-2 space-y-0.5">
-                                <p><i class="fa-solid fa-location-dot text-emerald-600 mr-1"></i> GPS: ${s.lat}, ${s.lng} • Radius: <strong>${s.radius} km</strong></p>
-                                <p><i class="fa-solid fa-user-tie text-slate-400 mr-1"></i> Mgr: <strong>${s.managerName || s.owner || '—'}</strong> (${s.managerPhone || s.phone || '—'})</p>
-                            </div>
-                        </div>
-                        <button onclick="openEditStoreModal('${key}')" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-2 rounded-xl text-xs transition">
-                            <i class="fa-solid fa-sliders mr-1 text-yellow-400"></i> Edit Store
-                        </button>
-                    </div>
-                `;
-            }).join('');
+      Object.values(ordersMap).forEach(o => {
+        const phone = (o.customerPhone || "").trim();
+        if (!phone) return;
+        if (!custMap[phone]) {
+          custMap[phone] = {
+            name: o.customerName || "Customer",
+            phone,
+            address: o.address || o.pincode || "Mumbai",
+            storeName: o.storeName || o.storeId || "Nearest Hub",
+            orders: 0,
+            spend: 0
+          };
         }
-
-        // ---------------------------------------------------------
-        // 4. DELIVERY FEE & COUPONS
-        // ---------------------------------------------------------
-        window.saveDeliveryConfig = async (e) => {
-            e.preventDefault();
-            await set(ref(db, 'config/delivery'), {
-                deliveryFee: Number(document.getElementById('cfg-del-fee').value),
-                freeDeliveryAbove: Number(document.getElementById('cfg-free-above').value)
-            });
-            alert('Delivery fee settings updated!');
-        };
-
-        window.addCoupon = async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('cpn-code').value.trim().toUpperCase();
-            await set(ref(db, 'coupons/' + code), {
-                code,
-                discount: Number(document.getElementById('cpn-disc').value),
-                minCart: Number(document.getElementById('cpn-min').value),
-                active: true
-            });
-            e.target.reset();
-        };
-
-        window.deleteCoupon = async (code) => {
-            await remove(ref(db, 'coupons/' + code));
-        };
-
-        // ---------------------------------------------------------
-        // 5. PROMO BANNERS
-        // ---------------------------------------------------------
-        window.addBanner = async (e) => {
-            e.preventDefault();
-            await set(push(ref(db, 'banners')), {
-                title: document.getElementById('bn-title').value.trim(),
-                subtitle: document.getElementById('bn-sub').value.trim(),
-                image: document.getElementById('bn-img').value.trim(),
-                active: true,
-                createdAt: Date.now()
-            });
-            e.target.reset();
-        };
-
-        window.deleteBanner = async (id) => {
-            await remove(ref(db, 'banners/' + id));
-        };
-
-        // ---------------------------------------------------------
-        // 6. SELLER KYC APPROVALS
-        // ---------------------------------------------------------
-        window.approveSellerKYC = async (kycId, encodedData) => {
-            const k = JSON.parse(decodeURIComponent(encodedData));
-            await update(ref(db, 'kycRequests/' + kycId), { status: 'Approved' });
-            await set(ref(db, 'stores/' + k.storeCode), {
-                code: k.storeCode,
-                name: k.storeName,
-                area: k.area || 'Approved Zone',
-                address: k.address || '',
-                lat: Number(k.lat || 19.2403),
-                lng: Number(k.lng || 73.1305),
-                radius: 5,
-                managerName: k.ownerName,
-                managerPhone: k.phone,
-                gst: k.gst,
-                status: 'Open',
-                active: true
-            });
-        };
-
-        window.rejectSellerKYC = async (kycId) => {
-            await update(ref(db, 'kycRequests/' + kycId), { status: 'Rejected' });
-        };
-
-        // ---------------------------------------------------------
-        // REAL-TIME LISTENERS & 12% / 88% PAYOUT LEDGER
-        // ---------------------------------------------------------
-        function startHQListeners() {
-            onValue(ref(db, 'products'), snap => {
-                allProducts = snap.val() || {};
-                document.getElementById('kpi-products').innerText = Object.keys(allProducts).length;
-                renderAdminProducts();
-            });
-
-            onValue(ref(db, 'stores'), snap => {
-                allStores = snap.val() || {};
-                document.getElementById('kpi-stores').innerText = Object.keys(allStores).length;
-                renderHQStores();
-                renderAdminProducts();
-            });
-
-            onValue(ref(db, 'orders'), snap => {
-                allOrders = snap.val() || {};
-                const entries = Object.entries(allOrders);
-                document.getElementById('kpi-orders').innerText = entries.length;
-
-                let gmv = 0, commTotal = 0, payoutTotal = 0;
-                const tbody = document.getElementById('hq-ledger-tbody');
-                tbody.innerHTML = '';
-
-                entries.slice().reverse().forEach(([id, o]) => {
-                    const amt = Number(o.totalAmount || 0);
-                    const c12 = Math.round(amt * 0.12);
-                    const p88 = amt - c12;
-                    if (o.status !== 'Cancelled') {
-                        gmv += amt;
-                        commTotal += c12;
-                        payoutTotal += p88;
-                    }
-                    tbody.innerHTML += `
-                        <tr>
-                            <td class="py-2.5 font-mono font-bold">#${id.slice(-6).toUpperCase()}</td>
-                            <td class="py-2.5 font-bold">${o.storeCode || 'ALL'}</td>
-                            <td class="py-2.5">${o.customerName || '—'}</td>
-                            <td class="py-2.5 font-extrabold">₹${amt}</td>
-                            <td class="py-2.5 font-bold text-emerald-700">₹${c12}</td>
-                            <td class="py-2.5 font-bold text-indigo-700">₹${p88}</td>
-                            <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold">${o.status || 'New'}</span></td>
-                        </tr>
-                    `;
-                });
-
-                document.getElementById('kpi-gmv').innerText = '₹' + gmv;
-                document.getElementById('kpi-comm').innerText = '₹' + commTotal;
-                document.getElementById('lg-gross').innerText = '₹' + gmv;
-                document.getElementById('lg-comm').innerText = '₹' + commTotal;
-                document.getElementById('lg-payout').innerText = '₹' + payoutTotal;
-
-                renderOrdersOverride();
-                rebuildCustomersCRM();
-            });
-
-            onValue(ref(db, 'config/delivery'), snap => {
-                const cfg = snap.val();
-                if (cfg) {
-                    document.getElementById('cfg-del-fee').value = cfg.deliveryFee ?? 25;
-                    document.getElementById('cfg-free-above').value = cfg.freeDeliveryAbove ?? 199;
-                }
-            });
-
-            onValue(ref(db, 'coupons'), snap => {
-                const cpns = snap.val() || {};
-                const list = document.getElementById('coupons-list');
-                const arr = Object.values(cpns);
-                list.innerHTML = arr.length === 0
-                    ? `<p class="text-xs text-slate-400 py-4 text-center">No active promo coupons.</p>`
-                    : arr.map(c => `
-                        <div class="py-3 flex justify-between items-center text-xs">
-                            <div>
-                                <span class="bg-yellow-300 text-slate-950 font-black px-2.5 py-1 rounded-lg mr-2">${c.code}</span>
-                                <span class="font-bold text-emerald-700">₹${c.discount} OFF</span>
-                                <span class="text-slate-500 ml-2">on orders above ₹${c.minCart}</span>
-                            </div>
-                            <button onclick="deleteCoupon('${c.code}')" class="text-red-500 hover:text-red-700 font-bold">Delete</button>
-                        </div>
-                    `).join('');
-            });
-
-            onValue(ref(db, 'banners'), snap => {
-                const bns = snap.val() || {};
-                const list = document.getElementById('banners-list');
-                const entries = Object.entries(bns).reverse();
-                list.innerHTML = entries.length === 0
-                    ? `<p class="text-xs text-slate-400 py-4 text-center">No promo banners published yet.</p>`
-                    : entries.map(([id, b]) => `
-                        <div class="border rounded-2xl p-3 flex items-center justify-between gap-3 bg-slate-50">
-                            <div class="flex items-center space-x-3">
-                                <img src="${b.image}" class="w-16 h-12 rounded-xl object-cover border">
-                                <div>
-                                    <p class="font-extrabold text-xs text-slate-900">${b.title}</p>
-                                    <p class="text-[11px] text-slate-500">${b.subtitle}</p>
-                                </div>
-                            </div>
-                            <button onclick="deleteBanner('${id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-xs font-bold">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    `).join('');
-            });
-
-            onValue(ref(db, 'kycRequests'), snap => {
-                const reqs = snap.val() || {};
-                const container = document.getElementById('hq-kyc-list');
-                let pending = 0;
-                const entries = Object.entries(reqs);
-                container.innerHTML = entries.length === 0
-                    ? `<p class="col-span-full text-xs text-slate-400 py-6 text-center">No KYC applications received.</p>`
-                    : entries.map(([id, k]) => {
-                        if (k.status === 'Pending') pending++;
-                        const enc = encodeURIComponent(JSON.stringify(k));
-                        return `
-                            <div class="border rounded-2xl p-4 bg-slate-50">
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <span class="font-extrabold text-sm text-slate-900">${k.storeName} (${k.storeCode})</span>
-                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${k.status === 'Approved' ? 'bg-emerald-100 text-emerald-800' : k.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}">${k.status}</span>
-                                </div>
-                                <p class="text-xs text-slate-600">Owner: <strong>${k.ownerName}</strong> • ${k.phone}</p>
-                                <p class="text-xs text-slate-600">GST/FSSAI: <strong>${k.gst}</strong></p>
-                                <p class="text-[11px] text-slate-500 mt-1">GPS: ${k.lat}, ${k.lng}</p>
-                                ${k.status === 'Pending' ? `
-                                    <div class="flex gap-2 mt-3">
-                                        <button onclick='approveSellerKYC("${id}", "${enc}")' class="flex-1 bg-emerald-600 text-white text-xs font-extrabold py-2 rounded-xl">Approve Store</button>
-                                        <button onclick="rejectSellerKYC('${id}')" class="flex-1 bg-red-100 text-red-700 text-xs font-extrabold py-2 rounded-xl">Reject</button>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                    }).join('');
-                document.getElementById('kyc-count').innerText = pending;
-            });
+        custMap[phone].orders += 1;
+        if (o.status !== "Cancelled") {
+          custMap[phone].spend += Number(o.totalAmount || 0);
         }
-    </script>
+      });
+
+      const list = Object.values(custMap).filter(c =>
+        !q || c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.address.toLowerCase().includes(q)
+      );
+
+      const tbody = document.getElementById("crmTableBody");
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Customer CRM auto-populates as orders arrive.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(c => {
+        const cleanPhone = c.phone.replace(/\D/g, "").slice(-10);
+        const promoMsg = encodeURIComponent(`Hi ${c.name}! Fresh Mumbai Sabzi, Fruits & Juices are stocked at ${c.storeName}. Order ₹199+ on Jhatpat for FREE 10-min delivery!`);
+        const upiMsg = encodeURIComponent(`Hi ${c.name}, pay seamlessly for your Jhatpat order via UPI: ${settings.upiId} (${settings.payeeName}).`);
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="px-4 py-3 font-bold text-slate-900">${c.name}</td>
+            <td class="px-4 py-3 font-mono">${c.phone}</td>
+            <td class="px-4 py-3">
+              <div>${c.address}</div>
+              <div class="text-[10px] text-[#0C831F] font-semibold">${c.storeName}</div>
+            </td>
+            <td class="px-4 py-3 text-right font-bold">${c.orders}</td>
+            <td class="px-4 py-3 text-right font-bold text-slate-900">₹${c.spend.toLocaleString("en-IN")}</td>
+            <td class="px-4 py-3 text-center space-x-1 whitespace-nowrap">
+              <a href="https://wa.me/91${cleanPhone}?text=${promoMsg}" target="_blank"
+                class="inline-flex items-center gap-1 bg-[#0C831F] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
+                <i class="fa-brands fa-whatsapp"></i> Offer
+              </a>
+              <a href="https://wa.me/91${cleanPhone}?text=${upiMsg}" target="_blank"
+                class="inline-flex items-center gap-1 bg-purple-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
+                <i class="fa-solid fa-qrcode"></i> UPI Link
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    };
+
+    // ================= SETTINGS & BANNERS =================
+    window.saveGlobalSettings = async () => {
+      const payload = {
+        deliveryFee: Number(document.getElementById("cfgDeliveryFee").value ?? 7),
+        freeThreshold: Number(document.getElementById("cfgFreeThreshold").value ?? 199),
+        upiId: document.getElementById("cfgUpiId").value.trim() || "8305530240@kotakbank",
+        payeeName: document.getElementById("cfgPayeeName").value.trim() || "Jhatpat"
+      };
+      await set(ref(db, "settings"), payload);
+      showToast("Delivery Fee (₹" + payload.deliveryFee + "), Free Threshold (₹" + payload.freeThreshold + ") & UPI saved!");
+    };
+
+    window.addBanner = async () => {
+      const title = document.getElementById("bannerTitle").value.trim();
+      const subtitle = document.getElementById("bannerSubtitle").value.trim();
+      const image = document.getElementById("bannerImage").value.trim();
+      if (!title) return alert("Enter banner headline.");
+      const id = "BAN_" + Date.now();
+      await set(ref(db, `banners/${id}`), { id, title, subtitle, image, active: true });
+      document.getElementById("bannerTitle").value = "";
+      document.getElementById("bannerSubtitle").value = "";
+      document.getElementById("bannerImage").value = "";
+      showToast("Banner published!");
+    };
+
+    window.deleteBanner = async (id) => {
+      await remove(ref(db, `banners/${id}`));
+      showToast("Banner removed.");
+    };
+
+    function renderBanners() {
+      const el = document.getElementById("bannersList");
+      const list = Object.values(bannersMap);
+      if (!list.length) {
+        el.innerHTML = `<p class="text-xs text-slate-400">No custom banners yet. Default Blinkit-style promo banner is active.</p>`;
+        return;
+      }
+      el.innerHTML = list.map(b => `
+        <div class="p-3 border border-slate-200 rounded-xl flex justify-between items-center bg-slate-50">
+          <div>
+            <div class="font-bold text-xs text-slate-900">${b.title}</div>
+            <div class="text-[11px] text-slate-500">${b.subtitle || ""}</div>
+          </div>
+          <button onclick="deleteBanner('${b.id}')" class="text-red-600 text-xs font-bold px-2 py-1 hover:bg-red-50 rounded-lg">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `).join("");
+    }
+  </script>
 </body>
 </html>
