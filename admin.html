@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jhatpat — Super Admin HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -18,7 +20,7 @@
     --border: #E2E8F0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
 
   .lock-screen {
     position: fixed; inset: 0; background: #0F172A; display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px;
@@ -52,15 +54,6 @@
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .kpi-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;
-  }
-  .kpi-card {
-    background: #fff; border-radius: 16px; padding: 16px; border: 1px solid var(--border);
-  }
-  .kpi-label { font-size: 12px; color: var(--muted); font-weight: 700; }
-  .kpi-val { font-size: 24px; font-weight: 800; margin-top: 6px; }
-
   .card {
     background: #fff; border-radius: 16px; padding: 18px; border: 1px solid var(--border); margin-bottom: 18px;
   }
@@ -77,12 +70,6 @@
   th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
   th { background: #F8FAFC; font-weight: 800; color: #475569; font-size: 12px; }
   .table-wrap { overflow-x: auto; }
-  .badge {
-    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-block;
-  }
-  .badge-green { background: #DCFCE7; color: #166534; }
-  .badge-red { background: #FEE2E2; color: #991B1B; }
-  .badge-amber { background: #FEF3C7; color: #92400E; }
 
   .modal-bg {
     position: fixed; inset: 0; background: rgba(15,23,42,0.65); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
@@ -121,8 +108,6 @@
 
 <nav class="nav-tabs">
   <button class="nav-tab active" onclick="switchTab('catalogTab', this)">🥦 Catalog & Store Stock</button>
-  <button class="nav-tab" onclick="switchTab('storesTab', this)">🏪 Active Dark Stores</button>
-  <button class="nav-tab" onclick="switchTab('financeTab', this)">💰 City & Store Financials</button>
   <button class="nav-tab" onclick="switchTab('ordersTab', this)">📦 Live Orders Override</button>
   <button class="nav-tab" onclick="switchTab('crmTab', this)">👥 Customer CRM & WhatsApp</button>
   <button class="nav-tab" onclick="switchTab('marketingTab', this)">🎟️ Coupons & Banners</button>
@@ -130,6 +115,7 @@
 
 <div class="main-wrap">
 
+  <!-- TAB 1: CATALOG & GALLERY PHOTO UPLOAD + FULL EDIT -->
   <div class="tab-panel active" id="catalogTab">
     <div class="card">
       <div class="card-head">
@@ -160,7 +146,7 @@
         </div>
       </div>
       <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <img id="prodPreviewImg" src="" alt="Preview" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;background:#F8FAFC;">
+        <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;">
         <button class="btn btn-primary" onclick="addSingleProduct()">+ Add Product to Catalog</button>
       </div>
     </div>
@@ -168,12 +154,7 @@
     <div class="card">
       <div class="card-head">
         <h3>Live Catalog (<span id="catalogTotalCount">0</span> Items)</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="catalogSearch" placeholder="Search product..." style="width:190px;" oninput="renderCatalogTable()">
-          <select id="catalogStoreOosFilter" style="width:210px;" onchange="renderCatalogTable()">
-            <option value="">Select Store for Stock Toggle</option>
-          </select>
-        </div>
+        <input type="text" id="catalogSearch" placeholder="Search product..." style="width:220px;" oninput="renderCatalogTable()">
       </div>
       <div class="table-wrap">
         <table>
@@ -182,7 +163,7 @@
               <th>Photo</th>
               <th>Product Details</th>
               <th>Price / MRP</th>
-              <th>Store Stock</th>
+              <th>Stock Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -192,63 +173,14 @@
     </div>
   </div>
 
-  <div class="tab-panel" id="storesTab">
-    <div class="card">
-      <div class="card-head">
-        <h3>🏪 Active Dark Stores Directory</h3>
-        <select id="storeListCityFilter" style="width:200px;" onchange="renderStoresTable()">
-          <option value="ALL">All Cities</option>
-        </select>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Store ID</th>
-              <th>City & Area</th>
-              <th>Store Name</th>
-              <th>Status</th>
-              <th>Toggle Open/Close</th>
-            </tr>
-          </thead>
-          <tbody id="storesTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="financeTab">
-    <div class="card">
-      <div class="card-head">
-        <h3>💰 Store-Wise & City-Wise Financial Breakdown</h3>
-        <select id="finCityFilter" style="width:180px;" onchange="renderFinancials()">
-          <option value="ALL">All Cities</option>
-        </select>
-      </div>
-      <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-label">TOTAL ORDERS</div><div class="kpi-val" id="finOrders">0</div></div>
-        <div class="kpi-card"><div class="kpi-label">GROSS SALES (GMV)</div><div class="kpi-val" id="finSales">₹0</div></div>
-        <div class="kpi-card"><div class="kpi-label">PLATFORM COMMISSION (12%)</div><div class="kpi-val" style="color:#0C831F;" id="finComm">₹0</div></div>
-        <div class="kpi-card"><div class="kpi-label">DARK STORE PAYOUT (88%)</div><div class="kpi-val" style="color:#2563EB;" id="finPayout">₹0</div></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Store ID</th><th>Store Name</th><th>City</th><th>Orders</th><th>Gross Sales</th><th>Jhatpat 12%</th><th>Payout 88%</th></tr>
-          </thead>
-          <tbody id="finTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
+  <!-- TAB 2: LIVE ORDERS OVERRIDE -->
   <div class="tab-panel" id="ordersTab">
     <div class="card">
       <div class="card-head"><h3>📦 Live Orders Command & Status Override</h3></div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Order ID</th><th>Store / City</th><th>Customer</th><th>Items</th><th>Total</th><th>Status Override</th></tr>
+            <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status Override</th></tr>
           </thead>
           <tbody id="adminOrdersBody"></tbody>
         </table>
@@ -256,6 +188,7 @@
     </div>
   </div>
 
+  <!-- TAB 3: CUSTOMER CRM & WHATSAPP -->
   <div class="tab-panel" id="crmTab">
     <div class="card">
       <div class="card-head"><h3>👥 Customer CRM & 1-Click WhatsApp</h3></div>
@@ -270,6 +203,7 @@
     </div>
   </div>
 
+  <!-- TAB 4: COUPONS & BANNERS -->
   <div class="tab-panel" id="marketingTab">
     <div class="card">
       <h3 style="margin-bottom:12px;">🎟️ Create Promo Coupon</h3>
@@ -309,6 +243,7 @@
 
 </div>
 
+<!-- FULL PRODUCT EDIT MODAL -->
 <div class="modal-bg" id="editProdModal">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
@@ -318,7 +253,7 @@
     <input type="hidden" id="editProdId">
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div style="display:flex;align-items:center;gap:12px;">
-        <img id="editProdPreviewImg" src="" alt="Product" style="width:70px;height:70px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;background:#F8FAFC;">
+        <img id="editProdPreviewImg" src="" style="width:70px;height:70px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;">
         <label class="upload-label">
           📷 Gallery se Nayi Photo Lagayein
           <input type="file" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, 'editProdPreviewImg', 'editProdImgInput')">
@@ -373,7 +308,6 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let allProducts = {};
-let allStores = {};
 let allOrders = {};
 let allCoupons = {};
 let allBanners = {};
@@ -428,7 +362,7 @@ function switchTab(panelId, btn) {
 }
 
 function handleGalleryUpload(event, previewImgId, hiddenInputId) {
-  const file = event.target.files && event.target.files[0];
+  const file = event.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -461,16 +395,8 @@ function bootAdmin() {
     renderCatalogTable();
   });
 
-  db.ref('stores').on('value', snap => {
-    allStores = snap.val() || {};
-    populateStoreDropdowns();
-    renderStoresTable();
-    renderFinancials();
-  });
-
   db.ref('orders').on('value', snap => {
     allOrders = snap.val() || {};
-    renderFinancials();
     renderAdminOrders();
     renderCRM();
   });
@@ -492,7 +418,7 @@ function addSingleProduct() {
   const unit = document.getElementById('prodUnitInput').value.trim();
   const price = Number(document.getElementById('prodPriceInput').value);
   const mrp = Number(document.getElementById('prodMrpInput').value) || price;
-  const img = document.getElementById('prodImgInput').value || '';
+  const img = document.getElementById('prodImgInput').value || document.getElementById('prodPreviewImg').src;
 
   if (!name || !unit || !price) {
     return showToast('Product Name, Unit aur Selling Price zaroori hai!', 'error');
@@ -507,7 +433,6 @@ function addSingleProduct() {
     document.getElementById('prodPriceInput').value = '';
     document.getElementById('prodMrpInput').value = '';
     document.getElementById('prodImgInput').value = '';
-    document.getElementById('prodPreviewImg').src = '';
     document.getElementById('prodGalleryFile').value = '';
     showToast('✅ Product add ho gaya!', 'success');
   });
@@ -522,7 +447,7 @@ function openEditProdModal(id) {
   document.getElementById('editProdUnit').value = p.unit || '';
   document.getElementById('editProdPrice').value = p.price || '';
   document.getElementById('editProdMrp').value = p.mrp || p.price || '';
-  const currentImg = p.image || p.img || '';
+  const currentImg = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
   document.getElementById('editProdPreviewImg').src = currentImg;
   document.getElementById('editProdImgInput').value = currentImg;
   document.getElementById('editProdModal').classList.add('open');
@@ -559,24 +484,18 @@ function deleteProduct(id) {
   }
 }
 
-function toggleStoreOos(prodId, storeId, markOos) {
-  if (!storeId) return showToast('Pehle upar se Store select karein!', 'error');
-  db.ref(`products/${prodId}/outOfStock/${storeId}`).set(markOos ? true : null);
-}
-
 function renderCatalogTable() {
   const q = document.getElementById('catalogSearch').value.trim().toLowerCase();
-  const selStore = document.getElementById('catalogStoreOosFilter').value;
   const entries = Object.entries(allProducts).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q)));
   document.getElementById('catalogTotalCount').textContent = entries.length;
 
   const tbody = document.getElementById('catalogTableBody');
   tbody.innerHTML = entries.map(([id, p]) => {
-    const imgUrl = p.image || p.img || '';
-    const isOos = selStore && p.outOfStock && p.outOfStock[selStore] === true;
+    const imgUrl = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
+    const isOos = p.globalOutOfStock === true;
     return `
       <tr>
-        <td><img src="${escapeHtml(imgUrl)}" alt="" style="width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid #E2E8F0;background:#F8FAFC;"></td>
+        <td><img src="${escapeHtml(imgUrl)}" style="width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid #E2E8F0;"></td>
         <td>
           <strong>${escapeHtml(p.name)}</strong><br>
           <span style="font-size:11px;color:#64748B;">${escapeHtml(p.category)} • ${escapeHtml(p.unit)}</span>
@@ -586,7 +505,9 @@ function renderCatalogTable() {
           ${p.mrp > p.price ? `<span style="text-decoration:line-through;color:#94A3B8;font-size:11px;margin-left:4px;">₹${p.mrp}</span>` : ''}
         </td>
         <td>
-          ${selStore ? `<button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="toggleStoreOos('${id}','${selStore}',${!isOos})">${isOos ? 'Out of Stock' : 'In Stock'}</button>` : `<span style="font-size:11px;color:#94A3B8;">Select store above</span>`}
+          <button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="db.ref('products/${id}').update({globalOutOfStock: ${!isOos}})">
+            ${isOos ? 'Out of Stock' : 'In Stock'}
+          </button>
         </td>
         <td>
           <div style="display:flex;gap:6px;">
@@ -599,70 +520,11 @@ function renderCatalogTable() {
   }).join('');
 }
 
-function populateStoreDropdowns() {
-  const stores = Object.values(allStores);
-  const cities = [...new Set(stores.map(s => s.city).filter(Boolean))];
-
-  const cityOptions = '<option value="ALL">All Cities</option>' + cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  document.getElementById('storeListCityFilter').innerHTML = cityOptions;
-  document.getElementById('finCityFilter').innerHTML = cityOptions;
-
-  const oosSel = document.getElementById('catalogStoreOosFilter');
-  const prev = oosSel.value;
-  oosSel.innerHTML = '<option value="">Select Store for Stock Toggle</option>' + stores.map(s => `<option value="${escapeHtml(s.storeId)}">${escapeHtml(s.name)} (${escapeHtml(s.city)})</option>`).join('');
-  if (prev) oosSel.value = prev;
-}
-
-function renderStoresTable() {
-  const filterCity = document.getElementById('storeListCityFilter').value;
-  const stores = Object.values(allStores).filter(s => filterCity === 'ALL' || s.city === filterCity);
-  document.getElementById('storesTableBody').innerHTML = stores.map(s => {
-    const isOpen = s.isOpen !== false;
-    return `
-      <tr>
-        <td><strong>${escapeHtml(s.storeId)}</strong></td>
-        <td>${escapeHtml(s.city)} • ${escapeHtml(s.area)}</td>
-        <td>${escapeHtml(s.name)}</td>
-        <td><span class="badge ${isOpen ? 'badge-green' : 'badge-red'}">${isOpen ? 'OPEN' : 'CLOSED'}</span></td>
-        <td><button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="db.ref('stores/${s.storeId}').update({isOpen: ${!isOpen}})">Switch Status</button></td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderFinancials() {
-  const city = document.getElementById('finCityFilter').value;
-  const orders = Object.values(allOrders).filter(o => o.status !== 'CANCELLED' && (city === 'ALL' || o.city === city));
-  const totalSales = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
-  document.getElementById('finOrders').textContent = orders.length;
-  document.getElementById('finSales').textContent = `₹${totalSales.toLocaleString('en-IN')}`;
-  document.getElementById('finComm').textContent = `₹${Math.round(totalSales * 0.12).toLocaleString('en-IN')}`;
-  document.getElementById('finPayout').textContent = `₹${Math.round(totalSales * 0.88).toLocaleString('en-IN')}`;
-
-  const stores = Object.values(allStores).filter(s => city === 'ALL' || s.city === city);
-  document.getElementById('finTableBody').innerHTML = stores.map(s => {
-    const sOrders = orders.filter(o => o.storeId === s.storeId);
-    const gmv = sOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
-    return `
-      <tr>
-        <td>${escapeHtml(s.storeId)}</td>
-        <td>${escapeHtml(s.name)}</td>
-        <td>${escapeHtml(s.city)}</td>
-        <td>${sOrders.length}</td>
-        <td>₹${gmv}</td>
-        <td style="color:#0C831F;font-weight:700;">₹${Math.round(gmv * 0.12)}</td>
-        <td style="color:#2563EB;font-weight:700;">₹${Math.round(gmv * 0.88)}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
 function renderAdminOrders() {
   const list = Object.values(allOrders).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   document.getElementById('adminOrdersBody').innerHTML = list.map(o => `
     <tr>
       <td><strong>#${escapeHtml(o.orderId)}</strong></td>
-      <td>${escapeHtml(o.storeId)}<br><span style="font-size:11px;color:#64748B;">${escapeHtml(o.city || '')}</span></td>
       <td>${escapeHtml(o.customerName)}<br><span style="font-size:11px;">${escapeHtml(o.customerPhone)}</span></td>
       <td style="font-size:12px;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</td>
       <td><strong>₹${o.totalAmount}</strong></td>

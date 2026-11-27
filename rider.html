@@ -35,6 +35,24 @@
     min-height: 100vh;
     padding-bottom: 40px;
   }
+  .lock-screen {
+    position: fixed;
+    inset: 0;
+    background: #030712;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 999;
+  }
+  .lock-card {
+    background: var(--card);
+    border: 1px solid #374151;
+    border-radius: 20px;
+    padding: 28px 22px;
+    width: 100%;
+    max-width: 390px;
+  }
   .header {
     background: var(--card);
     padding: 16px;
@@ -55,23 +73,17 @@
     justify-content: space-between;
     align-items: center;
   }
-  .zone-box {
-    margin: 0 16px 14px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px;
-  }
-  select, input {
+  input {
     width: 100%;
     background: var(--card2);
     color: #fff;
     border: 1px solid #374151;
     border-radius: 10px;
-    padding: 10px 12px;
+    padding: 12px 14px;
     font-family: inherit;
-    font-size: 13px;
-    margin-top: 6px;
+    font-size: 14px;
+    margin-top: 10px;
+    outline: none;
   }
   .task-card {
     margin: 0 16px 12px;
@@ -97,19 +109,35 @@
   .btn-green { background: var(--green); color: #052E16; }
   .btn-yellow { background: var(--yellow); color: #111; }
   .btn-blue { background: #2563EB; color: #fff; }
+  .btn-dark { background: #1F2937; color: #fff; border: 1px solid #374151; }
+  .btn-red { background: #DC2626; color: #fff; }
 </style>
 </head>
 <body>
-<div class="shell">
+
+<div class="lock-screen" id="riderLockScreen">
+  <div class="lock-card">
+    <div style="font-size:12px;color:var(--yellow);font-weight:800;">⚡ JHATPAT FLEET</div>
+    <h2 style="font-size:22px;margin-top:4px;">Rider Partner Login</h2>
+    <p style="font-size:12px;color:var(--muted);margin-top:4px;">Apna naam aur rider password daal kar duty start karein.</p>
+    <input type="text" id="loginRiderName" placeholder="Your Rider Name (e.g. Rahul)">
+    <input type="password" id="loginRiderPass" placeholder="Rider Password (RIDER@001)" onkeydown="if(event.key==='Enter') unlockRider()">
+    <button class="btn btn-green" style="width:100%;margin-top:14px;padding:13px;" onclick="unlockRider()">Start Duty ▸</button>
+  </div>
+</div>
+
+<div class="shell" id="riderMainApp" style="display:none;">
   <header class="header">
     <div>
       <div style="font-size:11px;color:var(--yellow);font-weight:800;">⚡ JHATPAT FLEET</div>
-      <div style="font-size:17px;font-weight:800;">Rider Partner App</div>
+      <div style="font-size:16px;font-weight:800;" id="headerRiderName">Rider Partner</div>
     </div>
-    <span id="dutyBadge" style="background:#064E3B;color:#34D399;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:800;">● ON DUTY</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn btn-yellow" style="padding:6px 10px;font-size:11px;" onclick="testRiderBeep()">🔔 Ring</button>
+      <button class="btn btn-red" style="padding:6px 10px;font-size:11px;" onclick="logoutRider()">Lock</button>
+    </div>
   </header>
 
-  <!-- Earnings Wallet -->
   <div class="wallet-card">
     <div>
       <div style="font-size:11px;opacity:0.85;font-weight:700;">RIDER EARNINGS WALLET</div>
@@ -119,20 +147,8 @@
     <div style="font-size:36px;">🛵</div>
   </div>
 
-  <!-- City / Store Zone Selection -->
-  <div class="zone-box">
-    <div style="font-size:12px;font-weight:800;color:var(--muted);">SELECT CITY & DARK STORE ZONE</div>
-    <input type="text" id="riderNameInput" placeholder="Your Rider Name (e.g. Rahul)" onchange="saveRiderProfile()">
-    <select id="riderCitySelect" onchange="populateRiderStores()">
-      <option value="">Select City</option>
-    </select>
-    <select id="riderStoreSelect" onchange="selectRiderZone()">
-      <option value="">Select Dark Store Zone</option>
-    </select>
-  </div>
-
   <div style="padding:4px 16px 10px;display:flex;justify-content:space-between;align-items:center;">
-    <h3 style="font-size:15px;">Active Dispatch & Drops</h3>
+    <h3 style="font-size:15px;">Live Dispatch & Drops</h3>
     <span style="font-size:12px;color:var(--green);font-weight:700;" id="activeDropCount">0 tasks</span>
   </div>
 
@@ -140,7 +156,6 @@
 </div>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyDummyKeyForRTDBAccess",
   authDomain: "jhatpat-22aa8.firebaseapp.com",
@@ -150,29 +165,17 @@ const firebaseConfig = {
   messagingSenderId: "100000000000",
   appId: "1:100000000000:web:jhatpat22aa8"
 };
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+let ordersMap = {};
+let knownReadyIds = new Set();
+let initialLoadDone = false;
+const PER_DROP_PAY = 35;
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function showToast(msg, type = 'dark') {
@@ -180,93 +183,99 @@ function showToast(msg, type = 'dark') {
   if (!box) {
     box = document.createElement('div');
     box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
+    box.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:360px;';
     document.body.appendChild(box);
   }
   const el = document.createElement('div');
   const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
+  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
   el.textContent = msg;
   box.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
+  setTimeout(() => el.remove(), 2800);
 }
 
+function playRiderBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [660, 880, 1100].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.14);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + idx * 0.14);
+      osc.stop(ctx.currentTime + idx * 0.14 + 0.36);
+    });
+  } catch (e) {}
+}
 
-let storesMap = {};
-let ordersMap = {};
-let selectedZoneStoreId = localStorage.getItem('jhatpat_rider_store') || '';
-const PER_DROP_PAY = 35;
+function testRiderBeep() {
+  playRiderBeep();
+  showToast('🔔 Rider Alert Sound Active!', 'success');
+}
 
-window.addEventListener('DOMContentLoaded', () => {
-  const savedName = localStorage.getItem('jhatpat_rider_name') || '';
-  if (savedName) document.getElementById('riderNameInput').value = savedName;
+if (sessionStorage.getItem('jhatpat_rider_unlocked') === '1') {
+  bootRiderApp();
+}
 
-  db.ref('stores').on('value', snap => {
-    storesMap = snap.val() || {};
-    populateRiderCities();
-  });
+function unlockRider() {
+  const name = document.getElementById('loginRiderName').value.trim();
+  const pass = document.getElementById('loginRiderPass').value.trim();
+  if (!name) return showToast('Apna Rider Name dalein!', 'error');
+  if (pass !== 'RIDER@001') return showToast('❌ Galat Rider Password!', 'error');
+
+  localStorage.setItem('jhatpat_rider_name', name);
+  sessionStorage.setItem('jhatpat_rider_unlocked', '1');
+  bootRiderApp();
+}
+
+function logoutRider() {
+  sessionStorage.removeItem('jhatpat_rider_unlocked');
+  location.reload();
+}
+
+function bootRiderApp() {
+  const rName = localStorage.getItem('jhatpat_rider_name') || 'Rider Partner';
+  document.getElementById('headerRiderName').textContent = `🛵 ${rName}`;
+  document.getElementById('riderLockScreen').style.display = 'none';
+  document.getElementById('riderMainApp').style.display = 'block';
 
   db.ref('orders').on('value', snap => {
     ordersMap = snap.val() || {};
+    const readyOrders = Object.values(ordersMap).filter(o => o && (o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY'));
+    if (initialLoadDone) {
+      const hasNewReady = readyOrders.some(o => !knownReadyIds.has(o.orderId));
+      if (hasNewReady) {
+        playRiderBeep();
+        showToast('🚨 NAYA ORDER PICKUP KE LIYE READY HAI!', 'success');
+      }
+    }
+    knownReadyIds = new Set(readyOrders.map(o => o.orderId));
+    initialLoadDone = true;
     renderRiderTasks();
   });
-});
-
-function saveRiderProfile() {
-  localStorage.setItem('jhatpat_rider_name', document.getElementById('riderNameInput').value.trim());
-}
-
-function populateRiderCities() {
-  const citySel = document.getElementById('riderCitySelect');
-  const cities = [...new Set(Object.values(storesMap).map(s => s.city).filter(Boolean))];
-  if (cities.length === 0) {
-    citySel.innerHTML = '<option value="">No active cities yet</option>';
-    document.getElementById('riderStoreSelect').innerHTML = '<option value="">No dark stores available</option>';
-    renderRiderTasks();
-    return;
-  }
-  const currentStore = storesMap[selectedZoneStoreId];
-  const activeCity = currentStore ? currentStore.city : cities[0];
-  citySel.innerHTML = cities.map(c => `<option value="${escapeHtml(c)}" ${c === activeCity ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-  populateRiderStores();
-}
-
-function populateRiderStores() {
-  const city = document.getElementById('riderCitySelect').value;
-  const storeSel = document.getElementById('riderStoreSelect');
-  const matching = Object.entries(storesMap).filter(([, s]) => s.city === city);
-  storeSel.innerHTML = matching.map(([id, s]) => `<option value="${escapeHtml(id)}" ${id === selectedZoneStoreId ? 'selected' : ''}>${escapeHtml(s.name)} (${escapeHtml(s.area || s.city)})</option>`).join('');
-  if (matching.length > 0 && (!selectedZoneStoreId || !storesMap[selectedZoneStoreId] || storesMap[selectedZoneStoreId].city !== city)) {
-    selectedZoneStoreId = matching[0][0];
-    localStorage.setItem('jhatpat_rider_store', selectedZoneStoreId);
-  }
-  renderRiderTasks();
-}
-
-function selectRiderZone() {
-  selectedZoneStoreId = document.getElementById('riderStoreSelect').value;
-  localStorage.setItem('jhatpat_rider_store', selectedZoneStoreId);
-  renderRiderTasks();
 }
 
 function renderRiderTasks() {
   const listEl = document.getElementById('riderTasksList');
-  const allZoneOrders = Object.values(ordersMap).filter(o => o && o.storeId === selectedZoneStoreId);
+  const allOrders = Object.values(ordersMap).filter(Boolean);
+  const myName = (localStorage.getItem('jhatpat_rider_name') || '').toLowerCase();
 
-  const delivered = allZoneOrders.filter(o => o.status === 'DELIVERED');
+  const delivered = allOrders.filter(o => o.status === 'DELIVERED' && (!o.riderName || o.riderName.toLowerCase() === myName));
   document.getElementById('riderTripCount').textContent = `${delivered.length} Completed Drops (₹${PER_DROP_PAY}/drop)`;
   document.getElementById('riderWalletAmt').textContent = `₹${(delivered.length * PER_DROP_PAY).toLocaleString('en-IN')}`;
 
-  const activeTasks = allZoneOrders.filter(o => o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY');
+  const activeTasks = allOrders
+    .filter(o => o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY')
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
   document.getElementById('activeDropCount').textContent = `${activeTasks.length} tasks`;
 
-  if (!selectedZoneStoreId) {
-    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">Select a City & Dark Store Zone above to receive live delivery tasks.</div>';
-    return;
-  }
-
   if (activeTasks.length === 0) {
-    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">No active pickups in this zone right now. Waiting for store dispatch...</div>';
+    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">Abhi koi active delivery nahi hai. Naye order ka intezaar karein...</div>';
     return;
   }
 
@@ -274,24 +283,33 @@ function renderRiderTasks() {
     const mapsQuery = encodeURIComponent(`${o.customerAddress}, ${o.city || ''}`);
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
     const isOut = o.status === 'OUT_FOR_DELIVERY';
+    const isCod = (o.paymentMethod || '').toUpperCase().includes('COD') || (o.paymentMethod || '').toUpperCase().includes('CASH');
     return `
       <div class="task-card">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span style="font-weight:800;font-size:15px;">#${escapeHtml(o.orderId)}</span>
-          <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:${isOut ? '#1E3A8A' : '#78350F'};color:#fff;">
+          <span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;background:${isOut ? '#1E3A8A' : '#78350F'};color:#fff;">
             ${isOut ? '🛵 OUT FOR DELIVERY' : '📦 READY AT STORE'}
           </span>
         </div>
-        <div style="margin-top:8px;font-size:13px;">
-          <div><strong>Customer:</strong> ${escapeHtml(o.customerName)} (${escapeHtml(o.customerPhone)})</div>
+
+        <div style="margin-top:10px;font-size:13px;line-height:1.5;">
+          <div><strong>Customer:</strong> ${escapeHtml(o.customerName)}</div>
           <div style="color:#D1D5DB;margin-top:3px;">📍 ${escapeHtml(o.customerAddress)}</div>
-          <div style="color:#9CA3AF;font-size:12px;margin-top:4px;">Collect: <strong>${o.paymentMethod === 'COD' ? '₹' + o.totalAmount + ' CASH' : 'PAID ONLINE (UPI)'}</strong></div>
+          <div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:${isCod ? '#450A0A' : '#064E3B'};color:${isCod ? '#FCA5A5' : '#6EE7B7'};font-weight:800;font-size:12px;">
+            ${isCod ? `💵 CASH LENA HAI: ₹${o.totalAmount}` : `✅ PAID ONLINE (₹${o.totalAmount})`}
+          </div>
         </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+          <a href="tel:${escapeHtml(o.customerPhone)}" class="btn btn-dark">📞 Call Customer</a>
           <a href="${mapsUrl}" target="_blank" class="btn btn-blue">🗺️ Google Maps</a>
+        </div>
+
+        <div style="margin-top:8px;">
           ${!isOut
-            ? `<button class="btn btn-yellow" onclick="riderUpdateOrder('${o.orderId}','OUT_FOR_DELIVERY')">📦 Picked Up</button>`
-            : `<button class="btn btn-green" onclick="riderUpdateOrder('${o.orderId}','DELIVERED')">✅ Mark Delivered</button>`
+            ? `<button class="btn btn-yellow" style="width:100%;" onclick="riderUpdateOrder('${o.orderId}','OUT_FOR_DELIVERY')">📦 Order Picked Up</button>`
+            : `<button class="btn btn-green" style="width:100%;" onclick="riderUpdateOrder('${o.orderId}','DELIVERED')">✅ Mark Delivered (+₹35)</button>`
           }
         </div>
       </div>
@@ -300,13 +318,13 @@ function renderRiderTasks() {
 }
 
 function riderUpdateOrder(orderId, status) {
-  const riderName = document.getElementById('riderNameInput').value.trim() || 'Jhatpat Rider';
+  const riderName = localStorage.getItem('jhatpat_rider_name') || 'Jhatpat Rider';
   db.ref('orders/' + orderId).update({
     status,
     riderName,
     updatedAt: Date.now()
   }).then(() => {
-    showToast(status === 'DELIVERED' ? '🎉 Drop Completed! +₹35 added to wallet' : '🛵 Order Picked Up! Navigate to customer', 'success');
+    showToast(status === 'DELIVERED' ? '🎉 Drop Completed! +₹35 wallet mein jud gaye' : '🛵 Order Picked Up! Customer ke address par jaayein', 'success');
   });
 }
 </script>
