@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jhatpat — Dark Store Terminal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -17,34 +15,24 @@
     --border: #E2E8F0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: #0F172A; }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #0F172A; }
 
-  /* Auth & KYC Screen */
   .auth-wrap {
     min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: linear-gradient(135deg, #0F172A, #1E293B);
   }
   .auth-card {
-    background: #fff; width: 100%; max-width: 440px; border-radius: 22px; padding: 26px; box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+    background: #fff; width: 100%; max-width: 400px; border-radius: 22px; padding: 28px; box-shadow: 0 25px 50px rgba(0,0,0,0.35);
   }
-  .auth-tabs {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #F1F5F9; padding: 5px; border-radius: 12px; margin: 16px 0;
-  }
-  .auth-tab {
-    padding: 9px; border: none; border-radius: 9px; font-weight: 800; font-size: 13px; cursor: pointer; background: transparent;
-  }
-  .auth-tab.active { background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
   input, select {
-    width: 100%; padding: 11px 12px; border: 1px solid #CBD5E1; border-radius: 10px; font-family: inherit; font-size: 13px; margin-bottom: 10px;
+    width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1; border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 12px;
   }
   .btn {
-    padding: 11px 16px; border-radius: 10px; border: none; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer;
+    padding: 12px 16px; border-radius: 10px; border: none; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer;
   }
   .btn-green { background: var(--green); color: #fff; }
   .btn-yellow { background: var(--yellow); color: #111; }
-  .btn-dark { background: #0F172A; color: #fff; }
   .btn-red { background: #DC2626; color: #fff; }
 
-  /* Terminal UI */
   .topbar {
     background: #0F172A; color: #fff; padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
   }
@@ -77,63 +65,31 @@
 </head>
 <body>
 
-<!-- Login & Seller KYC Screen -->
 <div class="auth-wrap" id="authScreen">
   <div class="auth-card">
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
       <span style="background:#F8CB46;padding:4px 10px;border-radius:8px;font-weight:800;">⚡ JHATPAT</span>
-      <strong>Dark Store Partner Portal</strong>
+      <strong>Dark Store Terminal</strong>
     </div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLoginBtn" onclick="toggleAuthMode('login')">🔐 Store Login</button>
-      <button class="auth-tab" id="tabKycBtn" onclick="toggleAuthMode('kyc')">🪪 New Seller KYC</button>
-    </div>
-
-    <!-- Store Terminal Login -->
-    <div id="loginFormBox">
-      <p style="font-size:12px;color:#64748B;margin-bottom:12px;">Enter exact Store ID & Store Password issued by Admin or approved KYC.</p>
-      <input type="text" id="loginStoreId" placeholder="Exact Store ID (e.g. JHT-MUM-01)">
-      <input type="password" id="loginStorePass" placeholder="Exact Store Password" onkeydown="if(event.key==='Enter') loginDarkStore()">
-      <button class="btn btn-green" style="width:100%;" onclick="loginDarkStore()">Login to Dark Store Terminal ▸</button>
-    </div>
-
-    <!-- Simple Seller KYC Registration Form -->
-    <div id="kycFormBox" style="display:none;">
-      <p style="font-size:12px;color:#64748B;margin-bottom:10px;">Apply to become a Jhatpat Dark Store Partner (88% payout on every order).</p>
-      <input type="text" id="kycStoreName" placeholder="Dark Store / Shop Name *">
-      <input type="text" id="kycOwnerName" placeholder="Owner Full Name *">
-      <input type="tel" id="kycPhone" placeholder="10-Digit Mobile Number *" maxlength="10">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <input type="text" id="kycCity" placeholder="City *">
-        <input type="text" id="kycArea" placeholder="Area / Locality *">
-      </div>
-      <input type="text" id="kycDesiredId" placeholder="Choose Your Store ID (e.g. JHT-IND-01) *">
-      <input type="text" id="kycDesiredPass" placeholder="Create Your Store Password *">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <input type="text" id="kycFssai" placeholder="FSSAI No. (Optional)">
-        <input type="text" id="kycPan" placeholder="PAN No. (Optional)">
-      </div>
-      <button class="btn btn-yellow" style="width:100%;" onclick="submitSellerKyc()">Submit KYC for 1-Tap Approval ▸</button>
-    </div>
+    <p style="font-size:13px;color:#64748B;margin-bottom:14px;">Enter Store Password to open live packing terminal.</p>
+    <input type="password" id="loginStorePass" placeholder="Enter Store Password" onkeydown="if(event.key==='Enter') loginDarkStore()">
+    <button class="btn btn-green" style="width:100%;" onclick="loginDarkStore()">Login to Dark Store Terminal ▸</button>
   </div>
 </div>
 
-<!-- Main Dark Store Terminal -->
 <div id="terminalApp" style="display:none;">
   <header class="topbar">
     <div>
-      <div style="font-size:11px;color:#94A3B8;font-weight:700;">DARK STORE TERMINAL</div>
-      <div style="font-size:17px;font-weight:800;" id="termStoreTitle">Store Name</div>
+      <div style="font-size:11px;color:#94A3B8;font-weight:700;">DARK STORE COMMAND TERMINAL</div>
+      <div style="font-size:17px;font-weight:800;" id="termStoreTitle">All Dark Stores • Live Orders</div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-yellow" onclick="testChime()">🔔 Test Chime</button>
-      <button class="btn btn-green" id="storeOpenToggleBtn" onclick="toggleStoreOpenStatus()">🟢 Store OPEN</button>
       <button class="btn btn-red" onclick="logoutStore()">Logout</button>
     </div>
   </header>
 
   <div class="container">
-    <!-- 88% Payout & Metrics -->
     <div class="stats-row">
       <div class="stat-card">
         <div style="font-size:12px;color:#64748B;font-weight:700;">ACTIVE QUEUE</div>
@@ -151,24 +107,21 @@
 
     <div class="panel-tabs">
       <button class="p-tab active" onclick="switchTermTab('queueView', this)">📦 Live Packing Queue</button>
-      <button class="p-tab" onclick="switchTermTab('stockView', this)">🥦 Local Stock Toggle</button>
+      <button class="p-tab" onclick="switchTermTab('stockView', this)">🥦 Catalog Stock View</button>
     </div>
 
-    <!-- Packing Queue -->
     <div id="queueView">
       <div class="order-grid" id="storeOrdersGrid"></div>
     </div>
 
-    <!-- Local Stock Toggle -->
     <div id="stockView" style="display:none;">
-      <input type="text" id="storeStockSearch" placeholder="Search item to mark In Stock / Out of Stock..." style="max-width:340px;background:#fff;" oninput="renderStoreStock()">
+      <input type="text" id="storeStockSearch" placeholder="Search item..." style="max-width:340px;background:#fff;" oninput="renderStoreStock()">
       <div class="stock-grid" id="storeStockGrid"></div>
     </div>
   </div>
 </div>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyDummyKeyForRTDBAccess",
   authDomain: "jhatpat-22aa8.firebaseapp.com",
@@ -178,29 +131,17 @@ const firebaseConfig = {
   messagingSenderId: "100000000000",
   appId: "1:100000000000:web:jhatpat22aa8"
 };
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+let storeOrders = {};
+let allProducts = {};
+let knownOrderIds = new Set();
+let initialLoadDone = false;
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function showToast(msg, type = 'dark') {
@@ -208,101 +149,44 @@ function showToast(msg, type = 'dark') {
   if (!box) {
     box = document.createElement('div');
     box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
+    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:380px;';
     document.body.appendChild(box);
   }
   const el = document.createElement('div');
   const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
+  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
   el.textContent = msg;
   box.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
+  setTimeout(() => el.remove(), 2800);
 }
 
-
-let activeStoreId = sessionStorage.getItem('jhatpat_term_store_id') || '';
-let activeStoreObj = null;
-let storeOrders = {};
-let allProducts = {};
-let knownOrderIds = new Set();
-let initialLoadDone = false;
-
-if (activeStoreId) {
-  verifyAndBootStore(activeStoreId, sessionStorage.getItem('jhatpat_term_store_pass') || '');
-}
-
-function toggleAuthMode(mode) {
-  document.getElementById('loginFormBox').style.display = mode === 'login' ? 'block' : 'none';
-  document.getElementById('kycFormBox').style.display = mode === 'kyc' ? 'block' : 'none';
-  document.getElementById('tabLoginBtn').classList.toggle('active', mode === 'login');
-  document.getElementById('tabKycBtn').classList.toggle('active', mode === 'kyc');
+if (sessionStorage.getItem('jhatpat_store_unlocked') === '1') {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('terminalApp').style.display = 'block';
+  bootTerminalListeners();
 }
 
 function loginDarkStore() {
-  const id = document.getElementById('loginStoreId').value.trim();
   const pass = document.getElementById('loginStorePass').value.trim();
-  if (!id || !pass) return showToast('Enter both Store ID and Store Password!', 'error');
-  verifyAndBootStore(id, pass);
-}
-
-function verifyAndBootStore(storeId, password) {
-  db.ref('stores/' + storeId).once('value', snap => {
-    const s = snap.val();
-    if (!s || String(s.password) !== String(password)) {
-      sessionStorage.removeItem('jhatpat_term_store_id');
-      sessionStorage.removeItem('jhatpat_term_store_pass');
-      showToast('Invalid Store ID or Password! Check with Admin.', 'error');
-      return;
-    }
-    activeStoreId = storeId;
-    activeStoreObj = s;
-    sessionStorage.setItem('jhatpat_term_store_id', storeId);
-    sessionStorage.setItem('jhatpat_term_store_pass', password);
-
+  if (pass === 'KING@001') {
+    sessionStorage.setItem('jhatpat_store_unlocked', '1');
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('terminalApp').style.display = 'block';
     bootTerminalListeners();
-  });
+  } else {
+    showToast('❌ Wrong Password!', 'error');
+  }
 }
 
 function logoutStore() {
-  sessionStorage.removeItem('jhatpat_term_store_id');
-  sessionStorage.removeItem('jhatpat_term_store_pass');
+  sessionStorage.removeItem('jhatpat_store_unlocked');
   location.reload();
-}
-
-function submitSellerKyc() {
-  const storeName = document.getElementById('kycStoreName').value.trim();
-  const ownerName = document.getElementById('kycOwnerName').value.trim();
-  const phone = document.getElementById('kycPhone').value.trim();
-  const city = document.getElementById('kycCity').value.trim();
-  const area = document.getElementById('kycArea').value.trim();
-  const desiredStoreId = document.getElementById('kycDesiredId').value.trim().replace(/[.#$\[\]]/g, '_');
-  const desiredPassword = document.getElementById('kycDesiredPass').value.trim();
-  const fssai = document.getElementById('kycFssai').value.trim();
-  const pan = document.getElementById('kycPan').value.trim();
-
-  if (!storeName || !ownerName || phone.length < 10 || !city || !area || !desiredStoreId || !desiredPassword) {
-    showToast('Please fill all required KYC fields!', 'error');
-    return;
-  }
-
-  const kycId = 'KYC_' + Date.now();
-  db.ref('seller_kyc/' + kycId).set({
-    kycId, storeName, ownerName, phone, city, area, desiredStoreId, desiredPassword, fssai, pan, status: 'PENDING', submittedAt: Date.now()
-  }).then(() => {
-    ['kycStoreName','kycOwnerName','kycPhone','kycCity','kycArea','kycDesiredId','kycDesiredPass','kycFssai','kycPan'].forEach(i => document.getElementById(i).value = '');
-    toggleAuthMode('login');
-    document.getElementById('loginStoreId').value = desiredStoreId;
-    showToast('KYC Submitted! Login once Admin clicks 1-Tap Approve.', 'success');
-  });
 }
 
 function playOrderChime() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const notes = [587.33, 880, 1174.66];
-    notes.forEach((freq, idx) => {
+    [587.33, 880, 1174.66].forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
@@ -323,18 +207,7 @@ function testChime() {
 }
 
 function bootTerminalListeners() {
-  db.ref('stores/' + activeStoreId).on('value', snap => {
-    const s = snap.val();
-    if (!s) return logoutStore();
-    activeStoreObj = s;
-    document.getElementById('termStoreTitle').textContent = `${s.name} (${s.storeId}) • ${s.city}`;
-    const isOpen = s.isOpen !== false;
-    const btn = document.getElementById('storeOpenToggleBtn');
-    btn.textContent = isOpen ? '🟢 Store OPEN' : '🔴 Store CLOSED';
-    btn.className = 'btn ' + (isOpen ? 'btn-green' : 'btn-red');
-  });
-
-  db.ref('orders').orderByChild('storeId').equalTo(activeStoreId).on('value', snap => {
+  db.ref('orders').on('value', snap => {
     storeOrders = snap.val() || {};
     const ids = Object.keys(storeOrders);
     if (initialLoadDone) {
@@ -353,11 +226,6 @@ function bootTerminalListeners() {
     allProducts = snap.val() || {};
     renderStoreStock();
   });
-}
-
-function toggleStoreOpenStatus() {
-  const next = !(activeStoreObj && activeStoreObj.isOpen !== false);
-  db.ref('stores/' + activeStoreId).update({ isOpen: next });
 }
 
 function switchTermTab(viewId, btn) {
@@ -381,14 +249,14 @@ function renderStoreOrders() {
 
   const grid = document.getElementById('storeOrdersGrid');
   if (list.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">No orders for this dark store yet. Keep terminal open for audio alerts!</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">No orders yet. Keep terminal open for live audio alerts!</div>';
     return;
   }
 
   grid.innerHTML = list.map(o => `
     <div class="order-card ${o.status === 'PLACED' ? 'new-alert' : ''}">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong>#${escapeHtml(o.orderId)}</strong>
+        <strong>#${escapeHtml(o.orderId)} (${escapeHtml(o.storeId || 'STORE')})</strong>
         <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:#FEF3C7;color:#92400E;">${escapeHtml(o.status)}</span>
       </div>
       <div style="font-size:12px;color:#64748B;margin:4px 0;">${escapeHtml(o.customerName)} • ${escapeHtml(o.customerPhone)}</div>
@@ -421,24 +289,19 @@ function renderStoreStock() {
   const items = Object.entries(allProducts).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q)));
 
   grid.innerHTML = items.map(([id, p]) => {
-    const isOos = p.outOfStock && p.outOfStock[activeStoreId] === true;
+    const isOos = p.globalOutOfStock === true;
     return `
       <div class="stock-item">
         <div>
           <div style="font-size:13px;font-weight:700;">${escapeHtml(p.name)}</div>
           <div style="font-size:11px;color:#64748B;">${escapeHtml(p.unit)} • ₹${p.price}</div>
         </div>
-        <button class="btn ${isOos ? 'btn-red' : 'btn-green'}" style="padding:6px 10px;font-size:11px;" onclick="toggleLocalOos('${id}', ${!isOos})">
+        <button class="btn ${isOos ? 'btn-red' : 'btn-green'}" style="padding:6px 10px;font-size:11px;" onclick="db.ref('products/${id}').update({globalOutOfStock: ${!isOos}})">
           ${isOos ? 'Out of Stock' : 'In Stock'}
         </button>
       </div>
     `;
   }).join('');
-}
-
-function toggleLocalOos(prodId, markOos) {
-  db.ref(`products/${prodId}/outOfStock/${activeStoreId}`).set(markOos ? true : null)
-    .then(() => showToast(markOos ? 'Marked Out of Stock' : 'Marked In Stock', 'dark'));
 }
 </script>
 </body>

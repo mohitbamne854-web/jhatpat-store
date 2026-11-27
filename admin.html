@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jhatpat — Super Admin HQ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -20,9 +18,8 @@
     --border: #E2E8F0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); }
 
-  /* Login Lock Screen */
   .lock-screen {
     position: fixed; inset: 0; background: #0F172A; display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px;
   }
@@ -41,7 +38,6 @@
   .btn-dark { background: #1E293B; color: #fff; }
   .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
 
-  /* Layout */
   .topbar {
     background: #0F172A; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 40;
   }
@@ -56,7 +52,6 @@
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  /* KPI Grid */
   .kpi-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;
   }
@@ -79,7 +74,7 @@
     width: 100%; padding: 9px 12px; border: 1px solid #CBD5E1; border-radius: 9px; font-family: inherit; font-size: 13px;
   }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
   th { background: #F8FAFC; font-weight: 800; color: #475569; font-size: 12px; }
   .table-wrap { overflow-x: auto; }
   .badge {
@@ -89,19 +84,20 @@
   .badge-red { background: #FEE2E2; color: #991B1B; }
   .badge-amber { background: #FEF3C7; color: #92400E; }
 
-  /* Modal */
   .modal-bg {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.6); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
+    position: fixed; inset: 0; background: rgba(15,23,42,0.65); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
   }
   .modal-bg.open { display: flex; }
   .modal-box {
-    background: #fff; border-radius: 18px; padding: 22px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    background: #fff; border-radius: 18px; padding: 22px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  }
+  .upload-label {
+    display: inline-flex; align-items: center; gap: 6px; background: #EFF6FF; color: #1D4ED8; border: 1px dashed #3B82F6; padding: 9px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; cursor: pointer;
   }
 </style>
 </head>
 <body>
 
-<!-- Admin Authentication Gate -->
 <div class="lock-screen" id="lockScreen">
   <div class="lock-card">
     <div style="font-size:38px;">⚡</div>
@@ -118,15 +114,14 @@
     <strong>Super Admin HQ</strong>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
-    <span id="dbCountPill" style="font-size:12px;background:#1E293B;padding:5px 10px;border-radius:8px;">0 Cities • 0 Stores</span>
+    <span id="dbCountPill" style="font-size:12px;background:#1E293B;padding:5px 10px;border-radius:8px;">0 Items</span>
     <button class="btn btn-danger" onclick="logoutAdmin()">Lock</button>
   </div>
 </header>
 
 <nav class="nav-tabs">
-  <button class="nav-tab active" onclick="switchTab('storesTab', this)">🏪 Multi-City Dark Stores</button>
-  <button class="nav-tab" onclick="switchTab('catalogTab', this)">🥦 Catalog & Store Stock</button>
-  <button class="nav-tab" onclick="switchTab('kycTab', this)">🪪 Seller KYC Approvals <span id="kycBadge" class="badge badge-amber" style="margin-left:4px;">0</span></button>
+  <button class="nav-tab active" onclick="switchTab('catalogTab', this)">🥦 Catalog & Store Stock</button>
+  <button class="nav-tab" onclick="switchTab('storesTab', this)">🏪 Active Dark Stores</button>
   <button class="nav-tab" onclick="switchTab('financeTab', this)">💰 City & Store Financials</button>
   <button class="nav-tab" onclick="switchTab('ordersTab', this)">📦 Live Orders Override</button>
   <button class="nav-tab" onclick="switchTab('crmTab', this)">👥 Customer CRM & WhatsApp</button>
@@ -135,36 +130,72 @@
 
 <div class="main-wrap">
 
-  <!-- TAB 1: MULTI-CITY DARK STORE CREATOR & MANAGER -->
-  <div class="tab-panel active" id="storesTab">
+  <div class="tab-panel active" id="catalogTab">
     <div class="card">
       <div class="card-head">
         <div>
-          <h3>➕ Create Multi-City Dark Store</h3>
-          <p style="font-size:12px;color:var(--muted);">Database starts with 0 cities & 0 stores. Set custom Store ID & Store Password.</p>
+          <h3>🥦 Add New Product (Phone Gallery Upload)</h3>
+          <p style="font-size:12px;color:var(--muted);">Apne phone ki gallery se photo upload karein aur price/unit set karein.</p>
         </div>
-        <button class="btn btn-danger" onclick="deleteAllStores()">🗑️ Delete All Existing Stores</button>
       </div>
-      <div class="form-grid">
-        <input type="text" id="newStoreCity" placeholder="City Name (e.g. Mumbai, Indore) *">
-        <input type="text" id="newStoreArea" placeholder="Area / Locality (e.g. Kalyan West) *">
-        <input type="text" id="newStoreName" placeholder="Dark Store Name *">
-        <input type="text" id="newStoreId" placeholder="Custom Store ID (e.g. JHT-MUM-01) *">
-        <input type="text" id="newStorePass" placeholder="Custom Store Password *">
-        <input type="text" id="newStoreOwner" placeholder="Manager / Partner Name">
-        <input type="tel" id="newStorePhone" placeholder="Manager Phone">
-        <input type="number" step="any" id="newStoreLat" placeholder="Latitude (optional, e.g. 19.2403)">
-        <input type="number" step="any" id="newStoreLng" placeholder="Longitude (optional, e.g. 73.1305)">
+
+      <div class="form-grid" style="align-items:center;">
+        <input type="text" id="prodNameInput" placeholder="Product Name (e.g. Fresh Onion) *">
+        <select id="prodCatInput">
+          <option value="Fresh Vegetables">Fresh Vegetables</option>
+          <option value="Fresh Fruits">Fresh Fruits</option>
+          <option value="Cold Pressed Juices">Cold Pressed Juices</option>
+          <option value="Leafy & Herbs">Leafy & Herbs</option>
+          <option value="Exotic & Organic">Exotic & Organic</option>
+        </select>
+        <input type="text" id="prodUnitInput" placeholder="Pack Size (e.g. 500 g, 1 kg) *">
+        <input type="number" id="prodPriceInput" placeholder="Selling Price ₹ *">
+        <input type="number" id="prodMrpInput" placeholder="MRP ₹ (Optional)">
+        <div>
+          <label class="upload-label">
+            📷 Gallery se Photo Chunein
+            <input type="file" id="prodGalleryFile" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, 'prodPreviewImg', 'prodImgInput')">
+          </label>
+          <input type="hidden" id="prodImgInput">
+        </div>
       </div>
-      <div style="margin-top:12px;display:flex;gap:10px;">
-        <button class="btn btn-primary" onclick="createDarkStore()">✅ Create Dark Store</button>
-        <button class="btn btn-outline" onclick="fillAdminGPS()">📍 Use My Current Lat/Lng</button>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <img id="prodPreviewImg" src="" alt="Preview" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;background:#F8FAFC;">
+        <button class="btn btn-primary" onclick="addSingleProduct()">+ Add Product to Catalog</button>
       </div>
     </div>
 
     <div class="card">
       <div class="card-head">
-        <h3>Active Dark Stores Directory</h3>
+        <h3>Live Catalog (<span id="catalogTotalCount">0</span> Items)</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="catalogSearch" placeholder="Search product..." style="width:190px;" oninput="renderCatalogTable()">
+          <select id="catalogStoreOosFilter" style="width:210px;" onchange="renderCatalogTable()">
+            <option value="">Select Store for Stock Toggle</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Product Details</th>
+              <th>Price / MRP</th>
+              <th>Store Stock</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="catalogTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="storesTab">
+    <div class="card">
+      <div class="card-head">
+        <h3>🏪 Active Dark Stores Directory</h3>
         <select id="storeListCityFilter" style="width:200px;" onchange="renderStoresTable()">
           <option value="ALL">All Cities</option>
         </select>
@@ -176,10 +207,8 @@
               <th>Store ID</th>
               <th>City & Area</th>
               <th>Store Name</th>
-              <th>Store Password</th>
-              <th>Coordinates</th>
               <th>Status</th>
-              <th>Actions</th>
+              <th>Toggle Open/Close</th>
             </tr>
           </thead>
           <tbody id="storesTableBody"></tbody>
@@ -188,138 +217,24 @@
     </div>
   </div>
 
-  <!-- TAB 2: CATALOG & STORE-WISE OUT-OF-STOCK -->
-  <div class="tab-panel" id="catalogTab">
-    <div class="card">
-      <div class="card-head">
-        <div>
-          <h3>🥦 Product Catalog & Auto-HD Image Fetcher</h3>
-          <p style="font-size:12px;color:var(--muted);">Type any product name to auto-fetch an HD photo, edit rates inline, or toggle store-wise availability.</p>
-        </div>
-        <button class="btn btn-yellow" onclick="load100PlusPack()">⚡ Load 100+ Sabzi, Fruits & Juice Pack</button>
-      </div>
-
-      <div class="form-grid" style="align-items:center;">
-        <input type="text" id="prodNameInput" placeholder="Product Name (e.g. Alphonso Mango)" oninput="autoFetchProductPhoto()">
-        <select id="prodCatInput">
-          <option value="Fresh Vegetables">Fresh Vegetables</option>
-          <option value="Fresh Fruits">Fresh Fruits</option>
-          <option value="Cold Pressed Juices">Cold Pressed Juices</option>
-          <option value="Leafy & Herbs">Leafy & Herbs</option>
-          <option value="Exotic & Organic">Exotic & Organic</option>
-        </select>
-        <input type="text" id="prodUnitInput" placeholder="Pack Size (e.g. 500 g, 1 L)">
-        <input type="number" id="prodPriceInput" placeholder="Selling Price ₹">
-        <input type="number" id="prodMrpInput" placeholder="MRP ₹">
-        <input type="text" id="prodImgInput" placeholder="HD Image URL (auto-filled)">
-      </div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
-        <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" style="width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid #CBD5E1;">
-        <button class="btn btn-primary" onclick="addSingleProduct()">+ Add Product to Catalog</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <h3>Live Catalog (<span id="catalogTotalCount">0</span> Items)</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <input type="text" id="catalogSearch" placeholder="Filter products..." style="width:190px;" oninput="renderCatalogTable()">
-          <select id="catalogStoreOosFilter" style="width:220px;" onchange="renderCatalogTable()">
-            <option value="">Select Store for Stock Toggle</option>
-          </select>
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Photo</th>
-              <th>Product Name</th>
-              <th>Category</th>
-              <th>Unit</th>
-              <th>Inline Rate (₹)</th>
-              <th>Store Availability</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody id="catalogTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 3: 1-TAP EASY SELLER KYC APPROVAL -->
-  <div class="tab-panel" id="kycTab">
-    <div class="card">
-      <div class="card-head">
-        <h3>🪪 Seller Partner KYC Applications</h3>
-        <span style="font-size:12px;color:var(--muted);">1-Click Approve auto-provisions the dark store with the seller's chosen Store ID & Password.</span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Applicant & Business</th>
-              <th>City & Area</th>
-              <th>Chosen Store ID</th>
-              <th>Chosen Password</th>
-              <th>Docs / FSSAI</th>
-              <th>Status</th>
-              <th>1-Tap Action</th>
-            </tr>
-          </thead>
-          <tbody id="kycTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 4: FINANCIAL BREAKDOWN (12% COMMISSION / 88% PAYOUT) -->
   <div class="tab-panel" id="financeTab">
     <div class="card">
       <div class="card-head">
         <h3>💰 Store-Wise & City-Wise Financial Breakdown</h3>
-        <div style="display:flex;gap:8px;">
-          <select id="finCityFilter" style="width:180px;" onchange="renderFinancials()">
-            <option value="ALL">All Cities</option>
-          </select>
-          <select id="finStoreFilter" style="width:200px;" onchange="renderFinancials()">
-            <option value="ALL">All Dark Stores</option>
-          </select>
-        </div>
+        <select id="finCityFilter" style="width:180px;" onchange="renderFinancials()">
+          <option value="ALL">All Cities</option>
+        </select>
       </div>
-
       <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">TOTAL ORDERS</div>
-          <div class="kpi-val" id="finOrders">0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">GROSS SALES (GMV)</div>
-          <div class="kpi-val" id="finSales">₹0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">PLATFORM COMMISSION (12%)</div>
-          <div class="kpi-val" style="color:#0C831F;" id="finComm">₹0</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">DARK STORE PAYOUT (88%)</div>
-          <div class="kpi-val" style="color:#2563EB;" id="finPayout">₹0</div>
-        </div>
+        <div class="kpi-card"><div class="kpi-label">TOTAL ORDERS</div><div class="kpi-val" id="finOrders">0</div></div>
+        <div class="kpi-card"><div class="kpi-label">GROSS SALES (GMV)</div><div class="kpi-val" id="finSales">₹0</div></div>
+        <div class="kpi-card"><div class="kpi-label">PLATFORM COMMISSION (12%)</div><div class="kpi-val" style="color:#0C831F;" id="finComm">₹0</div></div>
+        <div class="kpi-card"><div class="kpi-label">DARK STORE PAYOUT (88%)</div><div class="kpi-val" style="color:#2563EB;" id="finPayout">₹0</div></div>
       </div>
-
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Store ID</th>
-              <th>Store Name</th>
-              <th>City</th>
-              <th>Orders</th>
-              <th>Gross Sales</th>
-              <th>Jhatpat 12%</th>
-              <th>Store Payout 88%</th>
-            </tr>
+            <tr><th>Store ID</th><th>Store Name</th><th>City</th><th>Orders</th><th>Gross Sales</th><th>Jhatpat 12%</th><th>Payout 88%</th></tr>
           </thead>
           <tbody id="finTableBody"></tbody>
         </table>
@@ -327,23 +242,13 @@
     </div>
   </div>
 
-  <!-- TAB 5: LIVE ORDER STATUS OVERRIDE -->
   <div class="tab-panel" id="ordersTab">
     <div class="card">
-      <div class="card-head">
-        <h3>📦 Live Orders Command & Status Override</h3>
-      </div>
+      <div class="card-head"><h3>📦 Live Orders Command & Status Override</h3></div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Store / City</th>
-              <th>Customer</th>
-              <th>Items</th>
-              <th>Total & Pay</th>
-              <th>Status Override</th>
-            </tr>
+            <tr><th>Order ID</th><th>Store / City</th><th>Customer</th><th>Items</th><th>Total</th><th>Status Override</th></tr>
           </thead>
           <tbody id="adminOrdersBody"></tbody>
         </table>
@@ -351,23 +256,13 @@
     </div>
   </div>
 
-  <!-- TAB 6: CUSTOMER CRM & 1-CLICK WHATSAPP -->
   <div class="tab-panel" id="crmTab">
     <div class="card">
-      <div class="card-head">
-        <h3>👥 Customer CRM & 1-Click WhatsApp Engagement</h3>
-      </div>
+      <div class="card-head"><h3>👥 Customer CRM & 1-Click WhatsApp</h3></div>
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th>Customer Name</th>
-              <th>Phone</th>
-              <th>City & Address</th>
-              <th>Orders</th>
-              <th>Total Spend</th>
-              <th>1-Click WhatsApp SMS</th>
-            </tr>
+            <tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Total Spend</th><th>WhatsApp</th></tr>
           </thead>
           <tbody id="crmTableBody"></tbody>
         </table>
@@ -375,19 +270,15 @@
     </div>
   </div>
 
-  <!-- TAB 7: COUPON & BANNER MANAGER -->
   <div class="tab-panel" id="marketingTab">
     <div class="card">
       <h3 style="margin-bottom:12px;">🎟️ Create Promo Coupon</h3>
       <div class="form-grid">
-        <input type="text" id="cpCode" placeholder="Coupon Code (e.g. JHATPAT50)" style="text-transform:uppercase;">
-        <select id="cpType">
-          <option value="FLAT">Flat Discount (₹)</option>
-          <option value="PERCENT">Percentage (%)</option>
-        </select>
-        <input type="number" id="cpValue" placeholder="Discount Value (e.g. 50 or 15)">
-        <input type="number" id="cpMinOrder" placeholder="Min Order ₹ (e.g. 199)">
-        <input type="number" id="cpMaxDisc" placeholder="Max Discount ₹ (for %)">
+        <input type="text" id="cpCode" placeholder="Code (e.g. JHATPAT50)" style="text-transform:uppercase;">
+        <select id="cpType"><option value="FLAT">Flat Discount (₹)</option><option value="PERCENT">Percentage (%)</option></select>
+        <input type="number" id="cpValue" placeholder="Value (e.g. 50)">
+        <input type="number" id="cpMinOrder" placeholder="Min Order ₹">
+        <input type="number" id="cpMaxDisc" placeholder="Max Discount ₹">
       </div>
       <button class="btn btn-primary" style="margin-top:10px;" onclick="saveCoupon()">+ Save Coupon</button>
       <div class="table-wrap" style="margin-top:14px;">
@@ -401,15 +292,14 @@
     <div class="card">
       <h3 style="margin-bottom:12px;">🖼️ Add App Promo Banner</h3>
       <div class="form-grid">
-        <input type="text" id="bnTag" placeholder="Badge Tag (e.g. FLASH SALE)">
-        <input type="text" id="bnTitle" placeholder="Banner Title (e.g. Fresh Alphonso Mangoes)">
-        <input type="text" id="bnSub" placeholder="Subtitle (e.g. Delivered in 10 mins flat)">
-        <input type="text" id="bnEmoji" placeholder="Emoji Icon (e.g. 🥭)">
+        <input type="text" id="bnTag" placeholder="Tag (e.g. FLASH SALE)">
+        <input type="text" id="bnTitle" placeholder="Title">
+        <input type="text" id="bnSub" placeholder="Subtitle">
+        <input type="text" id="bnEmoji" placeholder="Emoji (e.g. 🥭)">
         <select id="bnBg">
           <option value="linear-gradient(135deg,#0C831F,#16A34A)">Blinkit Green</option>
           <option value="linear-gradient(135deg,#EA580C,#F59E0B)">Mango Orange</option>
           <option value="linear-gradient(135deg,#1D4ED8,#3B82F6)">Royal Blue</option>
-          <option value="linear-gradient(135deg,#7C3AED,#EC4899)">Berry Purple</option>
         </select>
       </div>
       <button class="btn btn-primary" style="margin-top:10px;" onclick="saveBanner()">+ Publish Banner</button>
@@ -419,54 +309,57 @@
 
 </div>
 
-<!-- Full Edit Dark Store Modal -->
-<div class="modal-bg" id="editStoreModal">
+<div class="modal-bg" id="editProdModal">
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <h3>✏️ Edit Dark Store</h3>
-      <button class="btn btn-outline" onclick="closeEditModal()">✕</button>
+      <h3>✏️ Edit Product Details</h3>
+      <button class="btn btn-outline" onclick="closeEditProdModal()">✕</button>
     </div>
-    <input type="hidden" id="editStoreOrigId">
+    <input type="hidden" id="editProdId">
     <div style="display:flex;flex-direction:column;gap:10px;">
-      <label style="font-size:12px;font-weight:700;">Store ID (Read-Only Key)</label>
-      <input type="text" id="editStoreIdDisplay" disabled style="background:#F1F5F9;">
-      <label style="font-size:12px;font-weight:700;">City</label>
-      <input type="text" id="editStoreCity">
-      <label style="font-size:12px;font-weight:700;">Area / Locality</label>
-      <input type="text" id="editStoreArea">
-      <label style="font-size:12px;font-weight:700;">Store Name</label>
-      <input type="text" id="editStoreName">
-      <label style="font-size:12px;font-weight:700;">Store Login Password</label>
-      <input type="text" id="editStorePass">
-      <label style="font-size:12px;font-weight:700;">Manager Name</label>
-      <input type="text" id="editStoreOwner">
-      <label style="font-size:12px;font-weight:700;">Manager Phone</label>
-      <input type="text" id="editStorePhone">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img id="editProdPreviewImg" src="" alt="Product" style="width:70px;height:70px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;background:#F8FAFC;">
+        <label class="upload-label">
+          📷 Gallery se Nayi Photo Lagayein
+          <input type="file" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, 'editProdPreviewImg', 'editProdImgInput')">
+        </label>
+        <input type="hidden" id="editProdImgInput">
+      </div>
+
+      <label style="font-size:12px;font-weight:700;">Product Name *</label>
+      <input type="text" id="editProdName">
+
+      <label style="font-size:12px;font-weight:700;">Category *</label>
+      <select id="editProdCat">
+        <option value="Fresh Vegetables">Fresh Vegetables</option>
+        <option value="Fresh Fruits">Fresh Fruits</option>
+        <option value="Cold Pressed Juices">Cold Pressed Juices</option>
+        <option value="Leafy & Herbs">Leafy & Herbs</option>
+        <option value="Exotic & Organic">Exotic & Organic</option>
+      </select>
+
+      <label style="font-size:12px;font-weight:700;">Pack Size / Unit (e.g. 500 g, 1 kg) *</label>
+      <input type="text" id="editProdUnit">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div>
-          <label style="font-size:12px;font-weight:700;">Latitude</label>
-          <input type="number" step="any" id="editStoreLat">
+          <label style="font-size:12px;font-weight:700;">Selling Price (₹) *</label>
+          <input type="number" id="editProdPrice">
         </div>
         <div>
-          <label style="font-size:12px;font-weight:700;">Longitude</label>
-          <input type="number" step="any" id="editStoreLng">
+          <label style="font-size:12px;font-weight:700;">MRP (₹)</label>
+          <input type="number" id="editProdMrp">
         </div>
       </div>
-      <label style="font-size:12px;font-weight:700;">Store Operational Status</label>
-      <select id="editStoreOpen">
-        <option value="true">OPEN (Accepting 10m Orders)</option>
-        <option value="false">CLOSED (Temporarily Offline)</option>
-      </select>
     </div>
-    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEditedStore()">💾 Save Changes</button>
+    <div style="margin-top:16px;display:flex;gap:10px;">
+      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveEditedProduct()">💾 Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditProdModal()">Cancel</button>
     </div>
   </div>
 </div>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyDummyKeyForRTDBAccess",
   authDomain: "jhatpat-22aa8.firebaseapp.com",
@@ -476,29 +369,18 @@ const firebaseConfig = {
   messagingSenderId: "100000000000",
   appId: "1:100000000000:web:jhatpat22aa8"
 };
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function haversineKm(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
+let allProducts = {};
+let allStores = {};
+let allOrders = {};
+let allCoupons = {};
+let allBanners = {};
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function showToast(msg, type = 'dark') {
@@ -506,663 +388,286 @@ function showToast(msg, type = 'dark') {
   if (!box) {
     box = document.createElement('div');
     box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
+    box.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:360px;';
     document.body.appendChild(box);
   }
   const el = document.createElement('div');
   const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
+  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
   el.textContent = msg;
   box.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
+  setTimeout(() => el.remove(), 2800);
 }
 
-
-const ADMIN_MASTER_PASS = 'MOHIT@001';
-let storesData = {};
-let productsData = {};
-let kycData = {};
-let ordersData = {};
-let customersData = {};
-let couponsData = {};
-let bannersData = {};
-
-if (sessionStorage.getItem('jhatpat_admin_auth') === 'true') {
+if (sessionStorage.getItem('jhatpat_admin_unlocked') === '1') {
   document.getElementById('lockScreen').style.display = 'none';
   bootAdmin();
 }
 
 function unlockAdmin() {
-  const val = document.getElementById('adminPassInput').value.trim();
-  if (val === ADMIN_MASTER_PASS) {
-    sessionStorage.setItem('jhatpat_admin_auth', 'true');
+  const pass = document.getElementById('adminPassInput').value.trim();
+  if (pass === 'MOHIT@001') {
+    sessionStorage.setItem('jhatpat_admin_unlocked', '1');
     document.getElementById('lockScreen').style.display = 'none';
     bootAdmin();
   } else {
-    showToast('Invalid Admin Password!', 'error');
+    showToast('Wrong Admin Password!', 'error');
   }
 }
 
 function logoutAdmin() {
-  sessionStorage.removeItem('jhatpat_admin_auth');
+  sessionStorage.removeItem('jhatpat_admin_unlocked');
   location.reload();
 }
 
-function switchTab(tabId, btn) {
+function switchTab(panelId, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
+  document.getElementById(panelId).classList.add('active');
   btn.classList.add('active');
 }
 
+function handleGalleryUpload(event, previewImgId, hiddenInputId) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX_SIZE = 320;
+      let w = img.width;
+      let h = img.height;
+      if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } }
+      else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+      document.getElementById(previewImgId).src = compressedDataUrl;
+      document.getElementById(hiddenInputId).value = compressedDataUrl;
+      showToast('Gallery se photo select ho gayi!', 'success');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function bootAdmin() {
-  db.ref('stores').on('value', snap => {
-    storesData = snap.val() || {};
-    const storeCount = Object.keys(storesData).length;
-    const cityCount = new Set(Object.values(storesData).map(s => s.city).filter(Boolean)).size;
-    document.getElementById('dbCountPill').textContent = `${cityCount} Cities • ${storeCount} Stores`;
-    syncCityAndStoreDropdowns();
-    renderStoresTable();
-    renderCatalogTable();
-    renderFinancials();
-  });
-
   db.ref('products').on('value', snap => {
-    productsData = snap.val() || {};
-    document.getElementById('catalogTotalCount').textContent = Object.keys(productsData).length;
+    allProducts = snap.val() || {};
+    document.getElementById('dbCountPill').textContent = `${Object.keys(allProducts).length} Items`;
     renderCatalogTable();
   });
 
-  db.ref('seller_kyc').on('value', snap => {
-    kycData = snap.val() || {};
-    const pendingCount = Object.values(kycData).filter(k => k.status === 'PENDING').length;
-    document.getElementById('kycBadge').textContent = pendingCount;
-    renderKycTable();
+  db.ref('stores').on('value', snap => {
+    allStores = snap.val() || {};
+    populateStoreDropdowns();
+    renderStoresTable();
+    renderFinancials();
   });
 
   db.ref('orders').on('value', snap => {
-    ordersData = snap.val() || {};
-    renderAdminOrders();
+    allOrders = snap.val() || {};
     renderFinancials();
-  });
-
-  db.ref('customers').on('value', snap => {
-    customersData = snap.val() || {};
-    renderCrmTable();
+    renderAdminOrders();
+    renderCRM();
   });
 
   db.ref('coupons').on('value', snap => {
-    couponsData = snap.val() || {};
-    renderCouponsTable();
+    allCoupons = snap.val() || {};
+    renderCoupons();
   });
 
   db.ref('banners').on('value', snap => {
-    bannersData = snap.val() || {};
-    renderBannersAdmin();
+    allBanners = snap.val() || {};
+    renderBanners();
   });
-}
-
-function syncCityAndStoreDropdowns() {
-  const cities = [...new Set(Object.values(storesData).map(s => s.city).filter(Boolean))];
-  const cityOpts = '<option value="ALL">All Cities</option>' + cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
-  document.getElementById('storeListCityFilter').innerHTML = cityOpts;
-  document.getElementById('finCityFilter').innerHTML = cityOpts;
-
-  const storeEntries = Object.entries(storesData);
-  const storeOpts = '<option value="ALL">All Dark Stores</option>' + storeEntries.map(([id, s]) => `<option value="${escapeHtml(id)}">${escapeHtml(s.name)} (${escapeHtml(s.city)})</option>`).join('');
-  document.getElementById('finStoreFilter').innerHTML = storeOpts;
-
-  const oosSel = document.getElementById('catalogStoreOosFilter');
-  const prevOos = oosSel.value;
-  oosSel.innerHTML = '<option value="">Select Store for Stock Toggle</option>' + storeEntries.map(([id, s]) => `<option value="${escapeHtml(id)}">${escapeHtml(s.name)} [${escapeHtml(id)}]</option>`).join('');
-  if (prevOos && storesData[prevOos]) oosSel.value = prevOos;
-  else if (storeEntries.length > 0) oosSel.value = storeEntries[0][0];
-}
-
-function fillAdminGPS() {
-  if (!navigator.geolocation) return showToast('Geolocation not supported', 'error');
-  navigator.geolocation.getCurrentPosition(pos => {
-    document.getElementById('newStoreLat').value = pos.coords.latitude.toFixed(6);
-    document.getElementById('newStoreLng').value = pos.coords.longitude.toFixed(6);
-    showToast('Coordinates captured!', 'success');
-  }, () => showToast('Unable to fetch GPS', 'error'));
-}
-
-function createDarkStore() {
-  const city = document.getElementById('newStoreCity').value.trim();
-  const area = document.getElementById('newStoreArea').value.trim();
-  const name = document.getElementById('newStoreName').value.trim();
-  const storeId = document.getElementById('newStoreId').value.trim().replace(/[.#$\[\]]/g, '_');
-  const password = document.getElementById('newStorePass').value.trim();
-  const owner = document.getElementById('newStoreOwner').value.trim();
-  const phone = document.getElementById('newStorePhone').value.trim();
-  const lat = parseFloat(document.getElementById('newStoreLat').value) || 0;
-  const lng = parseFloat(document.getElementById('newStoreLng').value) || 0;
-
-  if (!city || !area || !name || !storeId || !password) {
-    showToast('City, Area, Store Name, Store ID & Password are required!', 'error');
-    return;
-  }
-
-  db.ref('stores/' + storeId).set({
-    storeId, city, area, name, password, owner, phone, lat, lng, isOpen: true, createdAt: Date.now()
-  }).then(() => {
-    ['newStoreCity','newStoreArea','newStoreName','newStoreId','newStorePass','newStoreOwner','newStorePhone','newStoreLat','newStoreLng'].forEach(id => document.getElementById(id).value = '');
-    showToast(`Dark Store ${name} (${storeId}) created!`, 'success');
-  });
-}
-
-function deleteAllStores() {
-  if (!confirm('Are you sure you want to DELETE ALL dark stores? This resets cities & stores to 0.')) return;
-  db.ref('stores').remove().then(() => showToast('All dark stores deleted.', 'dark'));
-}
-
-function renderStoresTable() {
-  const filterCity = document.getElementById('storeListCityFilter').value;
-  const tbody = document.getElementById('storesTableBody');
-  const rows = Object.entries(storesData).filter(([, s]) => filterCity === 'ALL' || s.city === filterCity);
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748B;padding:24px;">0 Dark Stores in database. Create one above or approve a Seller KYC.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(([id, s]) => `
-    <tr>
-      <td><strong>${escapeHtml(id)}</strong></td>
-      <td>${escapeHtml(s.city)} — ${escapeHtml(s.area)}</td>
-      <td>${escapeHtml(s.name)}</td>
-      <td><code>${escapeHtml(s.password)}</code></td>
-      <td>${s.lat ? `${s.lat}, ${s.lng}` : 'Not set'}</td>
-      <td><span class="badge ${s.isOpen !== false ? 'badge-green' : 'badge-red'}">${s.isOpen !== false ? 'OPEN' : 'CLOSED'}</span></td>
-      <td style="display:flex;gap:6px;">
-        <button class="btn btn-outline" onclick="openEditStore('${id}')">✏️ Edit</button>
-        <button class="btn btn-danger" onclick="deleteSingleStore('${id}')">🗑️</button>
-      </td>
-    </tr>
-  `).join('');
-}
-
-function openEditStore(id) {
-  const s = storesData[id];
-  if (!s) return;
-  document.getElementById('editStoreOrigId').value = id;
-  document.getElementById('editStoreIdDisplay').value = id;
-  document.getElementById('editStoreCity').value = s.city || '';
-  document.getElementById('editStoreArea').value = s.area || '';
-  document.getElementById('editStoreName').value = s.name || '';
-  document.getElementById('editStorePass').value = s.password || '';
-  document.getElementById('editStoreOwner').value = s.owner || '';
-  document.getElementById('editStorePhone').value = s.phone || '';
-  document.getElementById('editStoreLat').value = s.lat || '';
-  document.getElementById('editStoreLng').value = s.lng || '';
-  document.getElementById('editStoreOpen').value = String(s.isOpen !== false);
-  document.getElementById('editStoreModal').classList.add('open');
-}
-
-function closeEditModal() { document.getElementById('editStoreModal').classList.remove('open'); }
-
-function saveEditedStore() {
-  const id = document.getElementById('editStoreOrigId').value;
-  if (!id) return;
-  db.ref('stores/' + id).update({
-    city: document.getElementById('editStoreCity').value.trim(),
-    area: document.getElementById('editStoreArea').value.trim(),
-    name: document.getElementById('editStoreName').value.trim(),
-    password: document.getElementById('editStorePass').value.trim(),
-    owner: document.getElementById('editStoreOwner').value.trim(),
-    phone: document.getElementById('editStorePhone').value.trim(),
-    lat: parseFloat(document.getElementById('editStoreLat').value) || 0,
-    lng: parseFloat(document.getElementById('editStoreLng').value) || 0,
-    isOpen: document.getElementById('editStoreOpen').value === 'true'
-  }).then(() => {
-    closeEditModal();
-    showToast('Store updated!', 'success');
-  });
-}
-
-function deleteSingleStore(id) {
-  if (confirm(`Delete store ${id}?`)) {
-    db.ref('stores/' + id).remove();
-  }
-}
-
-// Auto-HD Photo Fetch on typing product name
-const HD_PHOTO_DICTIONARY = [
-  { keys: ['apple', 'seb'], url: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&q=80' },
-  { keys: ['banana', 'kela'], url: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&q=80' },
-  { keys: ['mango', 'alphonso', 'aam'], url: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=500&q=80' },
-  { keys: ['orange', 'santra', 'mosambi'], url: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=500&q=80' },
-  { keys: ['strawberry'], url: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&q=80' },
-  { keys: ['watermelon', 'tarbooz'], url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=500&q=80' },
-  { keys: ['pineapple', 'ananas'], url: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&q=80' },
-  { keys: ['grapes', 'angoor'], url: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=500&q=80' },
-  { keys: ['pomegranate', 'anar'], url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&q=80' },
-  { keys: ['papaya', 'papita'], url: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=500&q=80' },
-  { keys: ['kiwi'], url: 'https://images.unsplash.com/photo-1585059895524-72359e06133a?w=500&q=80' },
-  { keys: ['avocado'], url: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=500&q=80' },
-  { keys: ['tomato', 'tamatar'], url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&q=80' },
-  { keys: ['potato', 'aloo'], url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&q=80' },
-  { keys: ['onion', 'pyaz'], url: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=500&q=80' },
-  { keys: ['carrot', 'gajar'], url: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&q=80' },
-  { keys: ['broccoli'], url: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=500&q=80' },
-  { keys: ['spinach', 'palak', 'coriander', 'dhaniya', 'mint', 'pudina', 'methi'], url: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&q=80' },
-  { keys: ['capsicum', 'bell pepper', 'shimla'], url: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=500&q=80' },
-  { keys: ['cucumber', 'kheera'], url: 'https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=500&q=80' },
-  { keys: ['cauliflower', 'gobi', 'cabbage'], url: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=500&q=80' },
-  { keys: ['garlic', 'lahsun', 'ginger', 'adrak'], url: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=500&q=80' },
-  { keys: ['lemon', 'nimbu', 'lime'], url: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=500&q=80' },
-  { keys: ['mushroom'], url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&q=80' },
-  { keys: ['juice', 'smoothie', 'shake', 'coconut water'], url: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500&q=80' }
-];
-
-function getHdPhotoForName(name) {
-  const lower = (name || '').toLowerCase();
-  for (const entry of HD_PHOTO_DICTIONARY) {
-    if (entry.keys.some(k => lower.includes(k))) return entry.url;
-  }
-  const cleanKw = encodeURIComponent((name || 'fresh vegetables').split(' ').slice(0, 2).join(','));
-  return `https://source.unsplash.com/500x500/?${cleanKw},fresh`;
-}
-
-function autoFetchProductPhoto() {
-  const name = document.getElementById('prodNameInput').value.trim();
-  if (!name) return;
-  const url = getHdPhotoForName(name);
-  document.getElementById('prodImgInput').value = url;
-  document.getElementById('prodPreviewImg').src = url;
 }
 
 function addSingleProduct() {
   const name = document.getElementById('prodNameInput').value.trim();
   const category = document.getElementById('prodCatInput').value;
-  const unit = document.getElementById('prodUnitInput').value.trim() || '500 g';
-  const price = parseFloat(document.getElementById('prodPriceInput').value) || 0;
-  const mrp = parseFloat(document.getElementById('prodMrpInput').value) || Math.round(price * 1.2);
-  const image = document.getElementById('prodImgInput').value.trim() || getHdPhotoForName(name);
+  const unit = document.getElementById('prodUnitInput').value.trim();
+  const price = Number(document.getElementById('prodPriceInput').value);
+  const mrp = Number(document.getElementById('prodMrpInput').value) || price;
+  const img = document.getElementById('prodImgInput').value || '';
 
-  if (!name || price <= 0) {
-    showToast('Enter Product Name and valid Selling Price!', 'error');
-    return;
+  if (!name || !unit || !price) {
+    return showToast('Product Name, Unit aur Selling Price zaroori hai!', 'error');
   }
-  const id = 'PRD_' + Date.now();
-  db.ref('products/' + id).set({ name, category, unit, price, mrp, image }).then(() => {
-    ['prodNameInput','prodUnitInput','prodPriceInput','prodMrpInput','prodImgInput'].forEach(i => document.getElementById(i).value = '');
-    showToast(`Added ${name}!`, 'success');
+
+  const id = 'PROD_' + Date.now();
+  db.ref('products/' + id).set({
+    id, name, category, unit, price, mrp, image: img, img: img, createdAt: Date.now()
+  }).then(() => {
+    document.getElementById('prodNameInput').value = '';
+    document.getElementById('prodUnitInput').value = '';
+    document.getElementById('prodPriceInput').value = '';
+    document.getElementById('prodMrpInput').value = '';
+    document.getElementById('prodImgInput').value = '';
+    document.getElementById('prodPreviewImg').src = '';
+    document.getElementById('prodGalleryFile').value = '';
+    showToast('✅ Product add ho gaya!', 'success');
   });
+}
+
+function openEditProdModal(id) {
+  const p = allProducts[id];
+  if (!p) return;
+  document.getElementById('editProdId').value = id;
+  document.getElementById('editProdName').value = p.name || '';
+  document.getElementById('editProdCat').value = p.category || 'Fresh Vegetables';
+  document.getElementById('editProdUnit').value = p.unit || '';
+  document.getElementById('editProdPrice').value = p.price || '';
+  document.getElementById('editProdMrp').value = p.mrp || p.price || '';
+  const currentImg = p.image || p.img || '';
+  document.getElementById('editProdPreviewImg').src = currentImg;
+  document.getElementById('editProdImgInput').value = currentImg;
+  document.getElementById('editProdModal').classList.add('open');
+}
+
+function closeEditProdModal() {
+  document.getElementById('editProdModal').classList.remove('open');
+}
+
+function saveEditedProduct() {
+  const id = document.getElementById('editProdId').value;
+  const name = document.getElementById('editProdName').value.trim();
+  const category = document.getElementById('editProdCat').value;
+  const unit = document.getElementById('editProdUnit').value.trim();
+  const price = Number(document.getElementById('editProdPrice').value);
+  const mrp = Number(document.getElementById('editProdMrp').value) || price;
+  const img = document.getElementById('editProdImgInput').value;
+
+  if (!name || !unit || !price) {
+    return showToast('Naam, Unit aur Price khaali nahi chhod sakte!', 'error');
+  }
+
+  db.ref('products/' + id).update({
+    name, category, unit, price, mrp, image: img, img: img
+  }).then(() => {
+    closeEditProdModal();
+    showToast('✅ Product update ho gaya!', 'success');
+  });
+}
+
+function deleteProduct(id) {
+  if (confirm('Kya aap is item ko delete karna chahte hain?')) {
+    db.ref('products/' + id).remove().then(() => showToast('Item deleted', 'dark'));
+  }
+}
+
+function toggleStoreOos(prodId, storeId, markOos) {
+  if (!storeId) return showToast('Pehle upar se Store select karein!', 'error');
+  db.ref(`products/${prodId}/outOfStock/${storeId}`).set(markOos ? true : null);
 }
 
 function renderCatalogTable() {
   const q = document.getElementById('catalogSearch').value.trim().toLowerCase();
-  const targetStore = document.getElementById('catalogStoreOosFilter').value;
+  const selStore = document.getElementById('catalogStoreOosFilter').value;
+  const entries = Object.entries(allProducts).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q)));
+  document.getElementById('catalogTotalCount').textContent = entries.length;
+
   const tbody = document.getElementById('catalogTableBody');
-  const rows = Object.entries(productsData).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q)));
-
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748B;">Catalog is empty. Click "Load 100+ Sabzi, Fruits & Juice Pack" above!</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = rows.map(([id, p]) => {
-    const isOos = targetStore && p.outOfStock && p.outOfStock[targetStore] === true;
+  tbody.innerHTML = entries.map(([id, p]) => {
+    const imgUrl = p.image || p.img || '';
+    const isOos = selStore && p.outOfStock && p.outOfStock[selStore] === true;
     return `
       <tr>
-        <td><img src="${escapeHtml(p.image)}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"></td>
-        <td><strong>${escapeHtml(p.name)}</strong></td>
-        <td>${escapeHtml(p.category)}</td>
-        <td>${escapeHtml(p.unit)}</td>
+        <td><img src="${escapeHtml(imgUrl)}" alt="" style="width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid #E2E8F0;background:#F8FAFC;"></td>
         <td>
-          <input type="number" value="${p.price}" style="width:82px;padding:5px 8px;" onchange="inlineRateEdit('${id}', this.value)">
+          <strong>${escapeHtml(p.name)}</strong><br>
+          <span style="font-size:11px;color:#64748B;">${escapeHtml(p.category)} • ${escapeHtml(p.unit)}</span>
         </td>
         <td>
-          ${targetStore
-            ? `<button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="toggleStoreProductOos('${id}', '${targetStore}', ${!isOos})">
-                 ${isOos ? '❌ Out of Stock' : '✅ In Stock'}
-               </button>`
-            : '<span style="font-size:11px;color:#64748B;">Create/Select store</span>'
-          }
+          <strong>₹${p.price}</strong>
+          ${p.mrp > p.price ? `<span style="text-decoration:line-through;color:#94A3B8;font-size:11px;margin-left:4px;">₹${p.mrp}</span>` : ''}
         </td>
-        <td><button class="btn btn-outline" style="padding:4px 8px;" onclick="db.ref('products/${id}').remove()">🗑️</button></td>
+        <td>
+          ${selStore ? `<button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="toggleStoreOos('${id}','${selStore}',${!isOos})">${isOos ? 'Out of Stock' : 'In Stock'}</button>` : `<span style="font-size:11px;color:#94A3B8;">Select store above</span>`}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-yellow" style="padding:6px 10px;font-size:12px;" onclick="openEditProdModal('${id}')">✏️ Edit</button>
+            <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteProduct('${id}')">🗑️</button>
+          </div>
+        </td>
       </tr>
     `;
   }).join('');
 }
 
-function inlineRateEdit(prodId, newPrice) {
-  const val = parseFloat(newPrice);
-  if (isNaN(val) || val <= 0) return;
-  db.ref('products/' + prodId).update({ price: val, mrp: Math.round(val * 1.2) })
-    .then(() => showToast('Price updated live!', 'success'));
+function populateStoreDropdowns() {
+  const stores = Object.values(allStores);
+  const cities = [...new Set(stores.map(s => s.city).filter(Boolean))];
+
+  const cityOptions = '<option value="ALL">All Cities</option>' + cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  document.getElementById('storeListCityFilter').innerHTML = cityOptions;
+  document.getElementById('finCityFilter').innerHTML = cityOptions;
+
+  const oosSel = document.getElementById('catalogStoreOosFilter');
+  const prev = oosSel.value;
+  oosSel.innerHTML = '<option value="">Select Store for Stock Toggle</option>' + stores.map(s => `<option value="${escapeHtml(s.storeId)}">${escapeHtml(s.name)} (${escapeHtml(s.city)})</option>`).join('');
+  if (prev) oosSel.value = prev;
 }
 
-function toggleStoreProductOos(prodId, storeId, markOos) {
-  db.ref(`products/${prodId}/outOfStock/${storeId}`).set(markOos ? true : null)
-    .then(() => showToast(markOos ? 'Marked Out of Stock for store' : 'Marked In Stock for store', 'dark'));
-}
-
-// 100+ Sabzi, Fruits & Juice Pack with Distinct HD Photos
-function load100PlusPack() {
-  const IMG = {
-    potato: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=450&q=80',
-    onion: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=450&q=80',
-    tomato: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=450&q=80',
-    carrot: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=450&q=80',
-    broccoli: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=450&q=80',
-    spinach: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=450&q=80',
-    capsicum: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=450&q=80',
-    cucumber: 'https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=450&q=80',
-    cauliflower: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=450&q=80',
-    cabbage: 'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=450&q=80',
-    garlic: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=450&q=80',
-    ginger: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=450&q=80',
-    lemon: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=450&q=80',
-    chili: 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=450&q=80',
-    okra: 'https://images.unsplash.com/photo-1425543103986-22abb7d7e8d2?w=450&q=80',
-    brinjal: 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=450&q=80',
-    peas: 'https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=450&q=80',
-    corn: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=450&q=80',
-    beetroot: 'https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?w=450&q=80',
-    radish: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?w=450&q=80',
-    pumpkin: 'https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=450&q=80',
-    beans: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?w=450&q=80',
-    mushroom: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=450&q=80',
-    zucchini: 'https://images.unsplash.com/photo-1563252722-6434563a985d?w=450&q=80',
-    lettuce: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=450&q=80',
-    apple: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=450&q=80',
-    greenApple: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=450&q=80',
-    banana: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=450&q=80',
-    mango: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=450&q=80',
-    orange: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=450&q=80',
-    strawberry: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=450&q=80',
-    watermelon: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=450&q=80',
-    pineapple: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=450&q=80',
-    grapes: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=450&q=80',
-    pomegranate: 'https://images.unsplash.com/photo-1541344999736-83eca272f6fc?w=450&q=80',
-    papaya: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=450&q=80',
-    kiwi: 'https://images.unsplash.com/photo-1585059895524-72359e06133a?w=450&q=80',
-    avocado: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=450&q=80',
-    dragonfruit: 'https://images.unsplash.com/photo-1527325678964-54921661f888?w=450&q=80',
-    blueberry: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=450&q=80',
-    pear: 'https://images.unsplash.com/photo-1514756331096-242fdeb70d6a?w=450&q=80',
-    guava: 'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?w=450&q=80',
-    peach: 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=450&q=80',
-    plum: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?w=450&q=80',
-    cherry: 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=450&q=80',
-    coconut: 'https://images.unsplash.com/photo-1580984969071-a8da5656c2fb?w=450&q=80',
-    orangeJuice: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=450&q=80',
-    greenJuice: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=450&q=80',
-    berryJuice: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=450&q=80',
-    mangoJuice: 'https://images.unsplash.com/photo-1546173159-315724a31696?w=450&q=80',
-    watermelonJuice: 'https://images.unsplash.com/photo-1589733955941-5eeaf752f6dd?w=450&q=80',
-    carrotJuice: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=450&q=80',
-    pineappleJuice: 'https://images.unsplash.com/photo-1589733955941-5eeaf752f6dd?w=450&q=80',
-    appleJuice: 'https://images.unsplash.com/photo-1576673442511-7e39b6545c87?w=450&q=80'
-  };
-
-  const items = [
-    // 40 Fresh Vegetables (Sabzi)
-    ['Fresh Jyoti Potato (Aloo)', 'Fresh Vegetables', '1 kg', 34, IMG.potato],
-    ['Red Nashik Onion (Pyaz)', 'Fresh Vegetables', '1 kg', 38, IMG.onion],
-    ['Desi Hybrid Tomato (Tamatar)', 'Fresh Vegetables', '500 g', 24, IMG.tomato],
-    ['Ooty Red Carrot (Gajar)', 'Fresh Vegetables', '500 g', 32, IMG.carrot],
-    ['Tender Lady Finger (Bhindi)', 'Fresh Vegetables', '500 g', 29, IMG.okra],
-    ['Green Capsicum (Shimla Mirch)', 'Fresh Vegetables', '500 g', 36, IMG.capsicum],
-    ['Fresh Cauliflower (Phool Gobi)', 'Fresh Vegetables', '1 pc (500g)', 35, IMG.cauliflower],
-    ['Crisp Green Cabbage (Patta Gobi)', 'Fresh Vegetables', '1 pc (600g)', 28, IMG.cabbage],
-    ['English Cucumber (Kheera)', 'Fresh Vegetables', '500 g', 26, IMG.cucumber],
-    ['Purple Round Brinjal (Baingan)', 'Fresh Vegetables', '500 g', 30, IMG.brinjal],
-    ['Fresh Green Peas (Matar)', 'Fresh Vegetables', '500 g', 54, IMG.peas],
-    ['Sweet Corn Cob (Bhutta)', 'Fresh Vegetables', '2 pcs', 35, IMG.corn],
-    ['Organic Beetroot (Chukandar)', 'Fresh Vegetables', '500 g', 28, IMG.beetroot],
-    ['White Radish (Mooli)', 'Fresh Vegetables', '500 g', 22, IMG.radish],
-    ['Yellow Pumpkin (Kaddu)', 'Fresh Vegetables', '500 g', 25, IMG.pumpkin],
-    ['French Beans (Fansi)', 'Fresh Vegetables', '250 g', 24, IMG.beans],
-    ['Farm Garlic (Lahsun)', 'Fresh Vegetables', '250 g', 48, IMG.garlic],
-    ['Fresh Ginger (Adrak)', 'Fresh Vegetables', '250 g', 38, IMG.ginger],
-    ['Juicy Yellow Lemon (Nimbu)', 'Fresh Vegetables', '250 g', 29, IMG.lemon],
-    ['Spicy Green Chilli (Hari Mirch)', 'Fresh Vegetables', '100 g', 14, IMG.chili],
-    ['Bottle Gourd (Lauki / Dudhi)', 'Fresh Vegetables', '1 pc (600g)', 32, IMG.cucumber],
-    ['Bitter Gourd (Karela)', 'Fresh Vegetables', '500 g', 34, IMG.okra],
-    ['Ridge Gourd (Turai)', 'Fresh Vegetables', '500 g', 36, IMG.beans],
-    ['Pointed Gourd (Parwal)', 'Fresh Vegetables', '250 g', 28, IMG.okra],
-    ['Ivy Gourd (Tindora)', 'Fresh Vegetables', '500 g', 32, IMG.beans],
-    ['Taro Root (Arbi)', 'Fresh Vegetables', '500 g', 38, IMG.potato],
-    ['Sweet Potato (Shakarkandi)', 'Fresh Vegetables', '500 g', 35, IMG.carrot],
-    ['Raw Banana (Kacha Kela)', 'Fresh Vegetables', '500 g', 30, IMG.banana],
-    ['Drumstick (Sahjan)', 'Fresh Vegetables', '250 g', 26, IMG.beans],
-    ['Cluster Beans (Gawar)', 'Fresh Vegetables', '250 g', 24, IMG.beans],
-    ['Spring Onion (Hara Pyaz)', 'Fresh Vegetables', '250 g', 22, IMG.onion],
-    ['Baby Potato (Chota Aloo)', 'Fresh Vegetables', '500 g', 28, IMG.potato],
-    ['Cherry Tomato Pack', 'Fresh Vegetables', '250 g', 45, IMG.tomato],
-    ['Red Bell Pepper', 'Fresh Vegetables', '250 g', 65, IMG.capsicum],
-    ['Yellow Bell Pepper', 'Fresh Vegetables', '250 g', 65, IMG.capsicum],
-    ['Sambar Onion (Shallots)', 'Fresh Vegetables', '250 g', 32, IMG.onion],
-    ['Ash Gourd (Petha)', 'Fresh Vegetables', '500 g', 26, IMG.pumpkin],
-    ['Snake Gourd (Chichinda)', 'Fresh Vegetables', '500 g', 30, IMG.cucumber],
-    ['Elephant Yam (Suran)', 'Fresh Vegetables', '500 g', 42, IMG.potato],
-    ['Raw Papaya (Kacha Papita)', 'Fresh Vegetables', '500 g', 28, IMG.papaya],
-
-    // 15 Leafy & Herbs
-    ['Fresh Palak (Spinach Bunch)', 'Leafy & Herbs', '250 g', 22, IMG.spinach],
-    ['Fresh Coriander (Hara Dhaniya)', 'Leafy & Herbs', '100 g', 15, IMG.spinach],
-    ['Garden Mint Leaves (Pudina)', 'Leafy & Herbs', '100 g', 14, IMG.spinach],
-    ['Fresh Fenugreek (Methi Bunch)', 'Leafy & Herbs', '250 g', 24, IMG.spinach],
-    ['Curry Leaves (Kadi Patta)', 'Leafy & Herbs', '50 g', 10, IMG.spinach],
-    ['Red Amaranth (Lal Maath)', 'Leafy & Herbs', '250 g', 25, IMG.spinach],
-    ['Green Amaranth (Chaulai)', 'Leafy & Herbs', '250 g', 22, IMG.spinach],
-    ['Mustard Greens (Sarson Saag)', 'Leafy & Herbs', '500 g', 35, IMG.spinach],
-    ['Bathua Leaves', 'Leafy & Herbs', '250 g', 24, IMG.spinach],
-    ['Dill Leaves (Shepu)', 'Leafy & Herbs', '100 g', 18, IMG.spinach],
-    ['Iceberg Lettuce Head', 'Leafy & Herbs', '1 pc', 55, IMG.lettuce],
-    ['Romaine Lettuce', 'Leafy & Herbs', '200 g', 49, IMG.lettuce],
-    ['Fresh Basil Leaves', 'Leafy & Herbs', '50 g', 35, IMG.spinach],
-    ['Lemongrass Stalks', 'Leafy & Herbs', '100 g', 20, IMG.lettuce],
-    ['Baby Spinach Pack', 'Leafy & Herbs', '200 g', 45, IMG.spinach],
-
-    // 30 Fresh Fruits
-    ['Royal Gala Apple', 'Fresh Fruits', '4 pcs (550g)', 119, IMG.apple],
-    ['Kashmiri Red Delicious Apple', 'Fresh Fruits', '4 pcs (600g)', 109, IMG.apple],
-    ['Granny Smith Green Apple', 'Fresh Fruits', '2 pcs (320g)', 95, IMG.greenApple],
-    ['Robusta Yelakki Banana', 'Fresh Fruits', '6 pcs', 42, IMG.banana],
-    ['Regular Robusta Banana', 'Fresh Fruits', '6 pcs', 34, IMG.banana],
-    ['Ratnagiri Alphonso Mango', 'Fresh Fruits', '6 pcs (1.2kg)', 349, IMG.mango],
-    ['Kesar Sweet Mango', 'Fresh Fruits', '1 kg', 149, IMG.mango],
-    ['Nagpur Mandarin Orange', 'Fresh Fruits', '1 kg', 79, IMG.orange],
-    ['Sweet Mosambi (Sweet Lime)', 'Fresh Fruits', '1 kg', 68, IMG.orange],
-    ['Bhagwa Pomegranate (Anar)', 'Fresh Fruits', '4 pcs (800g)', 129, IMG.pomegranate],
-    ['Kiran Watermelon (Tarbooz)', 'Fresh Fruits', '1 pc (2.5kg)', 75, IMG.watermelon],
-    ['Sweet Muskmelon (Kharbooja)', 'Fresh Fruits', '1 pc (900g)', 59, IMG.papaya],
-    ['Ripe Papaya (Papita)', 'Fresh Fruits', '1 pc (1kg)', 54, IMG.papaya],
-    ['Queen Pineapple (Ananas)', 'Fresh Fruits', '1 pc (1.1kg)', 79, IMG.pineapple],
-    ['Sonaka Seedless Green Grapes', 'Fresh Fruits', '500 g', 69, IMG.grapes],
-    ['Jumbo Black Seedless Grapes', 'Fresh Fruits', '500 g', 89, IMG.grapes],
-    ['Mahabaleshwar Strawberry Box', 'Fresh Fruits', '200 g', 85, IMG.strawberry],
-    ['Zespri Green Kiwi (3 pcs)', 'Fresh Fruits', '3 pcs', 99, IMG.kiwi],
-    ['Allahabad Safeda Guava', 'Fresh Fruits', '500 g', 48, IMG.guava],
-    ['Pink Guava (Amrood)', 'Fresh Fruits', '500 g', 54, IMG.guava],
-    ['Sweet Chikoo (Sapota)', 'Fresh Fruits', '500 g', 46, IMG.kiwi],
-    ['Nashpati Green Pear', 'Fresh Fruits', '500 g', 74, IMG.pear],
-    ['Custard Apple (Sitaphal)', 'Fresh Fruits', '500 g', 89, IMG.guava],
-    ['Tender Coconut (Nariyal Pani)', 'Fresh Fruits', '1 pc', 49, IMG.coconut],
-    ['Fresh Figs (Anjeer)', 'Fresh Fruits', '250 g', 95, IMG.plum],
-    ['Red Plum (Aloo Bukhara)', 'Fresh Fruits', '250 g', 79, IMG.plum],
-    ['Juicy Peach (Aadu)', 'Fresh Fruits', '250 g', 85, IMG.peach],
-    ['Washington Red Apple', 'Fresh Fruits', '4 pcs', 139, IMG.apple],
-    ['Kinnow Mandarin', 'Fresh Fruits', '1 kg', 65, IMG.orange],
-    ['Sun Melon (Sarda)', 'Fresh Fruits', '1 pc', 69, IMG.papaya],
-
-    // 10 Exotic & Organic
-    ['Hass Imported Avocado', 'Exotic & Organic', '1 pc (200g)', 119, IMG.avocado],
-    ['Fresh Broccoli Florets', 'Exotic & Organic', '1 pc (300g)', 59, IMG.broccoli],
-    ['Button White Mushroom', 'Exotic & Organic', '200 g', 48, IMG.mushroom],
-    ['Pink Dragon Fruit', 'Exotic & Organic', '1 pc (350g)', 99, IMG.dragonfruit],
-    ['Imported Blueberry Punnet', 'Exotic & Organic', '125 g', 189, IMG.blueberry],
-    ['Red Cherry Pack', 'Exotic & Organic', '200 g', 169, IMG.cherry],
-    ['Green Zucchini', 'Exotic & Organic', '250 g', 44, IMG.zucchini],
-    ['Yellow Zucchini', 'Exotic & Organic', '250 g', 49, IMG.zucchini],
-    ['Asparagus Spears', 'Exotic & Organic', '200 g', 149, IMG.beans],
-    ['Purple Cabbage', 'Exotic & Organic', '1 pc (500g)', 55, IMG.cabbage],
-
-    // 15 Cold Pressed Juices
-    ['Cold Pressed Valencia Orange Juice', 'Cold Pressed Juices', '250 ml', 69, IMG.orangeJuice],
-    ['Cold Pressed Alphonso Mango Nectar', 'Cold Pressed Juices', '250 ml', 75, IMG.mangoJuice],
-    ['Cold Pressed Pomegranate Anar Juice', 'Cold Pressed Juices', '250 ml', 85, IMG.berryJuice],
-    ['Cold Pressed Watermelon Mint Cooler', 'Cold Pressed Juices', '250 ml', 59, IMG.watermelonJuice],
-    ['Cold Pressed Green Detox (Spinach Apple)', 'Cold Pressed Juices', '250 ml', 79, IMG.greenJuice],
-    ['Cold Pressed Carrot Ginger Immunity Shot', 'Cold Pressed Juices', '250 ml', 65, IMG.carrotJuice],
-    ['Cold Pressed Pineapple Basil Juice', 'Cold Pressed Juices', '250 ml', 69, IMG.pineappleJuice],
-    ['Cold Pressed Kashmiri Apple Juice', 'Cold Pressed Juices', '250 ml', 72, IMG.appleJuice],
-    ['Cold Pressed Mixed Berry Blast', 'Cold Pressed Juices', '250 ml', 89, IMG.berryJuice],
-    ['Cold Pressed Sugarcane Nimbu Juice', 'Cold Pressed Juices', '250 ml', 49, IMG.greenJuice],
-    ['Cold Pressed ABC (Apple Beet Carrot)', 'Cold Pressed Juices', '250 ml', 79, IMG.carrotJuice],
-    ['Cold Pressed Mosambi Citrus Juice', 'Cold Pressed Juices', '250 ml', 59, IMG.orangeJuice],
-    ['Cold Pressed Strawberry Banana Smoothie', 'Cold Pressed Juices', '300 ml', 95, IMG.berryJuice],
-    ['100% Pure Tender Coconut Water Bottle', 'Cold Pressed Juices', '300 ml', 55, IMG.greenJuice],
-    ['Family Pack Fresh Orange Juice (1L)', 'Cold Pressed Juices', '1 Litre', 199, IMG.orangeJuice]
-  ];
-
-  const updates = {};
-  items.forEach((item, idx) => {
-    const key = 'PACK_' + String(idx + 1).padStart(3, '0');
-    updates[key] = {
-      name: item[0],
-      category: item[1],
-      unit: item[2],
-      price: item[3],
-      mrp: Math.round(item[3] * 1.2),
-      image: item[4]
-    };
-  });
-
-  db.ref('products').update(updates).then(() => {
-    showToast(`🎉 Loaded ${items.length} Sabzi, Fruits & Cold-Pressed Juices!`, 'success');
-  });
-}
-
-// Seller KYC 1-Tap Approval
-function renderKycTable() {
-  const tbody = document.getElementById('kycTableBody');
-  const rows = Object.entries(kycData).reverse();
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748B;">No Seller KYC applications yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(([id, k]) => `
-    <tr>
-      <td><strong>${escapeHtml(k.storeName)}</strong><br><span style="font-size:11px;color:#64748B;">${escapeHtml(k.ownerName)} • ${escapeHtml(k.phone)}</span></td>
-      <td>${escapeHtml(k.city)} — ${escapeHtml(k.area)}</td>
-      <td><code>${escapeHtml(k.desiredStoreId)}</code></td>
-      <td><code>${escapeHtml(k.desiredPassword)}</code></td>
-      <td>FSSAI: ${escapeHtml(k.fssai || 'N/A')}<br>PAN: ${escapeHtml(k.pan || 'N/A')}</td>
-      <td><span class="badge ${k.status === 'APPROVED' ? 'badge-green' : (k.status === 'REJECTED' ? 'badge-red' : 'badge-amber')}">${escapeHtml(k.status)}</span></td>
-      <td>
-        ${k.status === 'PENDING'
-          ? `<div style="display:flex;gap:6px;">
-               <button class="btn btn-primary" onclick="approveSellerKyc('${id}')">✅ Approve</button>
-               <button class="btn btn-danger" onclick="rejectSellerKyc('${id}')">✕ Reject</button>
-             </div>`
-          : '—'
-        }
-      </td>
-    </tr>
-  `).join('');
-}
-
-function approveSellerKyc(kycId) {
-  const k = kycData[kycId];
-  if (!k) return;
-  const storeId = (k.desiredStoreId || ('JHT_' + Date.now())).replace(/[.#$\[\]]/g, '_');
-  const storeObj = {
-    storeId,
-    city: k.city,
-    area: k.area,
-    name: k.storeName,
-    password: k.desiredPassword,
-    owner: k.ownerName,
-    phone: k.phone,
-    lat: parseFloat(k.lat) || 0,
-    lng: parseFloat(k.lng) || 0,
-    isOpen: true,
-    createdAt: Date.now()
-  };
-  Promise.all([
-    db.ref('stores/' + storeId).set(storeObj),
-    db.ref('seller_kyc/' + kycId).update({ status: 'APPROVED', approvedStoreId: storeId, reviewedAt: Date.now() })
-  ]).then(() => showToast(`Approved! Store ${storeId} is now LIVE.`, 'success'));
-}
-
-function rejectSellerKyc(kycId) {
-  db.ref('seller_kyc/' + kycId).update({ status: 'REJECTED', reviewedAt: Date.now() })
-    .then(() => showToast('KYC Application Rejected.', 'dark'));
-}
-
-// Financial Breakdown (12% Commission / 88% Store Payout)
-function renderFinancials() {
-  const cityFilter = document.getElementById('finCityFilter').value;
-  const storeFilter = document.getElementById('finStoreFilter').value;
-
-  const orders = Object.values(ordersData).filter(o => o && o.status !== 'CANCELLED');
-  const filteredOrders = orders.filter(o => {
-    const okCity = cityFilter === 'ALL' || o.city === cityFilter;
-    const okStore = storeFilter === 'ALL' || o.storeId === storeFilter;
-    return okCity && okStore;
-  });
-
-  const totalSales = filteredOrders.reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0);
-  const commission = Math.round(totalSales * 0.12);
-  const payout = totalSales - commission;
-
-  document.getElementById('finOrders').textContent = filteredOrders.length;
-  document.getElementById('finSales').textContent = `₹${totalSales.toLocaleString('en-IN')}`;
-  document.getElementById('finComm').textContent = `₹${commission.toLocaleString('en-IN')}`;
-  document.getElementById('finPayout').textContent = `₹${payout.toLocaleString('en-IN')}`;
-
-  const tbody = document.getElementById('finTableBody');
-  const storeList = Object.entries(storesData).filter(([id, s]) => {
-    const okCity = cityFilter === 'ALL' || s.city === cityFilter;
-    const okStore = storeFilter === 'ALL' || id === storeFilter;
-    return okCity && okStore;
-  });
-
-  if (storeList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748B;">No stores match selected filter.</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = storeList.map(([id, s]) => {
-    const stOrders = orders.filter(o => o.storeId === id);
-    const sales = stOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
-    const comm = Math.round(sales * 0.12);
-    const pay = sales - comm;
+function renderStoresTable() {
+  const filterCity = document.getElementById('storeListCityFilter').value;
+  const stores = Object.values(allStores).filter(s => filterCity === 'ALL' || s.city === filterCity);
+  document.getElementById('storesTableBody').innerHTML = stores.map(s => {
+    const isOpen = s.isOpen !== false;
     return `
       <tr>
-        <td><strong>${escapeHtml(id)}</strong></td>
+        <td><strong>${escapeHtml(s.storeId)}</strong></td>
+        <td>${escapeHtml(s.city)} • ${escapeHtml(s.area)}</td>
+        <td>${escapeHtml(s.name)}</td>
+        <td><span class="badge ${isOpen ? 'badge-green' : 'badge-red'}">${isOpen ? 'OPEN' : 'CLOSED'}</span></td>
+        <td><button class="btn btn-outline" style="padding:5px 10px;font-size:11px;" onclick="db.ref('stores/${s.storeId}').update({isOpen: ${!isOpen}})">Switch Status</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderFinancials() {
+  const city = document.getElementById('finCityFilter').value;
+  const orders = Object.values(allOrders).filter(o => o.status !== 'CANCELLED' && (city === 'ALL' || o.city === city));
+  const totalSales = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+  document.getElementById('finOrders').textContent = orders.length;
+  document.getElementById('finSales').textContent = `₹${totalSales.toLocaleString('en-IN')}`;
+  document.getElementById('finComm').textContent = `₹${Math.round(totalSales * 0.12).toLocaleString('en-IN')}`;
+  document.getElementById('finPayout').textContent = `₹${Math.round(totalSales * 0.88).toLocaleString('en-IN')}`;
+
+  const stores = Object.values(allStores).filter(s => city === 'ALL' || s.city === city);
+  document.getElementById('finTableBody').innerHTML = stores.map(s => {
+    const sOrders = orders.filter(o => o.storeId === s.storeId);
+    const gmv = sOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    return `
+      <tr>
+        <td>${escapeHtml(s.storeId)}</td>
         <td>${escapeHtml(s.name)}</td>
         <td>${escapeHtml(s.city)}</td>
-        <td>${stOrders.length}</td>
-        <td>₹${sales.toLocaleString('en-IN')}</td>
-        <td style="color:#0C831F;font-weight:700;">₹${comm.toLocaleString('en-IN')}</td>
-        <td style="color:#2563EB;font-weight:700;">₹${pay.toLocaleString('en-IN')}</td>
+        <td>${sOrders.length}</td>
+        <td>₹${gmv}</td>
+        <td style="color:#0C831F;font-weight:700;">₹${Math.round(gmv * 0.12)}</td>
+        <td style="color:#2563EB;font-weight:700;">₹${Math.round(gmv * 0.88)}</td>
       </tr>
     `;
   }).join('');
 }
 
-// Live Order Status Override
 function renderAdminOrders() {
-  const tbody = document.getElementById('adminOrdersBody');
-  const rows = Object.entries(ordersData).reverse();
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748B;">No orders placed yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(([id, o]) => `
+  const list = Object.values(allOrders).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  document.getElementById('adminOrdersBody').innerHTML = list.map(o => `
     <tr>
-      <td><strong>#${escapeHtml(id)}</strong><br><span style="font-size:11px;color:#64748B;">${new Date(o.createdAt).toLocaleTimeString()}</span></td>
-      <td>${escapeHtml(o.storeName)}<br><span style="font-size:11px;color:#64748B;">${escapeHtml(o.city)}</span></td>
+      <td><strong>#${escapeHtml(o.orderId)}</strong></td>
+      <td>${escapeHtml(o.storeId)}<br><span style="font-size:11px;color:#64748B;">${escapeHtml(o.city || '')}</span></td>
       <td>${escapeHtml(o.customerName)}<br><span style="font-size:11px;">${escapeHtml(o.customerPhone)}</span></td>
-      <td style="max-width:220px;font-size:12px;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</td>
-      <td><strong>₹${o.totalAmount}</strong><br><span style="font-size:11px;">${escapeHtml(o.paymentMethod)}</span></td>
+      <td style="font-size:12px;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</td>
+      <td><strong>₹${o.totalAmount}</strong></td>
       <td>
-        <select onchange="overrideOrderStatus('${id}', this.value)" style="width:165px;">
+        <select style="width:155px;" onchange="db.ref('orders/${o.orderId}').update({status: this.value})">
           ${['PLACED','PACKING','OUT_FOR_DELIVERY','DELIVERED','CANCELLED'].map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
         </select>
       </td>
@@ -1170,97 +675,64 @@ function renderAdminOrders() {
   `).join('');
 }
 
-function overrideOrderStatus(orderId, status) {
-  db.ref('orders/' + orderId).update({ status })
-    .then(() => showToast(`Order #${orderId} set to ${status}`, 'success'));
+function renderCRM() {
+  const map = {};
+  Object.values(allOrders).forEach(o => {
+    if (!o.customerPhone) return;
+    if (!map[o.customerPhone]) map[o.customerPhone] = { name: o.customerName, phone: o.customerPhone, address: o.customerAddress, count: 0, spend: 0 };
+    map[o.customerPhone].count++;
+    if (o.status !== 'CANCELLED') map[o.customerPhone].spend += Number(o.totalAmount) || 0;
+  });
+  document.getElementById('crmTableBody').innerHTML = Object.values(map).map(c => `
+    <tr>
+      <td><strong>${escapeHtml(c.name)}</strong></td>
+      <td>${escapeHtml(c.phone)}</td>
+      <td style="font-size:12px;">${escapeHtml(c.address)}</td>
+      <td>${c.count}</td>
+      <td><strong>₹${c.spend}</strong></td>
+      <td><a class="btn btn-primary" style="text-decoration:none;padding:5px 10px;font-size:11px;" target="_blank" href="https://wa.me/91${c.phone}?text=Hello%20${encodeURIComponent(c.name)},%20thank%20you%20for%20ordering%20from%20Jhatpat!">WhatsApp</a></td>
+    </tr>
+  `).join('');
 }
 
-// Customer CRM & 1-Click WhatsApp
-function renderCrmTable() {
-  const tbody = document.getElementById('crmTableBody');
-  const rows = Object.values(customersData);
-  if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748B;">No customer profiles yet.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = rows.map(c => {
-    const cleanPhone = String(c.phone || '').replace(/\D/g, '');
-    const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-    const msg = encodeURIComponent(`Hi ${c.name}! ⚡ Fresh Sabzi, Fruits & Cold-Pressed Juices are ready at Jhatpat ${c.city || ''} with 10-minute delivery! Order now.`);
-    return `
-      <tr>
-        <td><strong>${escapeHtml(c.name)}</strong></td>
-        <td>${escapeHtml(c.phone)}</td>
-        <td>${escapeHtml(c.city || '')} — ${escapeHtml(c.address || '')}</td>
-        <td>${c.totalOrders || 1}</td>
-        <td><strong>₹${(c.totalSpend || 0).toLocaleString('en-IN')}</strong></td>
-        <td>
-          <a href="https://wa.me/${waPhone}?text=${msg}" target="_blank" class="btn btn-primary" style="text-decoration:none;background:#16A34A;">
-            💬 WhatsApp SMS
-          </a>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
-
-// Coupons & Banners
 function saveCoupon() {
   const code = document.getElementById('cpCode').value.trim().toUpperCase();
   const type = document.getElementById('cpType').value;
-  const value = parseFloat(document.getElementById('cpValue').value) || 0;
-  const minOrder = parseFloat(document.getElementById('cpMinOrder').value) || 0;
-  const maxDisc = parseFloat(document.getElementById('cpMaxDisc').value) || 999;
-  if (!code || value <= 0) return showToast('Enter valid coupon code & value', 'error');
-
-  db.ref('coupons/' + code).set({ code, type, value, minOrder, maxDisc, active: true })
-    .then(() => {
-      ['cpCode','cpValue','cpMinOrder','cpMaxDisc'].forEach(i => document.getElementById(i).value = '');
-      showToast(`Coupon ${code} published!`, 'success');
-    });
+  const value = Number(document.getElementById('cpValue').value);
+  const minOrder = Number(document.getElementById('cpMinOrder').value) || 0;
+  const maxDiscount = Number(document.getElementById('cpMaxDisc').value) || value;
+  if (!code || !value) return showToast('Code aur Value dalein!', 'error');
+  db.ref('coupons/' + code).set({ code, type, value, minOrder, maxDiscount }).then(() => showToast('Coupon saved!', 'success'));
 }
 
-function renderCouponsTable() {
-  const tbody = document.getElementById('couponsTableBody');
-  const rows = Object.values(couponsData);
-  tbody.innerHTML = rows.length === 0
-    ? '<tr><td colspan="5" style="text-align:center;color:#64748B;">No active coupons.</td></tr>'
-    : rows.map(c => `
-      <tr>
-        <td><strong>${escapeHtml(c.code)}</strong></td>
-        <td>${escapeHtml(c.type)}</td>
-        <td>${c.type === 'PERCENT' ? c.value + '%' : '₹' + c.value}</td>
-        <td>₹${c.minOrder}</td>
-        <td><button class="btn btn-danger" style="padding:4px 10px;" onclick="db.ref('coupons/${c.code}').remove()">Delete</button></td>
-      </tr>
-    `).join('');
+function renderCoupons() {
+  document.getElementById('couponsTableBody').innerHTML = Object.values(allCoupons).map(c => `
+    <tr>
+      <td><strong>${escapeHtml(c.code)}</strong></td>
+      <td>${escapeHtml(c.type)}</td>
+      <td>${c.type === 'FLAT' ? '₹' + c.value : c.value + '%'}</td>
+      <td>₹${c.minOrder}</td>
+      <td><button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="db.ref('coupons/${c.code}').remove()">Delete</button></td>
+    </tr>
+  `).join('');
 }
 
 function saveBanner() {
-  const tag = document.getElementById('bnTag').value.trim() || 'JHATPAT SPECIAL';
+  const tag = document.getElementById('bnTag').value.trim();
   const title = document.getElementById('bnTitle').value.trim();
-  const sub = document.getElementById('bnSub').value.trim();
+  const subtitle = document.getElementById('bnSub').value.trim();
   const emoji = document.getElementById('bnEmoji').value.trim() || '⚡';
   const bg = document.getElementById('bnBg').value;
-  if (!title) return showToast('Enter banner title', 'error');
-
+  if (!title) return showToast('Banner Title dalein!', 'error');
   const id = 'BN_' + Date.now();
-  db.ref('banners/' + id).set({ tag, title, sub, emoji, bg }).then(() => {
-    ['bnTag','bnTitle','bnSub','bnEmoji'].forEach(i => document.getElementById(i).value = '');
-    showToast('Promo banner added!', 'success');
-  });
+  db.ref('banners/' + id).set({ id, tag, title, subtitle, emoji, bg }).then(() => showToast('Banner published!', 'success'));
 }
 
-function renderBannersAdmin() {
-  const box = document.getElementById('bannersListAdmin');
-  const rows = Object.entries(bannersData);
-  box.innerHTML = rows.map(([id, b]) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;color:#fff;background:${b.bg};">
-      <div>
-        <strong>${escapeHtml(b.emoji)} ${escapeHtml(b.title)}</strong>
-        <div style="font-size:12px;opacity:0.9;">${escapeHtml(b.sub)}</div>
-      </div>
-      <button class="btn btn-dark" onclick="db.ref('banners/${id}').remove()">Remove</button>
+function renderBanners() {
+  document.getElementById('bannersListAdmin').innerHTML = Object.values(allBanners).map(b => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #E2E8F0;border-radius:10px;">
+      <span>${escapeHtml(b.emoji)} <strong>${escapeHtml(b.title)}</strong> — ${escapeHtml(b.subtitle)}</span>
+      <button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="db.ref('banners/${b.id}').remove()">Remove</button>
     </div>
   `).join('');
 }
