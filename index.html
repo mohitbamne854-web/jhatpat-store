@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat - 10-Minute Grocery Delivery</title>
+  <style>
+    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #F7F8FA; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: #1C1C1C; padding-bottom: 90px; }
+    header { background: var(--yellow); padding: 14px 18px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .delivery-eta { font-size: 1.15rem; font-weight: 900; color: #000; }
+    .store-sub { font-size: 0.85rem; font-weight: 600; color: #333; margin-top: 2px; }
+    .loc-bar { display: flex; gap: 8px; margin-top: 10px; }
+    .loc-bar select, .loc-bar button { padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.85rem; }
+    .loc-bar button { background: #000; color: #fff; border: none; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .container { max-width: 900px; margin: 16px auto; padding: 0 14px; }
+    .unserviceable { background: #ffe5e5; border: 1px solid #ff9999; color: #a10000; padding: 25px; border-radius: 12px; text-align: center; margin-top: 20px; }
+    .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
+    .prod-card { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+    .prod-card img { width: 100%; height: 110px; object-fit: contain; margin-bottom: 8px; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .add-btn { background: #fff; color: var(--green); border: 1px solid var(--green); padding: 6px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; }
+    .add-btn:hover { background: var(--green); color: #fff; }
+    .cart-bar { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 860px; background: var(--green); color: #fff; padding: 14px 20px; border-radius: 12px; display: none; justify-content: space-between; align-items: center; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,0.2); cursor: pointer; }
+    #checkoutModal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; }
+    .modal-box { background: #fff; padding: 22px; border-radius: 14px; width: 92%; max-width: 400px; }
+    .modal-box input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="delivery-eta" id="etaBanner">⚡ Detecting nearest Jhatpat store...</div>
+  <div class="store-sub" id="storeBanner">Allow GPS or choose your area below</div>
+  <div class="loc-bar">
+    <button onclick="detectGPS()">📍 Use GPS</button>
+    <select id="manualAreaSelect" onchange="selectManualStore()" style="flex:1;">
+      <option value="">-- Or Select Your Area Manually --</option>
+    </select>
+  </div>
+</header>
+
+<div class="container">
+  <div id="unserviceableBanner" class="unserviceable" style="display:none;">
+    <h2>😔 Sorry, we are not delivering in your area yet</h2>
+    <p style="margin-top:8px;">We are expanding rapidly across Dombivli & Kalyan. Select another nearby area above to browse.</p>
+  </div>
+
+  <div class="prod-grid" id="productGrid"></div>
+</div>
+
+<div class="cart-bar" id="cartBar" onclick="openCheckout()">
+  <span id="cartSummary">0 Items • ₹0</span>
+  <span>Proceed to Order →</span>
+</div>
+
+<div id="checkoutModal">
+  <div class="modal-box">
+    <h3 style="margin-bottom:12px;">🚀 Fast 10-Min Checkout</h3>
+    <p id="checkoutStoreTag" style="font-size:0.8rem; color:var(--green); font-weight:700; margin-bottom:10px;"></p>
+    <input id="custName" placeholder="Your Full Name" />
+    <input id="custPhone" placeholder="Mobile Number" />
+    <input id="custAddress" placeholder="Flat / Building / Landmark" />
+    <button onclick="placeOrder()" style="width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">Place COD Order</button>
+    <button onclick="document.getElementById('checkoutModal').style.display='none'" style="width:100%; margin-top:8px; padding:8px; background:#eee; border:none; border-radius:8px;">Cancel</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
+    authDomain: "jhatpat-22aa8.firebaseapp.com",
+    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+    projectId: "jhatpat-22aa8",
+    storageBucket: "jhatpat-22aa8.firebasestorage.app",
+    messagingSenderId: "51391257177",
+    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
+    measurementId: "G-VXRGH8Y5SX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let stores = {};
+  let masterProducts = {};
+  let storeInventory = {};
+  let lockedStoreId = null;
+  let cart = {};
+
+  function getDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  }
+
+  onValue(ref(db, "stores"), (snap) => {
+    stores = snap.val() || {};
+    const select = document.getElementById("manualAreaSelect");
+    select.innerHTML = `<option value="">-- Select Your Area Manually --</option>`;
+    Object.entries(stores).forEach(([id, s]) => {
+      if (s.isOpen) {
+        select.innerHTML += `<option value="${id}">${s.area} (${s.name})</option>`;
+      }
+    });
+    if (!lockedStoreId) detectGPS();
+  });
+
+  onValue(ref(db, "master_products"), (snap) => {
+    masterProducts = snap.val() || {};
+    renderCatalog();
+  });
+
+  onValue(ref(db, "store_inventory"), (snap) => {
+    storeInventory = snap.val() || {};
+    renderCatalog();
+  });
+
+  window.detectGPS = () => {
+    if (!navigator.geolocation) return showOutOfZone();
+    navigator.geolocation.getCurrentPosition(
+      (pos) => matchNearestStore(pos.coords.latitude, pos.coords.longitude),
+      () => {
+        document.getElementById("etaBanner").innerText = "📍 Select your delivery area";
+        document.getElementById("storeBanner").innerText = "GPS permission denied — choose area manually";
+      }
+    );
+  };
+
+  function matchNearestStore(userLat, userLng) {
+    let bestStoreId = null;
+    let minDistance = Infinity;
+
+    Object.entries(stores).forEach(([id, s]) => {
+      if (!s.isOpen) return;
+      const dist = getDistanceKm(userLat, userLng, s.lat, s.lng);
+      if (dist <= s.radiusKm && dist < minDistance) {
+        minDistance = dist;
+        bestStoreId = id;
+      }
+    });
+
+    if (bestStoreId) {
+      lockStore(bestStoreId);
+    } else {
+      showOutOfZone();
+    }
+  }
+
+  window.selectManualStore = () => {
+    const val = document.getElementById("manualAreaSelect").value;
+    if (val) lockStore(val);
+  };
+
+  function lockStore(storeId) {
+    lockedStoreId = storeId;
+    cart = {};
+    updateCartUI();
+    const s = stores[storeId];
+    document.getElementById("unserviceableBanner").style.display = "none";
+    document.getElementById("etaBanner").innerText = `⚡ Delivering in 10 mins from ${s.name}`;
+    document.getElementById("storeBanner").innerText = `${s.area} • Free Express Delivery`;
+    renderCatalog();
+  }
+
+  function showOutOfZone() {
+    lockedStoreId = null;
+    document.getElementById("etaBanner").innerText = "⚠️ Area Not Serviceable";
+    document.getElementById("storeBanner").innerText = "No open Dark Store within range";
+    document.getElementById("unserviceableBanner").style.display = "block";
+    document.getElementById("productGrid").innerHTML = "";
+  }
+
+  function renderCatalog() {
+    if (!lockedStoreId) return;
+    const grid = document.getElementById("productGrid");
+    grid.innerHTML = "";
+    const activeStock = storeInventory[lockedStoreId] || {};
+
+    Object.entries(masterProducts).forEach(([prodId, p]) => {
+      if (activeStock[prodId] !== true) return;
+
+      grid.innerHTML += `
+        <div class="prod-card">
+          <div>
+            <img src="${p.image}" alt="${p.name}" />
+            <small style="color:var(--green); font-weight:700;">${p.discount || 0}% OFF</small>
+            <h4 style="font-size:0.95rem; margin:4px 0;">${p.name}</h4>
+          </div>
+          <div class="price-row">
+            <div>
+              <strong>₹${p.price}</strong>
+              <small style="text-decoration:line-through; color:#888; margin-left:4px;">₹${p.mrp}</small>
+            </div>
+            <button class="add-btn" onclick="addToCart('${prodId}')">+ ADD</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  window.addToCart = (prodId) => {
+    cart[prodId] = (cart[prodId] || 0) + 1;
+    updateCartUI();
+  };
+
+  function updateCartUI() {
+    let qty = 0, total = 0;
+    Object.entries(cart).forEach(([id, count]) => {
+      if (masterProducts[id]) {
+        qty += count;
+        total += masterProducts[id].price * count;
+      }
+    });
+    const bar = document.getElementById("cartBar");
+    bar.style.display = qty > 0 ? "flex" : "none";
+    document.getElementById("cartSummary").innerText = `${qty} Items • ₹${total}`;
+  }
+
+  window.openCheckout = () => {
+    document.getElementById("checkoutStoreTag").innerText = `Fulfilled by: ${stores[lockedStoreId].name}`;
+    document.getElementById("checkoutModal").style.display = "flex";
+  };
+
+  window.placeOrder = async () => {
+    const customerName = document.getElementById("custName").value.trim();
+    const customerPhone = document.getElementById("custPhone").value.trim();
+    const dropAddress = document.getElementById("custAddress").value.trim();
+    if (!customerName || !customerPhone || !dropAddress) return alert("Please fill delivery details!");
+
+    let total = 0;
+    const items = [];
+    Object.entries(cart).forEach(([id, count]) => {
+      const p = masterProducts[id];
+      total += p.price * count;
+      items.push({ name: p.name, qty: count, price: p.price });
+    });
+
+    const store = stores[lockedStoreId];
+    await set(push(ref(db, "orders")), {
+      storeId: lockedStoreId,
+      storeName: store.name,
+      storeAddress: store.address,
+      customerName,
+      customerPhone,
+      dropAddress,
+      items,
+      total,
+      status: "New",
+      createdAt: Date.now()
+    });
+
+    cart = {};
+    updateCartUI();
+    document.getElementById("checkoutModal").style.display = "none";
+    alert("🎉 Order Placed! Your Dark Store is packing it now.");
+  };
+</script>
+</body>
+</html>

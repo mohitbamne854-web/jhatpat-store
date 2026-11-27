@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Delivery Partner App</title>
+  <style>
+    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #121212; --card: #1E1E1E; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: #fff; }
+    header { background: var(--yellow); color: #000; padding: 15px 18px; display: flex; justify-content: space-between; align-items: center; }
+    .container { max-width: 600px; margin: 18px auto; padding: 0 15px; }
+    .control-box { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 18px; }
+    select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 700; margin-top: 8px; }
+    .duty-btn { background: #444; color: #fff; cursor: pointer; }
+    .duty-btn.online { background: var(--green); }
+    .task-card { background: var(--card); border-left: 5px solid var(--yellow); padding: 16px; border-radius: 12px; margin-bottom: 14px; }
+    .addr-block { background: #2A2A2A; padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 0.9rem; }
+    .step-btn { background: var(--green); color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1 style="font-size:1.2rem;">🛵 Jhatpat Rider Partner</h1>
+  <span id="dutyBadge" style="font-weight:800; font-size:0.85rem;">OFFLINE</span>
+</header>
+
+<div class="container">
+  <div class="control-box">
+    <label style="font-size:0.85rem; color:#bbb;">Select Your Assigned Dark Store Hub:</label>
+    <select id="riderStoreSelect" onchange="renderTasks()">
+      <option value="">-- Choose Dark Store Zone --</option>
+    </select>
+    <button id="dutyToggleBtn" class="duty-btn" onclick="toggleDuty()">Go ONLINE for Deliveries</button>
+  </div>
+
+  <div id="riderFeed">
+    <p style="text-align:center; color:#888; margin-top:30px;">Select your Dark Store & go Online to receive pickup alerts.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
+    authDomain: "jhatpat-22aa8.firebaseapp.com",
+    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+    projectId: "jhatpat-22aa8",
+    storageBucket: "jhatpat-22aa8.firebasestorage.app",
+    messagingSenderId: "51391257177",
+    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
+    measurementId: "G-VXRGH8Y5SX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let isOnline = false;
+  let allOrders = {};
+
+  onValue(ref(db, "stores"), (snap) => {
+    const stores = snap.val() || {};
+    const sel = document.getElementById("riderStoreSelect");
+    const prev = sel.value;
+    sel.innerHTML = `<option value="">-- Choose Dark Store Zone --</option>`;
+    Object.entries(stores).forEach(([id, s]) => {
+      sel.innerHTML += `<option value="${id}">${s.name} (${s.area})</option>`;
+    });
+    sel.value = prev;
+  });
+
+  onValue(ref(db, "orders"), (snap) => {
+    allOrders = snap.val() || {};
+    renderTasks();
+  });
+
+  window.toggleDuty = () => {
+    const storeId = document.getElementById("riderStoreSelect").value;
+    if (!storeId) return alert("Select your Dark Store Hub first!");
+    isOnline = !isOnline;
+
+    const btn = document.getElementById("dutyToggleBtn");
+    const badge = document.getElementById("dutyBadge");
+    btn.classList.toggle("online", isOnline);
+    btn.innerText = isOnline ? "🟢 ONLINE (Tap to Go Offline)" : "Go ONLINE for Deliveries";
+    badge.innerText = isOnline ? "ONLINE" : "OFFLINE";
+    renderTasks();
+  };
+
+  window.renderTasks = () => {
+    const feed = document.getElementById("riderFeed");
+    const selectedStoreId = document.getElementById("riderStoreSelect").value;
+
+    if (!isOnline || !selectedStoreId) {
+      feed.innerHTML = `<p style="text-align:center; color:#888; margin-top:30px;">You are currently Offline.</p>`;
+      return;
+    }
+
+    const tasks = Object.entries(allOrders).filter(([_, o]) =>
+      o.storeId === selectedStoreId && (o.status === "Ready for Pickup" || o.status === "Picked Up")
+    );
+
+    feed.innerHTML = tasks.length === 0 ? `<p style="text-align:center; color:#aaa; margin-top:30px;">Waiting for packed orders from store...</p>` : "";
+
+    tasks.forEach(([orderId, o]) => {
+      const btnHtml = o.status === "Ready for Pickup"
+        ? `<button class="step-btn" style="background:#e67e22;" onclick="setDeliveryStatus('${orderId}', 'Picked Up')">📦 Confirm Order Picked Up</button>`
+        : `<button class="step-btn" onclick="setDeliveryStatus('${orderId}', 'Delivered')">✅ Mark Order Delivered (Collect ₹${o.total})</button>`;
+
+      feed.innerHTML += `
+        <div class="task-card">
+          <div style="display:flex; justify-content:space-between;">
+            <strong>Order #${orderId.slice(-5).toUpperCase()}</strong>
+            <span style="color:var(--yellow); font-weight:700;">${o.status}</span>
+          </div>
+          <div class="addr-block">
+            <small style="color:#aaa;">PICKUP FROM DARK STORE:</small><br>
+            <strong>${o.storeName}</strong><br>${o.storeAddress || "Assigned Hub"}
+          </div>
+          <div class="addr-block">
+            <small style="color:#aaa;">DROP TO CUSTOMER:</small><br>
+            <strong>${o.customerName} (${o.customerPhone})</strong><br>${o.dropAddress}
+          </div>
+          ${btnHtml}
+        </div>`;
+    });
+  };
+
+  window.setDeliveryStatus = (orderId, status) => {
+    update(ref(db, `orders/${orderId}`), { status });
+  };
+</script>
+</body>
+</html>

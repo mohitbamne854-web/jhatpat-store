@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Super Admin Control Room</title>
+  <style>
+    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #F4F6FB; --dark: #1C1C1C; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--dark); padding-bottom: 40px; }
+    header { background: var(--yellow); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    header h1 { font-size: 1.3rem; font-weight: 800; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    h2 { font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px solid var(--yellow); padding-bottom: 6px; display: inline-block; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    input, select, button { padding: 10px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem; width: 100%; }
+    button { background: var(--green); color: #fff; font-weight: 700; border: none; cursor: pointer; }
+    button:hover { opacity: 0.92; }
+    .btn-danger { background: #dc3545; width: auto; padding: 6px 12px; }
+    .btn-toggle { width: auto; padding: 6px 14px; font-size: 0.85rem; }
+    .open { background: var(--green); }
+    .closed { background: #6c757d; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+    .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+    .stat-box { flex: 1; min-width: 160px; background: #fff9e6; border: 1px solid var(--yellow); padding: 15px; border-radius: 10px; }
+    .stat-box h3 { font-size: 1.5rem; color: var(--green); }
+    #loginScreen { position: fixed; inset: 0; background: var(--yellow); display: flex; align-items: center; justify-content: center; z-index: 999; }
+    .login-box { background: #fff; padding: 30px; border-radius: 14px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h2 style="border:none;">⚡ Jhatpat Super Admin</h2>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Enter Master Control Password</p>
+    <input type="password" id="adminPass" placeholder="Enter Password" style="margin-bottom:12px;" />
+    <button onclick="unlockAdmin()">Unlock Control Room</button>
+  </div>
+</div>
+
+<header>
+  <h1>⚡ Jhatpat Master Control Room</h1>
+  <span style="font-weight:700; font-size:0.9rem;">Multi-Dark Store HQ</span>
+</header>
+
+<div class="container">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h2 style="margin:0;">📊 Live Network Analytics</h2>
+      <select id="analyticsStoreFilter" style="max-width:250px;" onchange="renderOrders()">
+        <option value="ALL">All Dark Stores (Global)</option>
+      </select>
+    </div>
+    <div class="stats">
+      <div class="stat-box"><p>Total Orders</p><h3 id="statOrders">0</h3></div>
+      <div class="stat-box"><p>Total Revenue</p><h3 id="statRevenue">₹0</h3></div>
+      <div class="stat-box"><p>Active Dark Stores</p><h3 id="statStores">0</h3></div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Order ID</th><th>Store</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody id="adminOrdersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🏪 Create New Dark Store</h2>
+    <div class="grid">
+      <input id="sName" placeholder="Store Name (e.g. Dombivli East Hub)" />
+      <input id="sArea" placeholder="Area (e.g. Dombivli East)" />
+      <input id="sAddress" placeholder="Full Store Address" />
+      <input id="sLat" type="number" step="any" placeholder="Latitude (e.g. 19.2183)" />
+      <input id="sLng" type="number" step="any" placeholder="Longitude (e.g. 73.0867)" />
+      <input id="sRadius" type="number" placeholder="Delivery Radius (KM)" />
+      <input id="sManager" placeholder="Store Manager Name" />
+      <input id="sPhone" placeholder="Manager Phone" />
+      <input id="sLoginId" placeholder="Store Login Email/ID" />
+      <input id="sPassword" placeholder="Store Login Password" />
+    </div>
+    <button style="margin-top:12px; max-width:240px;" onclick="createStore()">+ Launch Dark Store</button>
+  </div>
+
+  <div class="card">
+    <h2>🟢 Dark Store Network Status</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>Store Name & Area</th><th>Manager & Login ID</th><th>Radius</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="storesTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📦 Add Master Product & Assign to Stores</h2>
+    <div class="grid">
+      <input id="pName" placeholder="Product Name (e.g. Fresh Banana 1 Dozen)" />
+      <input id="pCategory" placeholder="Category (e.g. Fruits & Veg)" />
+      <input id="pMrp" type="number" placeholder="MRP (₹)" />
+      <input id="pPrice" type="number" placeholder="Selling Price (₹)" />
+      <input id="pImage" placeholder="Image URL" />
+      <select id="pAssignStore">
+        <option value="ALL">Assign to ALL Stores</option>
+      </select>
+    </div>
+    <button style="margin-top:12px; max-width:260px;" onclick="addMasterProduct()">+ Save & Sync to Store(s)</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
+    authDomain: "jhatpat-22aa8.firebaseapp.com",
+    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+    projectId: "jhatpat-22aa8",
+    storageBucket: "jhatpat-22aa8.firebasestorage.app",
+    messagingSenderId: "51391257177",
+    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
+    measurementId: "G-VXRGH8Y5SX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.unlockAdmin = () => {
+    if (document.getElementById("adminPass").value === "MOHIT@001") {
+      document.getElementById("loginScreen").style.display = "none";
+    } else {
+      alert("Invalid Admin Password!");
+    }
+  };
+
+  let allStores = {};
+  let allOrders = {};
+
+  onValue(ref(db, "stores"), (snap) => {
+    allStores = snap.val() || {};
+    renderStores();
+  });
+
+  onValue(ref(db, "orders"), (snap) => {
+    allOrders = snap.val() || {};
+    renderOrders();
+  });
+
+  window.createStore = async () => {
+    const name = document.getElementById("sName").value.trim();
+    const area = document.getElementById("sArea").value.trim();
+    const address = document.getElementById("sAddress").value.trim();
+    const lat = parseFloat(document.getElementById("sLat").value);
+    const lng = parseFloat(document.getElementById("sLng").value);
+    const radiusKm = parseFloat(document.getElementById("sRadius").value) || 4;
+    const managerName = document.getElementById("sManager").value.trim();
+    const phone = document.getElementById("sPhone").value.trim();
+    const loginId = document.getElementById("sLoginId").value.trim();
+    const password = document.getElementById("sPassword").value.trim();
+
+    if (!name || isNaN(lat) || isNaN(lng) || !loginId || !password) return alert("Fill all required store fields!");
+
+    const newStoreRef = push(ref(db, "stores"));
+    await set(newStoreRef, { name, area, address, lat, lng, radiusKm, managerName, phone, loginId, password, isOpen: true });
+    alert("Dark Store Created!");
+    document.querySelectorAll("#sName,#sArea,#sAddress,#sLat,#sLng,#sRadius,#sManager,#sPhone,#sLoginId,#sPassword").forEach(i => i.value = "");
+  };
+
+  window.toggleStore = (storeId, currentState) => {
+    update(ref(db, `stores/${storeId}`), { isOpen: !currentState });
+  };
+
+  window.deleteStore = (storeId) => {
+    if (confirm("Delete this Dark Store?")) remove(ref(db, `stores/${storeId}`));
+  };
+
+  function renderStores() {
+    const tbody = document.getElementById("storesTable");
+    const filterSelect = document.getElementById("analyticsStoreFilter");
+    const assignSelect = document.getElementById("pAssignStore");
+    tbody.innerHTML = "";
+    filterSelect.innerHTML = `<option value="ALL">All Dark Stores (Global)</option>`;
+    assignSelect.innerHTML = `<option value="ALL">Assign to ALL Stores</option>`;
+
+    let activeCount = 0;
+    Object.entries(allStores).forEach(([id, s]) => {
+      if (s.isOpen) activeCount++;
+      filterSelect.innerHTML += `<option value="${id}">${s.name}</option>`;
+      assignSelect.innerHTML += `<option value="${id}">${s.name}</option>`;
+
+      tbody.innerHTML += `
+        <tr>
+          <td><strong>${s.name}</strong><br><small>${s.area} • ${s.address}</small></td>
+          <td>${s.managerName} (${s.phone})<br><small>ID: <b>${s.loginId}</b> | Pass: <b>${s.password}</b></small></td>
+          <td>${s.radiusKm} KM</td>
+          <td>
+            <button class="btn-toggle ${s.isOpen ? 'open' : 'closed'}" onclick="toggleStore('${id}', ${s.isOpen})">
+              ${s.isOpen ? 'OPEN (Live)' : 'CLOSED'}
+            </button>
+          </td>
+          <td><button class="btn-danger" onclick="deleteStore('${id}')">Delete</button></td>
+        </tr>`;
+    });
+    document.getElementById("statStores").innerText = activeCount;
+  }
+
+  window.addMasterProduct = async () => {
+    const name = document.getElementById("pName").value.trim();
+    const category = document.getElementById("pCategory").value.trim() || "Groceries";
+    const mrp = parseFloat(document.getElementById("pMrp").value);
+    const price = parseFloat(document.getElementById("pPrice").value);
+    const image = document.getElementById("pImage").value.trim() || "https://via.placeholder.com/150?text=Jhatpat";
+    const targetStore = document.getElementById("pAssignStore").value;
+
+    if (!name || !mrp || !price) return alert("Enter product name, MRP, and selling price.");
+    const discount = Math.round(((mrp - price) / mrp) * 100);
+
+    const prodRef = push(ref(db, "master_products"));
+    const prodId = prodRef.key;
+    await set(prodRef, { name, category, mrp, price, discount, image });
+
+    if (targetStore === "ALL") {
+      for (const storeId of Object.keys(allStores)) {
+        await set(ref(db, `store_inventory/${storeId}/${prodId}`), true);
+      }
+    } else {
+      await set(ref(db, `store_inventory/${targetStore}/${prodId}`), true);
+    }
+
+    alert("Product added & assigned!");
+    document.querySelectorAll("#pName,#pCategory,#pMrp,#pPrice,#pImage").forEach(i => i.value = "");
+  };
+
+  window.renderOrders = () => {
+    const selectedStore = document.getElementById("analyticsStoreFilter").value;
+    const tbody = document.getElementById("adminOrdersTable");
+    tbody.innerHTML = "";
+    let count = 0, revenue = 0;
+
+    Object.entries(allOrders).reverse().forEach(([id, o]) => {
+      if (selectedStore !== "ALL" && o.storeId !== selectedStore) return;
+      count++;
+      revenue += Number(o.total || 0);
+      tbody.innerHTML += `
+        <tr>
+          <td>#${id.slice(-5).toUpperCase()}</td>
+          <td>${o.storeName || o.storeId}</td>
+          <td>${o.customerName}<br><small>${o.dropAddress}</small></td>
+          <td><b>₹${o.total}</b></td>
+          <td><span style="padding:3px 8px; border-radius:6px; background:#eee; font-weight:600;">${o.status}</span></td>
+        </tr>`;
+    });
+
+    document.getElementById("statOrders").innerText = count;
+    document.getElementById("statRevenue").innerText = "₹" + revenue;
+  };
+</script>
+</body>
+</html>
