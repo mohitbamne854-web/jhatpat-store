@@ -3,210 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jhatpat - Master Admin Control Room</title>
+    <title>Jhatpat - Super Admin Control Room</title>
     <style>
-        :root {
-            --yellow: #f8cb46;
-            --green: #0c831f;
-            --dark: #1c1c1c;
-            --bg: #f4f6fb;
-            --white: #ffffff;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: var(--bg); color: var(--dark); padding-bottom: 50px; }
-        
-        header {
-            background: var(--yellow);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        header h1 { font-size: 22px; font-weight: 800; color: var(--dark); }
-        header span { background: var(--green); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-
-        .tabs {
-            display: flex;
-            background: var(--white);
-            padding: 10px;
-            gap: 10px;
-            overflow-x: auto;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab-btn {
-            padding: 10px 18px;
-            border: none;
-            background: #eee;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
+        :root { --yellow: #f8cb46; --green: #0c831f; --dark: #1c1c1c; --bg: #f4f6fb; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--dark); padding-bottom: 60px; }
+        header { background: var(--yellow); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        header h1 { font-size: 20px; font-weight: 900; }
+        .analytics-bar { max-width: 1050px; margin: 12px auto 0; padding: 0 14px; }
+        .filter-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .stat-card { background: white; padding: 12px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+        .stat-card h3 { font-size: 18px; color: var(--green); font-weight: 900; }
+        .stat-card p { font-size: 11px; color: #666; font-weight: 700; }
+        .tabs { display: flex; background: white; padding: 10px; gap: 8px; overflow-x: auto; margin-top: 12px; border-bottom: 1px solid #ddd; }
+        .tab-btn { padding: 9px 14px; border: none; background: #eee; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
         .tab-btn.active { background: var(--green); color: white; }
-
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
+        .container { max-width: 1050px; margin: 14px auto; padding: 0 14px; }
         .section { display: none; }
         .section.active { display: block; }
-
-        .card {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        .card h2 { margin-bottom: 15px; font-size: 18px; color: var(--green); border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; }
-        
-        .grid-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-        button.primary-btn {
-            background: var(--green);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .item-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .list-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .list-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; background: #f9f9f9; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
-        .badge-open { background: #dcfce7; color: #166534; }
-        .badge-closed { background: #fee2e2; color: #991b1b; }
-        
-        .action-row { display: flex; gap: 8px; margin-top: 12px; }
-        .btn-sm { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
-        .btn-toggle { background: #fef08a; color: #854d0e; }
-        .btn-del { background: #ef4444; color: white; }
-        .btn-edit { background: #3b82f6; color: white; }
-
-        #login-screen {
-            position: fixed; inset: 0; background: var(--yellow);
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .login-box { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 16px; }
+        .card h2 { font-size: 16px; color: var(--green); margin-bottom: 12px; border-bottom: 2px solid #f0f0f0; padding-bottom: 6px; }
+        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+        input, select { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; background: white; }
+        .btn-main { background: var(--green); color: white; border: none; padding: 13px; border-radius: 8px; font-weight: 800; width: 100%; margin-top: 10px; font-size: 15px; cursor: pointer; }
+        .item-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        .list-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; }
+        .list-card img { width: 100%; height: 115px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background: #f9fafb; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 800; }
+        .bg-open { background: #dcfce7; color: #166534; }
+        .bg-closed { background: #fee2e2; color: #991b1b; }
+        .act-row { display: flex; gap: 6px; margin-top: 10px; }
+        .btn-s { flex: 1; padding: 7px; border: none; border-radius: 6px; font-weight: 700; font-size: 12px; cursor: pointer; }
+        #login-modal { position: fixed; inset: 0; background: var(--yellow); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .login-box { background: white; padding: 28px; border-radius: 16px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     </style>
 </head>
 <body>
-
-    <div id="login-screen">
+    <div id="login-modal">
         <div class="login-box">
-            <h1 style="margin-bottom:5px;">⚡ Jhatpat Admin</h1>
-            <p style="color:#666; font-size:14px; margin-bottom:20px;">Super Admin Control Room</p>
-            <input type="text" id="admin-pass" placeholder="Enter Password (MOHIT@001)" style="margin-bottom:12px;">
-            <button type="button" class="primary-btn" onclick="var p=document.getElementById('admin-pass').value.trim().toUpperCase(); if(p==='MOHIT@001'){document.getElementById('login-screen').style.display='none'; localStorage.setItem('jhatpat_admin_ok','1');}else{alert('Galat Password! MOHIT@001 dalein');}">Login to Control Room</button>
+            <h1 style="margin-bottom:4px;">⚡ Jhatpat Admin</h1>
+            <p style="font-size:13px;color:#666;margin-bottom:18px;">Super Admin Control Room</p>
+            <input type="password" id="admin-pass" placeholder="Enter Password (MOHIT@001)" style="margin-bottom:12px;">
+            <button type="button" class="btn-main" onclick="verifyAdmin()">Login to Control Room</button>
         </div>
     </div>
 
-    <script>
-        if (localStorage.getItem('jhatpat_admin_ok') === '1') {
-            document.getElementById('login-screen').style.display = 'none';
-        }
-    </script>
-
     <header>
-        <h1>⚡ Jhatpat Admin</h1>
-        <span>LIVE CLOUD SYNC</span>
+        <h1>⚡ Jhatpat Master Admin</h1>
+        <button onclick="localStorage.removeItem('jhatpat_admin');location.reload();" style="background:#1c1c1c;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:bold;">Lock</button>
     </header>
 
+    <div class="analytics-bar">
+        <div class="filter-row">
+            <select id="analytics-store-filter" onchange="renderOrdersAndStats()">
+                <option value="ALL">📊 Global Analytics: ALL STORES</option>
+            </select>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><h3 id="stat-rev">₹0</h3><p>REVENUE</p></div>
+            <div class="stat-card"><h3 id="stat-ord">0</h3><p>ORDERS</p></div>
+            <div class="stat-card"><h3 id="stat-prd">0</h3><p>MASTER ITEMS</p></div>
+        </div>
+    </div>
+
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('products-tab', this)">🥬 Sabzi & Products</button>
-        <button class="tab-btn" onclick="switchTab('stores-tab', this)">🏪 Manage Dark Stores</button>
-        <button class="tab-btn" onclick="switchTab('orders-tab', this)">📦 Live Orders</button>
+        <button class="tab-btn active" onclick="openTab('tab-stores', this)">🏪 Dark Stores</button>
+        <button class="tab-btn" onclick="openTab('tab-prods', this)">🥬 Master Catalog</button>
+        <button class="tab-btn" onclick="openTab('tab-orders', this)">📦 Live Orders</button>
+        <button class="tab-btn" onclick="openTab('tab-riders', this)">🛵 Active Riders</button>
     </div>
 
     <div class="container">
-
-        <div id="products-tab" class="section active">
-            <div class="card">
-                <h2>➕ Add New Sabzi / Product (Instant Live)</h2>
-                <div class="grid-form">
-                    <input type="text" id="p-name" placeholder="Item Name (e.g., Fresh Tomato 1kg)">
-                    <select id="p-category">
-                        <option value="Sabzi & Fruits">Sabzi & Fruits</option>
-                        <option value="Dairy & Bread">Dairy & Bread</option>
-                        <option value="Atta, Rice & Dal">Atta, Rice & Dal</option>
-                        <option value="Snacks & Drinks">Snacks & Drinks</option>
-                        <option value="Masala & Oil">Masala & Oil</option>
-                    </select>
-                    <input type="number" id="p-mrp" placeholder="MRP (₹) e.g. 60">
-                    <input type="number" id="p-price" placeholder="Selling Price (₹) e.g. 40">
-                    <input type="text" id="p-weight" placeholder="Weight/Qty (e.g., 1 kg, 500 g, 1 L)">
-                    <input type="text" id="p-img" placeholder="Image URL (Paste link)">
-                    <select id="p-store">
-                        <option value="ALL">Available in ALL Stores</option>
-                    </select>
-                </div>
-                <button class="primary-btn" onclick="addProduct()">Publish Live to Customer App</button>
-            </div>
-
-            <div class="card">
-                <h2>📋 Live Catalog (<span id="prod-count">0</span> Items)</h2>
-                <div id="product-list" class="item-list"></div>
-            </div>
-        </div>
-
-        <div id="stores-tab" class="section">
+        <div id="tab-stores" class="section active">
             <div class="card">
                 <h2>🏪 Open New Dark Store</h2>
                 <div class="grid-form">
-                    <input type="text" id="s-name" placeholder="Store Name (e.g., Jhatpat Dombivli East)">
-                    <input type="text" id="s-area" placeholder="Area / Locality (e.g., Dombivli East)">
-                    <input type="text" id="s-address" placeholder="Full Store Address">
-                    <input type="number" step="any" id="s-lat" placeholder="Latitude (e.g., 19.2183)">
-                    <input type="number" step="any" id="s-lng" placeholder="Longitude (e.g., 73.0867)">
-                    <input type="number" id="s-radius" placeholder="Delivery Radius in KM (e.g., 5)">
-                    <input type="text" id="s-manager" placeholder="Store Manager Name">
-                    <input type="text" id="s-login" placeholder="Store Login ID (e.g., dombivli01)">
-                    <input type="text" id="s-pass" placeholder="Store Password (e.g., king@001)">
+                    <input type="text" id="s-name" placeholder="Store Name (e.g. Jhatpat Dombivli)">
+                    <input type="text" id="s-area" placeholder="Area / Locality (e.g. Dombivli East)">
+                    <input type="text" id="s-addr" placeholder="Full Store Address">
+                    <input type="number" step="any" id="s-lat" placeholder="Latitude (e.g. 19.2056)">
+                    <input type="number" step="any" id="s-lng" placeholder="Longitude (e.g. 73.0954)">
+                    <input type="number" id="s-rad" placeholder="Delivery Radius in KM (e.g. 5)">
+                    <input type="text" id="s-mgr" placeholder="Store Manager Name">
+                    <input type="tel" id="s-phone" placeholder="Manager Phone Number">
+                    <input type="text" id="s-id" placeholder="Store Login ID">
+                    <input type="text" id="s-pass" placeholder="Store Password">
                 </div>
-                <button class="primary-btn" onclick="createStore()">Create & Launch Store</button>
+                <button class="btn-main" onclick="createStore()">🚀 Create & Launch Store</button>
             </div>
-
             <div class="card">
-                <h2>🏢 Active & Closed Stores</h2>
+                <h2>🏢 Store Management List</h2>
                 <div id="store-list" class="item-list"></div>
             </div>
         </div>
 
-        <div id="orders-tab" class="section">
+        <div id="tab-prods" class="section">
             <div class="card">
-                <h2>📦 All Live Orders</h2>
-                <div id="order-list" class="item-list"></div>
+                <h2>➕ Add Master Product (Auto Real Photo)</h2>
+                <div class="grid-form">
+                    <input type="text" id="p-name" placeholder="Product Name (e.g. Fresh Tomato, Milk, Potato)">
+                    <select id="p-cat">
+                        <option value="Sabzi & Fruits">🥬 Sabzi & Fruits</option>
+                        <option value="Dairy & Bread">🥛 Dairy & Bread</option>
+                        <option value="Atta, Rice & Dal">🌾 Atta, Rice & Dal</option>
+                        <option value="Snacks & Drinks">🥤 Snacks & Drinks</option>
+                        <option value="Masala & Oil">🫙 Masala & Oil</option>
+                    </select>
+                    <input type="number" id="p-mrp" placeholder="MRP (₹) e.g. 60">
+                    <input type="number" id="p-price" placeholder="Selling Price (₹) e.g. 40">
+                    <input type="text" id="p-weight" placeholder="Weight/Pack (e.g. 1 kg, 500 g)">
+                    <input type="text" id="p-img" placeholder="Image URL (Optional - Auto Real Photo if blank)">
+                    <select id="p-store"><option value="ALL">Assign to ALL Stores</option></select>
+                </div>
+                <button class="btn-main" onclick="addMasterProduct()">⚡ Publish to Master Catalog</button>
+            </div>
+            <div class="card">
+                <h2>📋 Master Catalog</h2>
+                <div id="prod-list" class="item-list"></div>
             </div>
         </div>
 
+        <div id="tab-orders" class="section">
+            <div class="card">
+                <h2>📦 Live Orders (Filtered by Top Store Selector)</h2>
+                <div id="ord-list" class="item-list"></div>
+            </div>
+        </div>
+
+        <div id="tab-riders" class="section">
+            <div class="card">
+                <h2>🛵 Registered & Online Riders</h2>
+                <div id="rider-list" class="item-list"></div>
+            </div>
+        </div>
     </div>
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
@@ -217,48 +150,120 @@
             messagingSenderId: "51391257177",
             appId: "1:51391257177:web:2537fdd28d123dd8d0ef48"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        function switchTab(tabId, btn) {
+        function verifyAdmin() {
+            const p = document.getElementById('admin-pass').value.trim();
+            if (p === "MOHIT@001") {
+                document.getElementById('login-modal').style.display = 'none';
+                localStorage.setItem('jhatpat_admin', 'MOHIT@001');
+            } else {
+                alert("❌ Incorrect Password! Please enter MOHIT@001");
+            }
+        }
+        if (localStorage.getItem('jhatpat_admin') === 'MOHIT@001') {
+            document.getElementById('login-modal').style.display = 'none';
+        }
+
+        function openTab(id, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(id).classList.add('active');
             btn.classList.add('active');
         }
 
-        function addProduct() {
+        function getAutoPhoto(name) {
+            const n = name.toLowerCase();
+            if (n.includes('tomato') || n.includes('tamatar')) return 'https://unsplash.com';
+            if (n.includes('potato') || n.includes('aloo')) return 'https://unsplash.com';
+            if (n.includes('onion') || n.includes('pyaz') || n.includes('kanda')) return 'https://unsplash.com';
+            if (n.includes('banana') || n.includes('kela')) return 'https://unsplash.com';
+            if (n.includes('apple') || n.includes('seb')) return 'https://unsplash.com';
+            if (n.includes('milk') || n.includes('doodh')) return 'https://unsplash.com';
+            if (n.includes('bread')) return 'https://unsplash.com';
+            if (n.includes('rice') || n.includes('chawal')) return 'https://unsplash.com';
+            if (n.includes('atta')) return 'https://unsplash.com';
+            return 'https://unsplash.com?' + encodeURIComponent(name + ',grocery');
+        }
+
+        let allStores = {};
+        let allOrders = [];
+
+        function createStore() {
+            const name = document.getElementById('s-name').value.trim();
+            const area = document.getElementById('s-area').value.trim();
+            const address = document.getElementById('s-addr').value.trim();
+            const lat = parseFloat(document.getElementById('s-lat').value) || 19.2056;
+            const lng = parseFloat(document.getElementById('s-lng').value) || 73.0954;
+            const radius = Number(document.getElementById('s-rad').value) || 5;
+            const manager = document.getElementById('s-mgr').value.trim();
+            const phone = document.getElementById('s-phone').value.trim();
+            const loginId = document.getElementById('s-id').value.trim();
+            const password = document.getElementById('s-pass').value.trim();
+
+            if (!name || !area || !loginId || !password) { alert("Store Name, Area, Login ID & Password are required!"); return; }
+
+            const ref = db.ref('stores').push();
+            ref.set({
+                id: ref.key, name, area, address, lat, lng, radius, manager, phone, loginId, password, isOpen: true
+            }).then(() => {
+                alert("🎉 Dark Store Launched Successfully!");
+                document.querySelectorAll('#tab-stores input').forEach(i => i.value = '');
+            });
+        }
+
+        db.ref('stores').on('value', (snap) => {
+            allStores = {};
+            const list = document.getElementById('store-list');
+            const pSel = document.getElementById('p-store');
+            const aSel = document.getElementById('analytics-store-filter');
+            list.innerHTML = '';
+            pSel.innerHTML = '<option value="ALL">Assign to ALL Stores</option>';
+            aSel.innerHTML = '<option value="ALL">📊 Global Analytics: ALL STORES</option>';
+
+            snap.forEach((child) => {
+                const s = child.val();
+                allStores[s.id] = s;
+                pSel.innerHTML += `<option value="${s.id}">${s.name} (${s.area})</option>`;
+                aSel.innerHTML += `<option value="${s.id}">🏪 ${s.name} (${s.area})</option>`;
+                list.innerHTML += `
+                    <div class="list-card">
+                        <span class="badge ${s.isOpen ? 'bg-open' : 'bg-closed'}">${s.isOpen ? 'OPEN (LIVE)' : 'CLOSED'}</span>
+                        <h3 style="margin-top:6px;">${s.name}</h3>
+                        <p style="font-size:12px;">📍 ${s.area} (${s.radius} KM)</p>
+                        <p style="font-size:12px;">👤 ${s.manager} (${s.phone || ''})</p>
+                        <p style="font-size:12px;background:#f3f4f6;padding:5px;margin-top:5px;">ID: <b>${s.loginId}</b> | Pass: <b>${s.password}</b></p>
+                        <div class="act-row">
+                            <button class="btn-s" style="background:#fef08a;" onclick="db.ref('stores/${s.id}').update({isOpen:${!s.isOpen}})">${s.isOpen ? 'Close Store' : 'Open Store'}</button>
+                            <button class="btn-s" style="background:#ef4444;color:white;" onclick="if(confirm('Delete store?'))db.ref('stores/${s.id}').remove()">Delete</button>
+                        </div>
+                    </div>`;
+            });
+        });
+
+        function addMasterProduct() {
             const name = document.getElementById('p-name').value.trim();
-            const category = document.getElementById('p-category').value;
+            const category = document.getElementById('p-cat').value;
             const mrp = Number(document.getElementById('p-mrp').value);
             const price = Number(document.getElementById('p-price').value);
             const weight = document.getElementById('p-weight').value.trim() || "1 Unit";
-            const img = document.getElementById('p-img').value.trim() || "https://placeholder.com";
-            const storeId = document.getElementById('p-store').value;
+            const img = document.getElementById('p-img').value.trim() || getAutoPhoto(name);
+            const assignedStore = document.getElementById('p-store').value;
 
-            if (!name || !price) {
-                alert("Kripya Item ka naam aur Selling Price zaroor dalein!");
-                return;
-            }
-
+            if (!name || !price) { alert("Product Name & Selling Price required!"); return; }
             const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
-            const newProdRef = db.ref('products').push();
+            const ref = db.ref('master_products').push();
 
-            newProdRef.set({
-                id: newProdRef.key,
-                name: name,
-                category: category,
-                mrp: mrp || price,
-                price: price,
-                discount: discount,
-                weight: weight,
-                image: img,
-                storeId: storeId,
-                inStock: true,
-                createdAt: Date.now()
+            ref.set({
+                id: ref.key, name, category, mrp: mrp || price, price, discount, weight, image: img, assignedStore
             }).then(() => {
-                alert("✅ Item Live ho gaya! Ab Customer App par dikhega.");
+                if (assignedStore === "ALL") {
+                    Object.keys(allStores).forEach(stId => db.ref(`store_inventory/${stId}/${ref.key}`).set(true));
+                } else {
+                    db.ref(`store_inventory/${assignedStore}/${ref.key}`).set(true);
+                }
+                alert("✅ Product Published with Real Photo!");
                 document.getElementById('p-name').value = '';
                 document.getElementById('p-mrp').value = '';
                 document.getElementById('p-price').value = '';
@@ -266,156 +271,63 @@
             });
         }
 
-        db.ref('products').on('value', (snapshot) => {
-            const list = document.getElementById('product-list');
+        db.ref('master_products').on('value', (snap) => {
+            const list = document.getElementById('prod-list');
             list.innerHTML = '';
-            let count = 0;
+            let c = 0;
+            snap.forEach((child) => {
+                c++;
+                const i = child.val();
+                list.innerHTML += `
+                    <div class="list-card">
+                        <img src="${i.image}">
+                        <span class="badge bg-open">${i.discount}% OFF</span>
+                        <h3 style="margin-top:6px;font-size:15px;">${i.name}</h3>
+                        <p style="font-size:12px;color:#666;">${i.weight} • <b>₹${i.price}</b> <del>₹${i.mrp}</del></p>
+                        <div class="act-row">
+                            <button class="btn-s" style="background:#3b82f6;color:white;" onclick="const np=prompt('New Price:',${i.price});if(np)db.ref('master_products/${i.id}').update({price:Number(np)})">Edit Rate</button>
+                            <button class="btn-s" style="background:#ef4444;color:white;" onclick="if(confirm('Delete?'))db.ref('master_products/${i.id}').remove()">Delete</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('stat-prd').innerText = c;
+        });
 
-            snapshot.forEach((child) => {
+        db.ref('orders').on('value', (snap) => {
+            allOrders = [];
+            snap.forEach(c => allOrders.push({ key: c.key, ...c.val() }));
+            renderOrdersAndStats();
+        });
+
+        function renderOrdersAndStats() {
+            const filterStore = document.getElementById('analytics-store-filter').value;
+            const list = document.getElementById('ord-list');
+            list.innerHTML = '';
+            let rev = 0, count = 0;
+
+            allOrders.forEach(o => {
+                if (filterStore !== "ALL" && o.storeId !== filterStore) return;
                 count++;
-                const item = child.val();
+                rev += Number(o.total || 0);
                 list.innerHTML += `
                     <div class="list-card">
-                        <div>
-                            <img src="${item.image}" alt="${item.name}">
-                            <span class="badge ${item.inStock ? 'badge-open' : 'badge-closed'}">
-                                ${item.inStock ? 'LIVE / IN STOCK' : 'OUT OF STOCK'}
-                            </span>
-                            <h3 style="margin-top:8px; font-size:16px;">${item.name}</h3>
-                            <p style="font-size:13px; color:#666;">${item.weight} • ${item.category}</p>
-                            <p style="margin-top:5px; font-weight:bold; color:var(--green);">
-                                ₹${item.price} <del style="color:#999; font-weight:normal;">₹${item.mrp}</del> (${item.discount}% OFF)
-                            </p>
-                        </div>
-                        <div class="action-row">
-                            <button class="btn-sm btn-edit" onclick="updatePrice('${item.id}', ${item.price})">Edit Rate</button>
-                            <button class="btn-sm btn-toggle" onclick="toggleStock('${item.id}', ${item.inStock})">
-                                ${item.inStock ? 'Out Stock' : 'In Stock'}
-                            </button>
-                            <button class="btn-sm btn-del" onclick="deleteProduct('${item.id}')">Delete</button>
-                        </div>
-                    </div>
-                `;
+                        <span class="badge bg-open">${o.status}</span>
+                        <h3 style="margin-top:5px;">#${o.key.slice(-5).toUpperCase()} • ₹${o.total}</h3>
+                        <p style="font-size:12px;">🏪 ${o.storeName || 'Store'}</p>
+                        <p style="font-size:12px;">👤 ${o.customerName} (${o.phone})</p>
+                        <p style="font-size:12px;color:#555;">📍 ${o.address}</p>
+                    </div>`;
             });
-            document.getElementById('prod-count').innerText = count;
-        });
-
-        function updatePrice(id, oldPrice) {
-            const newPrice = prompt("Naya Selling Price (₹) dalein:", oldPrice);
-            if (newPrice && !isNaN(newPrice)) {
-                db.ref('products/' + id).update({ price: Number(newPrice) });
-            }
+            document.getElementById('stat-ord').innerText = count;
+            document.getElementById('stat-rev').innerText = '₹' + rev;
         }
 
-        function toggleStock(id, currentStatus) {
-            db.ref('products/' + id).update({ inStock: !currentStatus });
-        }
-
-        function deleteProduct(id) {
-            if (confirm("Kya aap is item ko hamesha ke liye delete karna chahte hain?")) {
-                db.ref('products/' + id).remove();
-            }
-        }
-
-        function createStore() {
-            const name = document.getElementById('s-name').value.trim();
-            const area = document.getElementById('s-area').value.trim();
-            const address = document.getElementById('s-address').value.trim();
-            const lat = parseFloat(document.getElementById('s-lat').value);
-            const lng = parseFloat(document.getElementById('s-lng').value);
-            const radius = Number(document.getElementById('s-radius').value) || 5;
-            const manager = document.getElementById('s-manager').value.trim();
-            const loginId = document.getElementById('s-login').value.trim();
-            const password = document.getElementById('s-pass').value.trim();
-
-            if (!name || !area || !loginId || !password) {
-                alert("Store ka naam, Area, Login ID aur Password zaroori hai!");
-                return;
-            }
-
-            const newStoreRef = db.ref('stores').push();
-            newStoreRef.set({
-                id: newStoreRef.key,
-                name: name,
-                area: area,
-                address: address,
-                lat: lat || 19.2183,
-                lng: lng || 73.0867,
-                radius: radius,
-                manager: manager,
-                loginId: loginId,
-                password: password,
-                isOpen: true
-            }).then(() => {
-                alert("🎉 Naya Dark Store successfully open ho gaya!");
-                document.querySelectorAll('#stores-tab input').forEach(i => i.value = '');
-            });
-        }
-
-        db.ref('stores').on('value', (snapshot) => {
-            const list = document.getElementById('store-list');
-            const storeSelect = document.getElementById('p-store');
+        db.ref('riders').on('value', (snap) => {
+            const list = document.getElementById('rider-list');
             list.innerHTML = '';
-            storeSelect.innerHTML = '<option value="ALL">Available in ALL Stores</option>';
-
-            snapshot.forEach((child) => {
-                const store = child.val();
-                storeSelect.innerHTML += `<option value="${store.id}">${store.name} (${store.area})</option>`;
-
-                list.innerHTML += `
-                    <div class="list-card">
-                        <div>
-                            <span class="badge ${store.isOpen ? 'badge-open' : 'badge-closed'}">
-                                ${store.isOpen ? 'STORE OPEN' : 'STORE CLOSED'}
-                            </span>
-                            <h3 style="margin-top:8px;">${store.name}</h3>
-                            <p style="font-size:13px; color:#555;">📍 ${store.area} (${store.radius} KM Radius)</p>
-                            <p style="font-size:12px; color:#777; margin-top:4px;">👤 Manager: ${store.manager}</p>
-                            <p style="font-size:12px; background:#f3f4f6; padding:5px; border-radius:5px; margin-top:6px;">
-                                🔑 Login ID: <b>${store.loginId}</b> | Pass: <b>${store.password}</b>
-                            </p>
-                        </div>
-                        <div class="action-row">
-                            <button class="btn-sm btn-toggle" onclick="toggleStore('${store.id}', ${store.isOpen})">
-                                ${store.isOpen ? 'Close Store' : 'Open Store'}
-                            </button>
-                            <button class="btn-sm btn-del" onclick="deleteStore('${store.id}')">Remove</button>
-                        </div>
-                    </div>
-                `;
-            });
-        });
-
-        function toggleStore(id, status) {
-            db.ref('stores/' + id).update({ isOpen: !status });
-        }
-
-        function deleteStore(id) {
-            if (confirm("Kya aap is Store ko band karke delete karna chahte hain?")) {
-                db.ref('stores/' + id).remove();
-            }
-        }
-
-                db.ref('orders').on('value', (snapshot) => {
-            const list = document.getElementById('order-list');
-            list.innerHTML = '';
-            if (!snapshot.exists()) {
-                list.innerHTML = '<p style="color:#777;">Abhi koi order nahi aaya hai.</p>';
-                return;
-            }
-            snapshot.forEach((child) => {
-                const ord = child.val();
-                list.innerHTML += `
-                    <div class="list-card">
-                        <div>
-                            <span class="badge badge-open">${ord.status || 'NEW'}</span>
-                            <h3 style="margin-top:6px;">Order #${child.key.slice(-5).toUpperCase()}</h3>
-                            <p style="font-size:13px;">👤 ${ord.customerName} (${ord.phone})</p>
-                            <p style="font-size:13px;">📍 ${ord.address}</p>
-                            <p style="font-weight:bold; color:var(--green); margin-top:5px;">Total: ₹${ord.total}</p>
-                        </div>
-                    </div>
-                `;
+            snap.forEach(c => {
+                const r = c.val();
+                list.innerHTML += `<div class="list-card"><span class="badge ${r.online?'bg-open':'bg-closed'}">${r.online?'ONLINE':'OFFLINE'}</span><h3 style="margin-top:6px;">🛵 ${r.name}</h3><p style="font-size:12px;">Zone: ${allStores[r.storeId]?.name || 'All Stores'}</p></div>`;
             });
         });
     </script>
