@@ -68,24 +68,23 @@
         }
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
         }
         button.primary-btn {
             background: var(--green);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
             width: 100%;
-            font-size: 15px;
+            font-size: 16px;
         }
-        button.primary-btn:hover { opacity: 0.9; }
 
         .item-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
         .list-card {
@@ -110,7 +109,7 @@
 
         #login-screen {
             position: fixed; inset: 0; background: var(--yellow);
-            display: flex; justify-content: center; align-items: center; z-index: 999;
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .login-box { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
     </style>
@@ -121,10 +120,16 @@
         <div class="login-box">
             <h1 style="margin-bottom:5px;">⚡ Jhatpat Admin</h1>
             <p style="color:#666; font-size:14px; margin-bottom:20px;">Super Admin Control Room</p>
-            <input type="password" id="admin-pass" placeholder="Enter Admin Password (MOHIT@001)" style="margin-bottom:12px;">
-            <button class="primary-btn" onclick="checkAdminLogin()">Login to Control Room</button>
+            <input type="text" id="admin-pass" placeholder="Enter Password (MOHIT@001)" style="margin-bottom:12px;">
+            <button type="button" class="primary-btn" onclick="var p=document.getElementById('admin-pass').value.trim().toUpperCase(); if(p==='MOHIT@001'){document.getElementById('login-screen').style.display='none'; localStorage.setItem('jhatpat_admin_ok','1');}else{alert('Galat Password! MOHIT@001 dalein');}">Login to Control Room</button>
         </div>
     </div>
+
+    <script>
+        if (localStorage.getItem('jhatpat_admin_ok') === '1') {
+            document.getElementById('login-screen').style.display = 'none';
+        }
+    </script>
 
     <header>
         <h1>⚡ Jhatpat Admin</h1>
@@ -215,15 +220,6 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        function checkAdminLogin() {
-            const pass = document.getElementById('admin-pass').value;
-            if (pass === "MOHIT@001") {
-                document.getElementById('login-screen').style.display = 'none';
-            } else {
-                alert("Galat Password! Sahi password dalein.");
-            }
-        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -400,7 +396,7 @@
             }
         }
 
-        db.ref('orders').on('value', (snapshot) => {
+                db.ref('orders').on('value', (snapshot) => {
             const list = document.getElementById('order-list');
             list.innerHTML = '';
             if (!snapshot.exists()) {
@@ -410,3 +406,18 @@
             snapshot.forEach((child) => {
                 const ord = child.val();
                 list.innerHTML += `
+                    <div class="list-card">
+                        <div>
+                            <span class="badge badge-open">${ord.status || 'NEW'}</span>
+                            <h3 style="margin-top:6px;">Order #${child.key.slice(-5).toUpperCase()}</h3>
+                            <p style="font-size:13px;">👤 ${ord.customerName} (${ord.phone})</p>
+                            <p style="font-size:13px;">📍 ${ord.address}</p>
+                            <p style="font-weight:bold; color:var(--green); margin-top:5px;">Total: ₹${ord.total}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
