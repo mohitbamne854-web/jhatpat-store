@@ -1,266 +1,422 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat - 10-Minute Grocery Delivery</title>
-  <style>
-    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #F7F8FA; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: #1C1C1C; padding-bottom: 90px; }
-    header { background: var(--yellow); padding: 14px 18px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .delivery-eta { font-size: 1.15rem; font-weight: 900; color: #000; }
-    .store-sub { font-size: 0.85rem; font-weight: 600; color: #333; margin-top: 2px; }
-    .loc-bar { display: flex; gap: 8px; margin-top: 10px; }
-    .loc-bar select, .loc-bar button { padding: 8px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.85rem; }
-    .loc-bar button { background: #000; color: #fff; border: none; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .container { max-width: 900px; margin: 16px auto; padding: 0 14px; }
-    .unserviceable { background: #ffe5e5; border: 1px solid #ff9999; color: #a10000; padding: 25px; border-radius: 12px; text-align: center; margin-top: 20px; }
-    .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
-    .prod-card { background: #fff; border-radius: 12px; padding: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
-    .prod-card img { width: 100%; height: 110px; object-fit: contain; margin-bottom: 8px; }
-    .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-    .add-btn { background: #fff; color: var(--green); border: 1px solid var(--green); padding: 6px 14px; border-radius: 8px; font-weight: 800; cursor: pointer; }
-    .add-btn:hover { background: var(--green); color: #fff; }
-    .cart-bar { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 860px; background: var(--green); color: #fff; padding: 14px 20px; border-radius: 12px; display: none; justify-content: space-between; align-items: center; font-weight: 700; box-shadow: 0 6px 20px rgba(0,0,0,0.2); cursor: pointer; }
-    #checkoutModal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 200; }
-    .modal-box { background: #fff; padding: 22px; border-radius: 14px; width: 92%; max-width: 400px; }
-    .modal-box input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhatpat - Fresh Groceries & Produce in Minutes</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 pb-24">
 
-<header>
-  <div class="delivery-eta" id="etaBanner">⚡ Detecting nearest Jhatpat store...</div>
-  <div class="store-sub" id="storeBanner">Allow GPS or choose your area below</div>
-  <div class="loc-bar">
-    <button onclick="detectGPS()">📍 Use GPS</button>
-    <select id="manualAreaSelect" onchange="selectManualStore()" style="flex:1;">
-      <option value="">-- Or Select Your Area Manually --</option>
-    </select>
-  </div>
-</header>
-
-<div class="container">
-  <div id="unserviceableBanner" class="unserviceable" style="display:none;">
-    <h2>😔 Sorry, we are not delivering in your area yet</h2>
-    <p style="margin-top:8px;">We are expanding rapidly across Dombivli & Kalyan. Select another nearby area above to browse.</p>
-  </div>
-
-  <div class="prod-grid" id="productGrid"></div>
-</div>
-
-<div class="cart-bar" id="cartBar" onclick="openCheckout()">
-  <span id="cartSummary">0 Items • ₹0</span>
-  <span>Proceed to Order →</span>
-</div>
-
-<div id="checkoutModal">
-  <div class="modal-box">
-    <h3 style="margin-bottom:12px;">🚀 Fast 10-Min Checkout</h3>
-    <p id="checkoutStoreTag" style="font-size:0.8rem; color:var(--green); font-weight:700; margin-bottom:10px;"></p>
-    <input id="custName" placeholder="Your Full Name" />
-    <input id="custPhone" placeholder="Mobile Number" />
-    <input id="custAddress" placeholder="Flat / Building / Landmark" />
-    <button onclick="placeOrder()" style="width:100%; padding:12px; background:var(--green); color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">Place COD Order</button>
-    <button onclick="document.getElementById('checkoutModal').style.display='none'" style="width:100%; margin-top:8px; padding:8px; background:#eee; border:none; border-radius:8px;">Cancel</button>
-  </div>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
-    authDomain: "jhatpat-22aa8.firebaseapp.com",
-    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-    projectId: "jhatpat-22aa8",
-    storageBucket: "jhatpat-22aa8.firebasestorage.app",
-    messagingSenderId: "51391257177",
-    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
-    measurementId: "G-VXRGH8Y5SX"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  let stores = {};
-  let masterProducts = {};
-  let storeInventory = {};
-  let lockedStoreId = null;
-  let cart = {};
-
-  function getDistanceKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-  }
-
-  onValue(ref(db, "stores"), (snap) => {
-    stores = snap.val() || {};
-    const select = document.getElementById("manualAreaSelect");
-    select.innerHTML = `<option value="">-- Select Your Area Manually --</option>`;
-    Object.entries(stores).forEach(([id, s]) => {
-      if (s.isOpen) {
-        select.innerHTML += `<option value="${id}">${s.area} (${s.name})</option>`;
-      }
-    });
-    if (!lockedStoreId) detectGPS();
-  });
-
-  onValue(ref(db, "master_products"), (snap) => {
-    masterProducts = snap.val() || {};
-    renderCatalog();
-  });
-
-  onValue(ref(db, "store_inventory"), (snap) => {
-    storeInventory = snap.val() || {};
-    renderCatalog();
-  });
-
-  window.detectGPS = () => {
-    if (!navigator.geolocation) return showOutOfZone();
-    navigator.geolocation.getCurrentPosition(
-      (pos) => matchNearestStore(pos.coords.latitude, pos.coords.longitude),
-      () => {
-        document.getElementById("etaBanner").innerText = "📍 Select your delivery area";
-        document.getElementById("storeBanner").innerText = "GPS permission denied — choose area manually";
-      }
-    );
-  };
-
-  function matchNearestStore(userLat, userLng) {
-    let bestStoreId = null;
-    let minDistance = Infinity;
-
-    Object.entries(stores).forEach(([id, s]) => {
-      if (!s.isOpen) return;
-      const dist = getDistanceKm(userLat, userLng, s.lat, s.lng);
-      if (dist <= s.radiusKm && dist < minDistance) {
-        minDistance = dist;
-        bestStoreId = id;
-      }
-    });
-
-    if (bestStoreId) {
-      lockStore(bestStoreId);
-    } else {
-      showOutOfZone();
-    }
-  }
-
-  window.selectManualStore = () => {
-    const val = document.getElementById("manualAreaSelect").value;
-    if (val) lockStore(val);
-  };
-
-  function lockStore(storeId) {
-    lockedStoreId = storeId;
-    cart = {};
-    updateCartUI();
-    const s = stores[storeId];
-    document.getElementById("unserviceableBanner").style.display = "none";
-    document.getElementById("etaBanner").innerText = `⚡ Delivering in 10 mins from ${s.name}`;
-    document.getElementById("storeBanner").innerText = `${s.area} • Free Express Delivery`;
-    renderCatalog();
-  }
-
-  function showOutOfZone() {
-    lockedStoreId = null;
-    document.getElementById("etaBanner").innerText = "⚠️ Area Not Serviceable";
-    document.getElementById("storeBanner").innerText = "No open Dark Store within range";
-    document.getElementById("unserviceableBanner").style.display = "block";
-    document.getElementById("productGrid").innerHTML = "";
-  }
-
-  function renderCatalog() {
-    if (!lockedStoreId) return;
-    const grid = document.getElementById("productGrid");
-    grid.innerHTML = "";
-    const activeStock = storeInventory[lockedStoreId] || {};
-
-    Object.entries(masterProducts).forEach(([prodId, p]) => {
-      if (activeStock[prodId] !== true) return;
-
-      grid.innerHTML += `
-        <div class="prod-card">
-          <div>
-            <img src="${p.image}" alt="${p.name}" />
-            <small style="color:var(--green); font-weight:700;">${p.discount || 0}% OFF</small>
-            <h4 style="font-size:0.95rem; margin:4px 0;">${p.name}</h4>
-          </div>
-          <div class="price-row">
-            <div>
-              <strong>₹${p.price}</strong>
-              <small style="text-decoration:line-through; color:#888; margin-left:4px;">₹${p.mrp}</small>
+    <!-- Blinkit Yellow Header -->
+    <header class="bg-yellow-400 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 pt-3 pb-2 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+                <div class="bg-slate-950 text-yellow-400 font-black px-2.5 py-1.5 rounded-xl text-lg tracking-tighter">
+                    jhatpat
+                </div>
+                <div class="border-l border-yellow-500 pl-2.5">
+                    <p class="text-[11px] font-extrabold uppercase text-slate-800 leading-none">Delivery in 12 mins</p>
+                    <button onclick="detectNearestStore()" class="text-xs font-semibold text-slate-900 flex items-center mt-0.5">
+                        <span id="nearest-store-label">Detecting nearest dark store...</span>
+                        <i class="fa-solid fa-location-crosshairs ml-1.5 text-emerald-800"></i>
+                    </button>
+                </div>
             </div>
-            <button class="add-btn" onclick="addToCart('${prodId}')">+ ADD</button>
-          </div>
-        </div>`;
-    });
-  }
+            <div class="flex items-center space-x-2">
+                <button onclick="openTracker()" class="bg-white/90 hover:bg-white text-slate-900 px-3 py-2 rounded-xl text-xs font-bold shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-700 mr-1"></i> Orders
+                </button>
+            </div>
+        </div>
 
-  window.addToCart = (prodId) => {
-    cart[prodId] = (cart[prodId] || 0) + 1;
-    updateCartUI();
-  };
+        <!-- Live Search -->
+        <div class="max-w-5xl mx-auto px-4 pb-3">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                <input type="text" id="live-search" oninput="renderCatalog()" placeholder='Search "alphonso mango", "onion", "coriander"...' 
+                    class="w-full bg-white pl-10 pr-4 py-2.5 rounded-xl text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-600">
+            </div>
+        </div>
+    </header>
 
-  function updateCartUI() {
-    let qty = 0, total = 0;
-    Object.entries(cart).forEach(([id, count]) => {
-      if (masterProducts[id]) {
-        qty += count;
-        total += masterProducts[id].price * count;
-      }
-    });
-    const bar = document.getElementById("cartBar");
-    bar.style.display = qty > 0 ? "flex" : "none";
-    document.getElementById("cartSummary").innerText = `${qty} Items • ₹${total}`;
-  }
+    <main class="max-w-5xl mx-auto px-4 pt-4 space-y-6">
+        <!-- Sponsored Bestsellers Banner Section -->
+        <section id="sponsored-section" class="hidden">
+            <div class="flex items-center justify-between mb-2.5">
+                <h2 class="font-extrabold text-base text-slate-900 flex items-center">
+                    <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded mr-2">SPONSORED</span>
+                    Bestsellers Near You
+                </h2>
+            </div>
+            <div id="sponsored-grid" class="flex space-x-3 overflow-x-auto no-scrollbar pb-2"></div>
+        </section>
 
-  window.openCheckout = () => {
-    document.getElementById("checkoutStoreTag").innerText = `Fulfilled by: ${stores[lockedStoreId].name}`;
-    document.getElementById("checkoutModal").style.display = "flex";
-  };
+        <!-- Category Filter Pills -->
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar">
+            <button onclick="setCat('All')" class="cat-pill bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">All Produce</button>
+            <button onclick="setCat('Vegetables')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Fresh Vegetables</button>
+            <button onclick="setCat('Fruits')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Fresh Fruits</button>
+            <button onclick="setCat('Leafy & Herbs')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Leafy & Herbs</button>
+            <button onclick="setCat('Exotic & Organic')" class="cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">Exotic & Organic</button>
+        </div>
 
-  window.placeOrder = async () => {
-    const customerName = document.getElementById("custName").value.trim();
-    const customerPhone = document.getElementById("custPhone").value.trim();
-    const dropAddress = document.getElementById("custAddress").value.trim();
-    if (!customerName || !customerPhone || !dropAddress) return alert("Please fill delivery details!");
+        <!-- Main Product Grid -->
+        <section>
+            <h2 class="font-extrabold text-base text-slate-900 mb-3">Shop Fresh Daily</h2>
+            <div id="main-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5"></div>
+        </section>
+    </main>
 
-    let total = 0;
-    const items = [];
-    Object.entries(cart).forEach(([id, count]) => {
-      const p = masterProducts[id];
-      total += p.price * count;
-      items.push({ name: p.name, qty: count, price: p.price });
-    });
+    <!-- Blinkit Green Floating Cart Bar -->
+    <div id="floating-cart" class="hidden fixed bottom-4 inset-x-4 max-w-2xl mx-auto bg-emerald-600 text-white rounded-2xl p-3.5 shadow-2xl z-40 flex items-center justify-between cursor-pointer" onclick="openCart()">
+        <div class="flex items-center space-x-3">
+            <div class="bg-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center font-bold">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold" id="bar-items">0 ITEMS</p>
+                <p class="text-base font-black leading-tight" id="bar-total">₹0</p>
+            </div>
+        </div>
+        <div class="font-extrabold text-sm flex items-center">
+            View Cart <i class="fa-solid fa-caret-right ml-2"></i>
+        </div>
+    </div>
 
-    const store = stores[lockedStoreId];
-    await set(push(ref(db, "orders")), {
-      storeId: lockedStoreId,
-      storeName: store.name,
-      storeAddress: store.address,
-      customerName,
-      customerPhone,
-      dropAddress,
-      items,
-      total,
-      status: "New",
-      createdAt: Date.now()
-    });
+    <!-- Checkout Drawer Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 class="font-extrabold text-base">Delivery in 12 minutes</h3>
+                    <p class="text-[11px] text-emerald-700 font-semibold" id="checkout-store-tag">Fulfilled by Nearest Dark Store</p>
+                </div>
+                <button onclick="closeCart()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">&times;</button>
+            </div>
 
-    cart = {};
-    updateCartUI();
-    document.getElementById("checkoutModal").style.display = "none";
-    alert("🎉 Order Placed! Your Dark Store is packing it now.");
-  };
-</script>
+            <div id="cart-items-box" class="divide-y my-3 max-h-52 overflow-y-auto"></div>
+
+            <div class="bg-slate-50 p-3.5 rounded-2xl text-xs space-y-1.5 mb-4 border">
+                <div class="flex justify-between"><span>Item Total</span><span id="bill-sub">₹0</span></div>
+                <div class="flex justify-between"><span>Handling & Delivery</span><span class="text-emerald-600 font-bold">FREE</span></div>
+                <div class="flex justify-between font-black text-sm border-t pt-1.5"><span>Grand Total</span><span id="bill-grand">₹0</span></div>
+            </div>
+
+            <form onsubmit="submitOrder(event)" class="space-y-3">
+                <input type="text" id="c-name" required placeholder="Your Full Name" class="w-full border rounded-xl px-3.5 py-2.5 text-sm">
+                <input type="tel" id="c-phone" required pattern="[0-9]{10}" placeholder="10-Digit Mobile Number" class="w-full border rounded-xl px-3.5 py-2.5 text-sm">
+                <textarea id="c-addr" required rows="2" placeholder="House / Flat No, Building, Landmark" class="w-full border rounded-xl px-3.5 py-2.5 text-sm"></textarea>
+                <select id="c-pay" class="w-full border rounded-xl px-3.5 py-2.5 text-sm font-semibold">
+                    <option value="UPI">Instant UPI on Delivery</option>
+                    <option value="COD">Cash on Delivery (COD)</option>
+                </select>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-lg">
+                    Place Jhatpat Order
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Real-Time Order Tracker Modal -->
+    <div id="tracker-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-5 max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <h3 class="font-extrabold text-base">Live Order Tracker</h3>
+                <button onclick="closeTracker()" class="w-8 h-8 rounded-full bg-slate-100 font-bold">&times;</button>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <input type="tel" id="track-mobile" placeholder="Enter 10-digit mobile" class="flex-1 border rounded-xl px-3 py-2 text-sm">
+                <button onclick="trackByPhone()" class="bg-emerald-600 text-white font-bold px-4 py-2 rounded-xl text-xs">Track</button>
+            </div>
+            <div id="tracker-results" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+        getDatabase, ref, set, push, update, remove, onValue, get 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        projectId: "jhatpat-22aa8",
+        storageBucket: "jhatpat-22aa8.appspot.com",
+        messagingSenderId: "000000000000",
+        appId: "1:000000000000:web:jhatpat22aa8app"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+
+        let products = [];
+        let stores = [];
+        let activeStore = { code: 'KYN01', name: 'Kalyan Central Hub', distance: 1.2 };
+        let userCoords = { lat: 19.2403, lng: 73.1305 };
+        let cart = JSON.parse(localStorage.getItem('jhatpat_v2_cart') || '{}');
+        let selectedCat = 'All';
+
+        // Haversine Formula for Nearest Dark Store Detection
+        function haversineKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
+
+        window.detectNearestStore = () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    computeClosestHub();
+                }, () => computeClosestHub());
+            } else {
+                computeClosestHub();
+            }
+        };
+
+        function computeClosestHub() {
+            if (stores.length === 0) {
+                document.getElementById('nearest-store-label').innerText = `${activeStore.name} (${activeStore.distance} km)`;
+                return;
+            }
+            let best = null;
+            let minDist = Infinity;
+            stores.forEach(s => {
+                const d = haversineKm(userCoords.lat, userCoords.lng, Number(s.lat), Number(s.lng));
+                if (d < minDist) {
+                    minDist = d;
+                    best = { ...s, distance: d.toFixed(1) };
+                }
+            });
+            if (best) {
+                activeStore = best;
+                document.getElementById('nearest-store-label').innerText = `${best.name} (${best.distance} km)`;
+                document.getElementById('checkout-store-tag').innerText = `Fulfilled by ${best.name} (${best.code})`;
+            }
+        }
+
+        onValue(ref(db, 'stores'), snap => {
+            stores = Object.values(snap.val() || {});
+            detectNearestStore();
+        });
+
+        onValue(ref(db, 'products'), snap => {
+            const raw = snap.val() || {};
+            products = Object.entries(raw)
+                .map(([id, val]) => ({ id, ...val }))
+                .filter(p => p.inStock !== false);
+            renderCatalog();
+            syncCartBar();
+        });
+
+        window.setCat = (cat) => {
+            selectedCat = cat;
+            document.querySelectorAll('.cat-pill').forEach(el => {
+                el.className = (el.innerText.includes(cat) || (cat === 'All' && el.innerText === 'All Produce'))
+                    ? 'cat-pill bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap'
+                    : 'cat-pill bg-white border text-slate-700 px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap';
+            });
+            renderCatalog();
+        };
+
+        function buildCard(p, isHorizontal = false) {
+            const qty = cart[p.id]?.qty || 0;
+            const off = p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+            const widthClass = isHorizontal ? 'min-w-[165px] max-w-[165px]' : '';
+            return `
+                <div class="${widthClass} bg-white border border-slate-200/80 rounded-2xl p-3 flex flex-col justify-between relative shadow-sm">
+                    ${p.sponsored ? `<span class="absolute top-2 left-2 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">AD</span>` : ''}
+                    ${off > 0 ? `<span class="absolute top-2 right-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">${off}% OFF</span>` : ''}
+                    <div>
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-28 object-cover rounded-xl mb-2 bg-slate-100">
+                        <div class="inline-flex items-center bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-600">
+                            <i class="fa-solid fa-stopwatch text-emerald-600 mr-1"></i> 12 MINS
+                        </div>
+                        <h3 class="font-bold text-xs text-slate-800 mt-1 line-clamp-2 leading-snug">${p.name}</h3>
+                        <p class="text-[11px] text-slate-500 mt-0.5">${p.unit}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-3 pt-1">
+                        <div>
+                            <span class="font-extrabold text-sm text-slate-900">₹${p.price}</span>
+                            ${p.mrp > p.price ? `<span class="text-[10px] text-slate-400 line-through block leading-none">₹${p.mrp}</span>` : ''}
+                        </div>
+                        ${qty === 0 ? `
+                            <button onclick="stepQty('${p.id}', 1)" class="border border-emerald-600 text-emerald-600 bg-emerald-50 hover:bg-emerald-600 hover:text-white font-extrabold text-xs px-3.5 py-1.5 rounded-xl transition">
+                                ADD
+                            </button>
+                        ` : `
+                            <div class="flex items-center bg-emerald-600 text-white rounded-xl font-extrabold text-xs shadow-sm">
+                                <button onclick="stepQty('${p.id}', -1)" class="px-2.5 py-1.5">-</button>
+                                <span class="px-1">${qty}</span>
+                                <button onclick="stepQty('${p.id}', 1)" class="px-2.5 py-1.5">+</button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.renderCatalog = () => {
+            const query = document.getElementById('live-search').value.toLowerCase();
+            const sponsored = products.filter(p => p.sponsored && p.name.toLowerCase().includes(query));
+            const spSec = document.getElementById('sponsored-section');
+            if (sponsored.length > 0) {
+                spSec.classList.remove('hidden');
+                document.getElementById('sponsored-grid').innerHTML = sponsored.map(p => buildCard(p, true)).join('');
+            } else {
+                spSec.classList.add('hidden');
+            }
+
+            const filtered = products.filter(p => {
+                const catOk = selectedCat === 'All' || p.category === selectedCat;
+                const searchOk = p.name.toLowerCase().includes(query);
+                return catOk && searchOk;
+            });
+
+            document.getElementById('main-grid').innerHTML = filtered.length === 0
+                ? `<p class="col-span-full text-center text-xs text-slate-400 py-10">No produce items matched your search.</p>`
+                : filtered.map(p => buildCard(p, false)).join('');
+        };
+
+        window.stepQty = (id, delta) => {
+            const prod = products.find(p => p.id === id);
+            if (!prod) return;
+            if (!cart[id]) cart[id] = { id: prod.id, name: prod.name, price: Number(prod.price), unit: prod.unit, qty: 0 };
+            cart[id].qty += delta;
+            if (cart[id].qty <= 0) delete cart[id];
+            localStorage.setItem('jhatpat_v2_cart', JSON.stringify(cart));
+            renderCatalog();
+            syncCartBar();
+        };
+
+        function syncCartBar() {
+            const list = Object.values(cart);
+            const count = list.reduce((s, i) => s + i.qty, 0);
+            const total = list.reduce((s, i) => s + (i.price * i.qty), 0);
+
+            document.getElementById('floating-cart').classList.toggle('hidden', count === 0);
+            document.getElementById('bar-items').innerText = `${count} ITEM${count > 1 ? 'S' : ''}`;
+            document.getElementById('bar-total').innerText = '₹' + total;
+            document.getElementById('bill-sub').innerText = '₹' + total;
+            document.getElementById('bill-grand').innerText = '₹' + total;
+
+            document.getElementById('cart-items-box').innerHTML = list.map(i => `
+                <div class="py-2.5 flex justify-between items-center text-xs">
+                    <div>
+                        <p class="font-bold text-slate-800">${i.name}</p>
+                        <p class="text-slate-500">${i.unit} × ₹${i.price}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="flex items-center bg-emerald-600 text-white rounded-lg font-bold">
+                            <button onclick="stepQty('${i.id}', -1)" class="px-2 py-1">-</button>
+                            <span class="px-1.5">${i.qty}</span>
+                            <button onclick="stepQty('${i.id}', 1)" class="px-2 py-1">+</button>
+                        </div>
+                        <span class="font-extrabold w-12 text-right">₹${i.price * i.qty}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openCart = () => document.getElementById('cart-modal').classList.remove('hidden');
+        window.closeCart = () => document.getElementById('cart-modal').classList.add('hidden');
+        window.openTracker = () => {
+            document.getElementById('tracker-modal').classList.remove('hidden');
+            const saved = localStorage.getItem('jhatpat_user_phone');
+            if (saved) {
+                document.getElementById('track-mobile').value = saved;
+                trackByPhone();
+            }
+        };
+        window.closeTracker = () => document.getElementById('tracker-modal').classList.add('hidden');
+
+        window.submitOrder = async (e) => {
+            e.preventDefault();
+            const items = Object.values(cart);
+            if (items.length === 0) return;
+
+            const customerPhone = document.getElementById('c-phone').value.trim();
+            const totalAmount = items.reduce((s, i) => s + (i.price * i.qty), 0);
+
+            await set(push(ref(db, 'orders')), {
+                storeCode: activeStore.code,
+                storeName: activeStore.name,
+                customerName: document.getElementById('c-name').value.trim(),
+                customerPhone,
+                customerAddress: document.getElementById('c-addr').value.trim(),
+                customerLat: userCoords.lat,
+                customerLng: userCoords.lng,
+                paymentMode: document.getElementById('c-pay').value,
+                items,
+                totalAmount,
+                status: 'Placed',
+                riderName: '',
+                riderPhone: '',
+                createdAt: Date.now()
+            });
+
+            localStorage.setItem('jhatpat_user_phone', customerPhone);
+            cart = {};
+            localStorage.removeItem('jhatpat_v2_cart');
+            syncCartBar();
+            renderCatalog();
+            closeCart();
+            openTracker();
+        };
+
+        window.trackByPhone = () => {
+            const phone = document.getElementById('track-mobile').value.trim();
+            if (!phone) return;
+            onValue(ref(db, 'orders'), snap => {
+                const all = snap.val() || {};
+                const mine = Object.entries(all)
+                    .map(([id, val]) => ({ id, ...val }))
+                    .filter(o => o.customerPhone === phone)
+                    .reverse();
+
+                const steps = ['Placed', 'Packing', 'Ready for Pickup', 'Out for Delivery', 'Delivered'];
+                document.getElementById('tracker-results').innerHTML = mine.length === 0
+                    ? `<p class="text-xs text-center text-slate-400 py-4">No orders found for ${phone}.</p>`
+                    : mine.map(o => {
+                        const idx = steps.indexOf(o.status);
+                        const pct = Math.max(15, ((idx + 1) / steps.length) * 100);
+                        return `
+                            <div class="border rounded-2xl p-4 bg-slate-50">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-mono text-[11px] font-bold text-slate-500">#${o.id.slice(-5).toUpperCase()} • ${o.storeCode}</span>
+                                    <span class="bg-emerald-600 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">${o.status}</span>
+                                </div>
+                                <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden my-2">
+                                    <div class="bg-emerald-600 h-full transition-all duration-500" style="width:${pct}%"></div>
+                                </div>
+                                <p class="text-xs font-bold">${(o.items || []).map(i => `${i.name} ×${i.qty}`).join(', ')}</p>
+                                <div class="flex justify-between items-center mt-2 pt-2 border-t text-[11px] text-slate-600">
+                                    <span>Paid: <strong>₹${o.totalAmount}</strong> (${o.paymentMode})</span>
+                                    ${o.riderName ? `<span class="text-emerald-700 font-bold"><i class="fa-solid fa-motorcycle"></i> ${o.riderName} (${o.riderPhone})</span>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+            });
+        };
+    </script>
 </body>
 </html>

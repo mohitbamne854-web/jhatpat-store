@@ -1,205 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat Dark Store Panel</title>
-  <style>
-    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #F4F6FB; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: #1C1C1C; }
-    header { background: var(--green); color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-    .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-    .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; background: #ddd; }
-    .tab-btn.active { background: var(--yellow); color: #000; }
-    .order-card { background: #fff; border-left: 6px solid var(--yellow); border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; background: #fff3cd; }
-    .action-btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700; color: #fff; background: var(--green); cursor: pointer; margin-top: 10px; }
-    .inv-item { background: #fff; padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    #storeLoginModal { position: fixed; inset: 0; background: var(--green); display: flex; align-items: center; justify-content: center; z-index: 999; }
-    .box { background: #fff; padding: 28px; border-radius: 12px; width: 90%; max-width: 360px; }
-    input { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhatpat Seller & Dark Store Terminal</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800">
 
-<div id="storeLoginModal">
-  <div class="box">
-    <h2 style="margin-bottom:6px;">🏪 Dark Store Login</h2>
-    <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Sign in with your Store Manager ID</p>
-    <input id="loginIdInput" placeholder="Store Login Email / ID" />
-    <input id="loginPassInput" type="password" placeholder="Password" />
-    <button class="action-btn" style="width:100%;" onclick="loginStore()">Enter Dark Store</button>
-  </div>
-</div>
+    <!-- Store Login & KYC Portal -->
+    <div id="store-auth" class="min-h-screen flex items-center justify-center p-4 bg-emerald-950">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="bg-yellow-400 p-5 text-slate-950 flex items-center justify-between">
+                <div>
+                    <h1 class="font-black text-xl tracking-tight">JHATPAT PARTNER</h1>
+                    <p class="text-xs font-semibold">Dark Store & Seller Operations</p>
+                </div>
+                <i class="fa-solid fa-store text-2xl"></i>
+            </div>
 
-<header>
-  <div>
-    <h1 id="headerStoreName" style="font-size:1.2rem;">Jhatpat Dark Store</h1>
-    <small id="headerStoreArea">Isolated Store Operations</small>
-  </div>
-  <button onclick="logoutStore()" style="background:#fff; color:#000; border:none; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer;">Logout</button>
-</header>
+            <div class="flex border-b text-xs font-bold">
+                <button onclick="toggleAuthMode('login')" id="mode-login" class="flex-1 py-3 bg-white text-emerald-700 border-b-2 border-emerald-600">Store Login</button>
+                <button onclick="toggleAuthMode('kyc')" id="mode-kyc" class="flex-1 py-3 bg-slate-50 text-slate-500">New Seller KYC Registration</button>
+            </div>
 
-<div class="container">
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('ordersTab', this)">📦 Live Packing Orders</button>
-    <button class="tab-btn" onclick="switchTab('stockTab', this)">📋 Local Store Stock</button>
-  </div>
+            <!-- Login Form -->
+            <form id="form-login" onsubmit="loginStore(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600">Approved Store Code</label>
+                    <input type="text" id="login-code" required placeholder="e.g., KYN01" class="w-full border rounded-xl px-3.5 py-2.5 mt-1 text-sm uppercase">
+                </div>
+                <p id="store-login-err" class="text-xs text-red-600 hidden font-semibold">Store code not found or KYC pending approval.</p>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow">
+                    Open Packing Terminal
+                </button>
+            </form>
 
-  <div id="ordersTab"></div>
-  <div id="stockTab" style="display:none;"></div>
-</div>
+            <!-- KYC Registration Form -->
+            <form id="form-kyc" onsubmit="submitKYC(event)" class="hidden p-6 space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600">Store / Business Name</label>
+                    <input type="text" id="k-store" required placeholder="Fresh Mart Dark Store" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600">Desired Store Code</label>
+                        <input type="text" id="k-code" required placeholder="MUM02" class="w-full border rounded-xl px-3 py-2 text-sm mt-1 uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600">Owner Name</label>
+                        <input type="text" id="k-owner" required placeholder="Full Name" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600">Mobile Number</label>
+                        <input type="tel" id="k-phone" required placeholder="10-digit number" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600">FSSAI / GST No.</label>
+                        <input type="text" id="k-gst" required placeholder="27AAAAA0000A1Z5" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="number" step="any" id="k-lat" required placeholder="Latitude (19.24)" class="border rounded-xl px-3 py-2 text-xs">
+                    <input type="number" step="any" id="k-lng" required placeholder="Longitude (73.13)" class="border rounded-xl px-3 py-2 text-xs">
+                </div>
+                <button type="button" onclick="getStoreGPS()" class="w-full bg-slate-100 text-slate-700 font-semibold py-2 rounded-xl text-xs">
+                    <i class="fa-solid fa-location-crosshairs text-emerald-600 mr-1"></i> Detect Store GPS
+                </button>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-3 rounded-xl text-sm">
+                    Submit KYC for Admin Approval
+                </button>
+            </form>
+        </div>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, onValue, update, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    <!-- Store Operations Dashboard -->
+    <div id="store-dashboard" class="hidden min-h-screen">
+        <header class="bg-emerald-800 text-white px-6 py-4 flex flex-wrap justify-between items-center gap-3 shadow sticky top-0 z-40">
+            <div class="flex items-center space-x-3">
+                <span class="bg-yellow-400 text-slate-950 font-black px-2.5 py-1 rounded-lg text-xs" id="active-store-code">KYN01</span>
+                <div>
+                    <h1 class="font-bold text-base leading-none" id="active-store-name">Dark Store Terminal</h1>
+                    <p class="text-[11px] text-emerald-200 mt-0.5"><i class="fa-solid fa-volume-high mr-1"></i> Audio Order Alerts Active</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="playBeep()" class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    Test Chime
+                </button>
+                <button onclick="logoutStore()" class="bg-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold">Switch Store</button>
+            </div>
+        </header>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
-    authDomain: "jhatpat-22aa8.firebaseapp.com",
-    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-    projectId: "jhatpat-22aa8",
-    storageBucket: "jhatpat-22aa8.firebasestorage.app",
-    messagingSenderId: "51391257177",
-    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
-    measurementId: "G-VXRGH8Y5SX"
-  };
+        <div class="max-w-6xl mx-auto p-4 sm:p-6">
+            <!-- Tabs -->
+            <div class="flex space-x-2 mb-6 border-b pb-3">
+                <button onclick="switchStoreTab('packing')" id="st-packing" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold">
+                    <i class="fa-solid fa-box-open mr-1"></i> Live Packing Queue
+                </button>
+                <button onclick="switchStoreTab('inventory')" id="st-inventory" class="bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold">
+                    <i class="fa-solid fa-sliders mr-1"></i> Stock Transfer / Inventory Toggle
+                </button>
+                <button onclick="switchStoreTab('earnings')" id="st-earnings" class="bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold">
+                    <i class="fa-solid fa-wallet mr-1"></i> Payout Earnings
+                </button>
+            </div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+            <!-- Packing Queue -->
+            <div id="view-packing" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="font-extrabold text-sm text-slate-700 mb-3 flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2 animate-ping"></span> Incoming Orders (<span id="count-new">0</span>)
+                    </h2>
+                    <div id="queue-incoming" class="space-y-4"></div>
+                </div>
+                <div>
+                    <h2 class="font-extrabold text-sm text-slate-700 mb-3 flex items-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span> Ready for Rider Dispatch (<span id="count-ready">0</span>)
+                    </h2>
+                    <div id="queue-ready" class="space-y-4"></div>
+                </div>
+            </div>
 
-  let storesData = {};
-  let activeStoreId = localStorage.getItem("jhatpat_store_id");
-  let knownOrderCount = null;
-  let dashboardInitialized = false;
+            <!-- Inventory Toggle -->
+            <div id="view-inventory" class="hidden bg-white p-5 rounded-2xl border shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-extrabold text-base">Live Store Stock & Quick Transfer</h2>
+                    <span class="text-xs text-slate-500">Toggle availability instantly on customer app</span>
+                </div>
+                <div id="store-inventory-list" class="divide-y"></div>
+            </div>
 
-  function playAlertSound() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.35);
-    } catch (e) {}
-  }
+            <!-- Earnings View -->
+            <div id="view-earnings" class="hidden space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Completed Store Orders</p>
+                        <p id="earn-orders" class="text-2xl font-black text-slate-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Gross Sales</p>
+                        <p id="earn-gross" class="text-2xl font-black text-slate-800 mt-1">₹0</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Net Seller Payout (88%)</p>
+                        <p id="earn-net" class="text-2xl font-black text-emerald-600 mt-1">₹0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  onValue(ref(db, "stores"), (snap) => {
-    storesData = snap.val() || {};
-    if (activeStoreId && storesData[activeStoreId] && !dashboardInitialized) {
-      initStoreDashboard(activeStoreId);
-    }
-  });
+    <script type="module">
+        
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+        getDatabase, ref, set, push, update, remove, onValue, get 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  window.loginStore = () => {
-    const idVal = document.getElementById("loginIdInput").value.trim();
-    const passVal = document.getElementById("loginPassInput").value.trim();
+    const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        projectId: "jhatpat-22aa8",
+        storageBucket: "jhatpat-22aa8.appspot.com",
+        messagingSenderId: "000000000000",
+        appId: "1:000000000000:web:jhatpat22aa8app"
+    };
 
-    const matchedEntry = Object.entries(storesData).find(([id, s]) => s.loginId === idVal && s.password === passVal);
-    if (!matchedEntry) return alert("Invalid Store Credentials!");
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    activeStoreId = matchedEntry[0];
-    localStorage.setItem("jhatpat_store_id", activeStoreId);
-    initStoreDashboard(activeStoreId);
-  };
 
-  window.logoutStore = () => {
-    localStorage.removeItem("jhatpat_store_id");
-    location.reload();
-  };
+        let currentStore = JSON.parse(localStorage.getItem('jhatpat_store_session') || 'null');
+        let knownOrderIds = new Set();
+        let initialLoad = true;
 
-  window.switchTab = (tabId, btn) => {
-    document.getElementById("ordersTab").style.display = tabId === "ordersTab" ? "block" : "none";
-    document.getElementById("stockTab").style.display = tabId === "stockTab" ? "block" : "none";
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  };
+        window.playBeep = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) {}
+        };
 
-  function initStoreDashboard(storeId) {
-    dashboardInitialized = true;
-    document.getElementById("storeLoginModal").style.display = "none";
-    const store = storesData[storeId];
-    document.getElementById("headerStoreName").innerText = store.name;
-    document.getElementById("headerStoreArea").innerText = `${store.area} • Radius: ${store.radiusKm} KM`;
+        window.toggleAuthMode = (mode) => {
+            document.getElementById('form-login').classList.toggle('hidden', mode !== 'login');
+            document.getElementById('form-kyc').classList.toggle('hidden', mode !== 'kyc');
+            document.getElementById('mode-login').className = mode === 'login' ? 'flex-1 py-3 bg-white text-emerald-700 border-b-2 border-emerald-600' : 'flex-1 py-3 bg-slate-50 text-slate-500';
+            document.getElementById('mode-kyc').className = mode === 'kyc' ? 'flex-1 py-3 bg-white text-emerald-700 border-b-2 border-emerald-600' : 'flex-1 py-3 bg-slate-50 text-slate-500';
+        };
 
-    onValue(ref(db, "orders"), (snap) => {
-      const orders = snap.val() || {};
-      const storeOrders = Object.entries(orders).filter(([_, o]) => o.storeId === storeId && o.status !== "Delivered");
+        window.getStoreGPS = () => {
+            navigator.geolocation?.getCurrentPosition(pos => {
+                document.getElementById('k-lat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('k-lng').value = pos.coords.longitude.toFixed(6);
+            });
+        };
 
-      if (knownOrderCount !== null && storeOrders.length > knownOrderCount) {
-        playAlertSound();
-      }
-      knownOrderCount = storeOrders.length;
+        window.submitKYC = async (e) => {
+            e.preventDefault();
+            const storeCode = document.getElementById('k-code').value.trim().toUpperCase();
+            await set(push(ref(db, 'kycRequests')), {
+                storeName: document.getElementById('k-store').value.trim(),
+                storeCode,
+                ownerName: document.getElementById('k-owner').value.trim(),
+                phone: document.getElementById('k-phone').value.trim(),
+                gst: document.getElementById('k-gst').value.trim(),
+                lat: Number(document.getElementById('k-lat').value),
+                lng: Number(document.getElementById('k-lng').value),
+                status: 'Pending',
+                createdAt: Date.now()
+            });
+            alert('KYC submitted! Ask Admin (MOHIT@001) to approve store code: ' + storeCode);
+            toggleAuthMode('login');
+        };
 
-      const container = document.getElementById("ordersTab");
-      container.innerHTML = storeOrders.length === 0 ? "<p>No active orders for your store right now.</p>" : "";
+        window.loginStore = async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('login-code').value.trim().toUpperCase();
+            const snap = await get(ref(db, 'stores/' + code));
+            if (snap.exists() && snap.val().active) {
+                currentStore = snap.val();
+                localStorage.setItem('jhatpat_store_session', JSON.stringify(currentStore));
+                openTerminal();
+            } else {
+                document.getElementById('store-login-err').classList.remove('hidden');
+            }
+        };
 
-      storeOrders.reverse().forEach(([orderId, o]) => {
-        const itemsList = (o.items || []).map(i => `${i.qty}x ${i.name}`).join(", ");
-        let nextAction = "";
-        if (o.status === "New") {
-          nextAction = `<button class="action-btn" style="background:#e67e22;" onclick="updateOrderStatus('${orderId}', 'Packing')">Start Packing</button>`;
-        } else if (o.status === "Packing") {
-          nextAction = `<button class="action-btn" onclick="updateOrderStatus('${orderId}', 'Ready for Pickup')">Mark Ready for Pickup</button>`;
-        } else {
-          nextAction = `<p style="color:var(--green); font-weight:700; margin-top:8px;">✓ Waiting for Rider Pickup</p>`;
+        window.logoutStore = () => {
+            localStorage.removeItem('jhatpat_store_session');
+            location.reload();
+        };
+
+        if (currentStore) openTerminal();
+
+        function openTerminal() {
+            document.getElementById('store-auth').classList.add('hidden');
+            document.getElementById('store-dashboard').classList.remove('hidden');
+            document.getElementById('active-store-code').innerText = currentStore.code;
+            document.getElementById('active-store-name').innerText = currentStore.name;
+            listenStoreData();
         }
 
-        container.innerHTML += `
-          <div class="order-card">
-            <div style="display:flex; justify-content:space-between;">
-              <strong>Order #${orderId.slice(-5).toUpperCase()}</strong>
-              <span class="badge">${o.status}</span>
-            </div>
-            <p style="margin:8px 0; font-size:0.95rem;"><b>Items:</b> ${itemsList}</p>
-            <p style="font-size:0.85rem; color:#555;">Customer: ${o.customerName} (${o.customerPhone}) • Total: <b>₹${o.total}</b></p>
-            ${nextAction}
-          </div>`;
-      });
-    });
+        window.switchStoreTab = (tab) => {
+            ['packing', 'inventory', 'earnings'].forEach(t => {
+                document.getElementById('view-' + t).classList.toggle('hidden', t !== tab);
+                document.getElementById('st-' + t).className = t === tab 
+                    ? 'bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold'
+                    : 'bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold';
+            });
+        };
 
-    let masterProducts = {};
-    let localInventory = {};
+        window.setOrderState = async (orderId, status) => {
+            await update(ref(db, 'orders/' + orderId), { status });
+        };
 
-    onValue(ref(db, "master_products"), (snap) => {
-      masterProducts = snap.val() || {};
-      renderInventory();
-    });
+        window.toggleProductStock = async (prodId, current) => {
+            await update(ref(db, 'products/' + prodId), { inStock: !current });
+        };
 
-    onValue(ref(db, `store_inventory/${storeId}`), (snap) => {
-      localInventory = snap.val() || {};
-      renderInventory();
-    });
+        function listenStoreData() {
+            // Orders listener with Audio Alert on new order
+            onValue(ref(db, 'orders'), snap => {
+                const orders = snap.val() || {};
+                const incoming = [], ready = [];
+                let completedCount = 0, gross = 0;
 
-    function renderInventory() {
-      const stockDiv = document.getElementById("stockTab");
-      stockDiv.innerHTML = "";
-      Object.entries(masterProducts).forEach(([prodId, p]) => {
-        const inStock = localInventory[prodId] === true;
-        stockDiv.innerHTML += `
-          <div class="inv-item">
-            <div>
-              <strong>${p.name}</strong><br>
-              <small>₹${p.price} (MRP ₹${p.mrp}) • ${p.category}</small>
-            </div>
-            <button onclick="toggleStock('${prodId}', ${inStock})" style="padding:8px 14px; border:none; border-radius:8px; font-weight:700; color:#fff; cursor:pointer; background:${inStock ? 'var(--green)' : '#dc3545'};">
-              ${inStock ? 'In Stock' : 'Out of Stock'}
-            </button>
-          </div>`;
-      });
-    }
-  }
+                Object.entries(orders).forEach(([id, o]) => {
+                    if (o.storeCode && o.storeCode !== currentStore.code) return;
 
-  window.updateOrderStatus = (orderId, status) => {
-    update(ref(db, `orders/${orderId}`), { status });
-  };
+                    if (o.status === 'Placed' || o.status === 'Packing') {
+                        incoming.push({ id, ...o });
+                        if (!initialLoad && !knownOrderIds.has(id)) {
+                            playBeep();
+                        }
+                        knownOrderIds.add(id);
+                    } else if (o.status === 'Ready for Pickup') {
+                        ready.push({ id, ...o });
+                    }
 
-  window.toggleStock = (prodId, currentStatus) => {
-    set(ref(db, `store_inventory/${activeStoreId}/${prodId}`), !currentStatus);
-  };
-</script>
+                    if (o.status !== 'Cancelled') {
+                        completedCount++;
+                        gross += Number(o.totalAmount || 0);
+                    }
+                });
+                initialLoad = false;
+
+                document.getElementById('count-new').innerText = incoming.length;
+                document.getElementById('count-ready').innerText = ready.length;
+                document.getElementById('earn-orders').innerText = completedCount;
+                document.getElementById('earn-gross').innerText = '₹' + gross;
+                document.getElementById('earn-net').innerText = '₹' + Math.round(gross * 0.88);
+
+                document.getElementById('queue-incoming').innerHTML = incoming.length === 0
+                    ? `<div class="bg-white p-6 rounded-2xl border text-center text-xs text-slate-400">No new orders waiting to be packed.</div>`
+                    : incoming.map(o => `
+                        <div class="bg-white border-l-4 border-amber-500 rounded-2xl p-4 shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-mono text-xs font-bold text-slate-500">#${o.id.slice(-5).toUpperCase()}</span>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">${o.status}</span>
+                            </div>
+                            <p class="font-bold text-sm">${o.customerName} • ${o.customerPhone}</p>
+                            <div class="bg-slate-50 rounded-xl p-3 my-2.5 space-y-1.5 text-xs border">
+                                ${(o.items || []).map(i => `
+                                    <label class="flex justify-between items-center cursor-pointer">
+                                        <span><input type="checkbox" class="mr-2 accent-emerald-600"> ${i.name} (${i.unit})</span>
+                                        <span class="font-extrabold">×${i.qty}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                            <div class="flex gap-2">
+                                ${o.status === 'Placed' ? `<button onclick="setOrderState('${o.id}', 'Packing')" class="flex-1 bg-amber-500 text-slate-950 font-bold py-2 rounded-xl text-xs">Start Packing</button>` : ''}
+                                <button onclick="setOrderState('${o.id}', 'Ready for Pickup')" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-xs">Ready for Rider</button>
+                            </div>
+                        </div>
+                    `).join('');
+
+                document.getElementById('queue-ready').innerHTML = ready.length === 0
+                    ? `<div class="bg-white p-6 rounded-2xl border text-center text-xs text-slate-400">No packed bags waiting at dispatch counter.</div>`
+                    : ready.map(o => `
+                        <div class="bg-white border-l-4 border-emerald-500 rounded-2xl p-4 shadow-sm">
+                            <div class="flex justify-between items-center">
+                                <span class="font-mono text-xs font-bold text-slate-500">#${o.id.slice(-5).toUpperCase()}</span>
+                                <span class="font-bold text-xs text-emerald-700">₹${o.totalAmount} (${o.paymentMode})</span>
+                            </div>
+                            <p class="font-bold text-sm mt-1">${o.customerName}</p>
+                            <p class="text-xs text-slate-500 mt-1">Sealed & awaiting rider pickup.</p>
+                        </div>
+                    `).join('');
+            });
+
+            // Inventory listener
+            onValue(ref(db, 'products'), snap => {
+                const prods = snap.val() || {};
+                const list = document.getElementById('store-inventory-list');
+                list.innerHTML = '';
+                Object.entries(prods).forEach(([id, p]) => {
+                    list.innerHTML += `
+                        <div class="py-3 flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <img src="${p.image}" class="w-10 h-10 rounded-lg object-cover border">
+                                <div>
+                                    <p class="font-bold text-xs">${p.name}</p>
+                                    <p class="text-[11px] text-slate-500">${p.unit} • ₹${p.price}</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleProductStock('${id}', ${p.inStock !== false})" class="px-3 py-1.5 rounded-xl text-xs font-bold ${p.inStock !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
+                                ${p.inStock !== false ? 'IN STOCK (Tap to Pause)' : 'OUT OF STOCK (Restock)'}
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+        }
+    </script>
 </body>
 </html>

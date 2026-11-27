@@ -1,262 +1,550 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat Super Admin Control Room</title>
-  <style>
-    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #F4F6FB; --dark: #1C1C1C; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--dark); padding-bottom: 40px; }
-    header { background: var(--yellow); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    header h1 { font-size: 1.3rem; font-weight: 800; }
-    .container { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    h2 { font-size: 1.1rem; margin-bottom: 15px; border-bottom: 2px solid var(--yellow); padding-bottom: 6px; display: inline-block; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-    input, select, button { padding: 10px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 0.95rem; width: 100%; }
-    button { background: var(--green); color: #fff; font-weight: 700; border: none; cursor: pointer; }
-    button:hover { opacity: 0.92; }
-    .btn-danger { background: #dc3545; width: auto; padding: 6px 12px; }
-    .btn-toggle { width: auto; padding: 6px 14px; font-size: 0.85rem; }
-    .open { background: var(--green); }
-    .closed { background: #6c757d; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-    .stats { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
-    .stat-box { flex: 1; min-width: 160px; background: #fff9e6; border: 1px solid var(--yellow); padding: 15px; border-radius: 10px; }
-    .stat-box h3 { font-size: 1.5rem; color: var(--green); }
-    #loginScreen { position: fixed; inset: 0; background: var(--yellow); display: flex; align-items: center; justify-content: center; z-index: 999; }
-    .login-box { background: #fff; padding: 30px; border-radius: 14px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhatpat Admin Control | jhatpat-22aa8</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800">
 
-<div id="loginScreen">
-  <div class="login-box">
-    <h2 style="border:none;">⚡ Jhatpat Super Admin</h2>
-    <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">Enter Master Control Password</p>
-    <input type="password" id="adminPass" placeholder="Enter Password" style="margin-bottom:12px;" />
-    <button onclick="unlockAdmin()">Unlock Control Room</button>
-  </div>
-</div>
-
-<header>
-  <h1>⚡ Jhatpat Master Control Room</h1>
-  <span style="font-weight:700; font-size:0.9rem;">Multi-Dark Store HQ</span>
-</header>
-
-<div class="container">
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
-      <h2 style="margin:0;">📊 Live Network Analytics</h2>
-      <select id="analyticsStoreFilter" style="max-width:250px;" onchange="renderOrders()">
-        <option value="ALL">All Dark Stores (Global)</option>
-      </select>
+    <!-- Login Gate -->
+    <div id="login-gate" class="min-h-screen flex items-center justify-center bg-slate-950 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm border-t-4 border-yellow-400">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-yellow-400 text-slate-900 text-2xl font-extrabold mb-3 shadow">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold text-slate-900">Jhatpat Admin</h1>
+                <p class="text-xs text-slate-500 mt-1">RTDB: jhatpat-22aa8</p>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600">Master Password</label>
+                    <input type="password" id="admin-pass" required placeholder="Enter password" 
+                        class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mt-1 text-sm focus:ring-2 focus:ring-yellow-400 focus:outline-none">
+                </div>
+                <p id="auth-error" class="text-xs text-red-600 font-semibold hidden">Invalid credentials. Access blocked.</p>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow transition">
+                    Access Admin Panel
+                </button>
+            </form>
+        </div>
     </div>
-    <div class="stats">
-      <div class="stat-box"><p>Total Orders</p><h3 id="statOrders">0</h3></div>
-      <div class="stat-box"><p>Total Revenue</p><h3 id="statRevenue">₹0</h3></div>
-      <div class="stat-box"><p>Active Dark Stores</p><h3 id="statStores">0</h3></div>
+
+    <!-- Admin Workspace -->
+    <div id="admin-app" class="hidden min-h-screen">
+        <header class="bg-slate-900 text-white px-6 py-4 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-40 shadow">
+            <div class="flex items-center space-x-3">
+                <span class="bg-yellow-400 text-slate-950 font-black px-2.5 py-1 rounded-lg text-sm">JHATPAT</span>
+                <div>
+                    <h1 class="font-bold text-base leading-none">Super Admin Console</h1>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Live Firebase Realtime DB Sync</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="seedSampleData()" class="bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Seed Demo Store & Items
+                </button>
+                <button onclick="logout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto p-4 sm:p-6">
+            <!-- Navigation Tabs -->
+            <div class="flex space-x-2 overflow-x-auto pb-3 mb-6 border-b">
+                <button onclick="setTab('products')" id="btn-products" class="tab-btn bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">
+                    <i class="fa-solid fa-tags mr-1.5"></i> Blinkit Product Listing
+                </button>
+                <button onclick="setTab('stores')" id="btn-stores" class="tab-btn bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">
+                    <i class="fa-solid fa-location-dot mr-1.5"></i> Multi-Dark Store GPS
+                </button>
+                <button onclick="setTab('kyc')" id="btn-kyc" class="tab-btn bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">
+                    <i class="fa-solid fa-user-check mr-1.5"></i> Seller KYC Approval <span id="kyc-badge" class="ml-1 bg-amber-500 text-white px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+                </button>
+                <button onclick="setTab('ledger')" id="btn-ledger" class="tab-btn bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap">
+                    <i class="fa-solid fa-coins mr-1.5"></i> Commission & Payout Ledger
+                </button>
+            </div>
+
+            <!-- TAB 1: Product Listing + Gallery Upload + Live Preview + Sponsored Toggle -->
+            <div id="tab-products" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-5 bg-white p-5 rounded-2xl shadow-sm border">
+                    <h2 class="font-extrabold text-base mb-4">Add Blinkit-Style Product</h2>
+                    <form onsubmit="saveProduct(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600">Product Title</label>
+                            <input type="text" id="p-name" oninput="updatePreview()" required placeholder="e.g., Fresh Farm Tomato (Desi)" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">Selling Price (₹)</label>
+                                <input type="number" id="p-price" oninput="updatePreview()" required placeholder="38" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">MRP (₹)</label>
+                                <input type="number" id="p-mrp" oninput="updatePreview()" required placeholder="50" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">Pack Weight / Unit</label>
+                                <input type="text" id="p-unit" oninput="updatePreview()" required placeholder="500 g" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">Category</label>
+                                <select id="p-category" onchange="updatePreview()" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                                    <option value="Vegetables">Fresh Vegetables</option>
+                                    <option value="Fruits">Fresh Fruits</option>
+                                    <option value="Leafy & Herbs">Leafy & Herbs</option>
+                                    <option value="Exotic & Organic">Exotic & Organic</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600">Gallery Image Upload or URL</label>
+                            <input type="file" id="p-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs border rounded-xl p-2 mt-1 bg-slate-50">
+                            <input type="url" id="p-url" oninput="updatePreview()" placeholder="Or paste image URL..." class="w-full border rounded-xl px-3 py-2 text-xs mt-1.5">
+                        </div>
+                        <div class="flex items-center justify-between bg-yellow-50 border border-yellow-200 p-3 rounded-xl">
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">Sponsored Bestseller Ad</p>
+                                <p class="text-[11px] text-slate-500">Pin to top carousel with AD badge</p>
+                            </div>
+                            <input type="checkbox" id="p-sponsored" onchange="updatePreview()" class="w-5 h-5 accent-emerald-600">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow">
+                            Publish to Live Catalog
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Card Preview + Catalog Table -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 mb-3">Live Customer Card Preview</h3>
+                        <div class="max-w-[210px] mx-auto bg-white border border-slate-200 rounded-2xl p-3 shadow-sm relative">
+                            <span id="prev-sponsored" class="hidden absolute top-2 left-2 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.5 rounded">SPONSORED</span>
+                            <span id="prev-off" class="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">24% OFF</span>
+                            <img id="prev-img" src="https://placehold.co/240x180/f1f5f9/059669?text=Produce" class="w-full h-28 object-cover rounded-xl mb-2">
+                            <div class="inline-flex items-center bg-slate-100 text-[10px] font-bold px-1.5 py-0.5 rounded text-slate-600">
+                                <i class="fa-solid fa-stopwatch text-emerald-600 mr-1"></i> 12 MINS
+                            </div>
+                            <h4 id="prev-name" class="font-bold text-xs text-slate-800 mt-1 line-clamp-2">Fresh Farm Tomato (Desi)</h4>
+                            <p id="prev-unit" class="text-[11px] text-slate-500 mt-0.5">500 g</p>
+                            <div class="flex items-center justify-between mt-3">
+                                <div>
+                                    <span id="prev-price" class="font-extrabold text-sm text-slate-900">₹38</span>
+                                    <span id="prev-mrp" class="text-[11px] text-slate-400 line-through ml-1">₹50</span>
+                                </div>
+                                <span class="border border-emerald-600 text-emerald-600 bg-emerald-50 font-extrabold text-xs px-3 py-1 rounded-lg">ADD</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border">
+                        <h3 class="font-bold text-sm mb-3">Active Catalog & Sponsored Controls</h3>
+                        <div id="admin-catalog-list" class="divide-y max-h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Multi-Dark Store GPS Manager -->
+            <div id="tab-stores" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border h-fit">
+                    <h2 class="font-extrabold text-base mb-4">Register Dark Store Hub</h2>
+                    <form onsubmit="saveStore(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600">Dark Store Name</label>
+                            <input type="text" id="s-name" required placeholder="e.g., Kalyan West Hub #01" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600">Store Login Code / ID</label>
+                            <input type="text" id="s-code" required placeholder="e.g., KYN01" class="w-full border rounded-xl px-3 py-2 text-sm mt-1 uppercase">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">Latitude</label>
+                                <input type="number" step="any" id="s-lat" required placeholder="19.2403" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600">Longitude</label>
+                                <input type="number" step="any" id="s-lng" required placeholder="73.1305" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                            </div>
+                        </div>
+                        <button type="button" onclick="captureAdminGPS()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs">
+                            <i class="fa-solid fa-crosshairs mr-1 text-emerald-600"></i> Auto-Fill Current GPS Coordinates
+                        </button>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600">Delivery Radius (km)</label>
+                            <input type="number" id="s-radius" required value="5" class="w-full border rounded-xl px-3 py-2 text-sm mt-1">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm">
+                            Save Dark Store
+                        </button>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border">
+                    <h2 class="font-extrabold text-base mb-4">Active Dark Store Network</h2>
+                    <div id="stores-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Seller KYC Approval -->
+            <div id="tab-kyc" class="hidden bg-white p-5 rounded-2xl shadow-sm border">
+                <h2 class="font-extrabold text-base mb-4">Seller & Dark Store KYC Verification Queue</h2>
+                <div id="kyc-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <!-- TAB 4: Commission & Payout Ledger -->
+            <div id="tab-ledger" class="hidden space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Gross GMV</p>
+                        <p id="led-gmv" class="text-2xl font-black text-slate-900 mt-1">₹0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Platform Commission (12%)</p>
+                        <p id="led-comm" class="text-2xl font-black text-emerald-600 mt-1">₹0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Seller Net Payout (88%)</p>
+                        <p id="led-seller" class="text-2xl font-black text-indigo-600 mt-1">₹0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border shadow-sm">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Rider Delivery Fees</p>
+                        <p id="led-rider" class="text-2xl font-black text-amber-600 mt-1">₹0</p>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border shadow-sm overflow-x-auto">
+                    <h3 class="font-bold text-sm mb-3">Order-by-Order Settlement Ledger</h3>
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b text-slate-400 uppercase">
+                                <th class="py-2">Order ID</th>
+                                <th class="py-2">Store</th>
+                                <th class="py-2">Order Total</th>
+                                <th class="py-2">Admin (12%)</th>
+                                <th class="py-2">Seller Net</th>
+                                <th class="py-2">Rider Fee</th>
+                                <th class="py-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-rows" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Order ID</th><th>Store</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-        <tbody id="adminOrdersTable"></tbody>
-      </table>
-    </div>
-  </div>
 
-  <div class="card">
-    <h2>🏪 Create New Dark Store</h2>
-    <div class="grid">
-      <input id="sName" placeholder="Store Name (e.g. Dombivli East Hub)" />
-      <input id="sArea" placeholder="Area (e.g. Dombivli East)" />
-      <input id="sAddress" placeholder="Full Store Address" />
-      <input id="sLat" type="number" step="any" placeholder="Latitude (e.g. 19.2183)" />
-      <input id="sLng" type="number" step="any" placeholder="Longitude (e.g. 73.0867)" />
-      <input id="sRadius" type="number" placeholder="Delivery Radius (KM)" />
-      <input id="sManager" placeholder="Store Manager Name" />
-      <input id="sPhone" placeholder="Manager Phone" />
-      <input id="sLoginId" placeholder="Store Login Email/ID" />
-      <input id="sPassword" placeholder="Store Login Password" />
-    </div>
-    <button style="margin-top:12px; max-width:240px;" onclick="createStore()">+ Launch Dark Store</button>
-  </div>
+    <script type="module">
+        
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+        getDatabase, ref, set, push, update, remove, onValue, get 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  <div class="card">
-    <h2>🟢 Dark Store Network Status</h2>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>Store Name & Area</th><th>Manager & Login ID</th><th>Radius</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="storesTable"></tbody>
-      </table>
-    </div>
-  </div>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        projectId: "jhatpat-22aa8",
+        storageBucket: "jhatpat-22aa8.appspot.com",
+        messagingSenderId: "000000000000",
+        appId: "1:000000000000:web:jhatpat22aa8app"
+    };
 
-  <div class="card">
-    <h2>📦 Add Master Product & Assign to Stores</h2>
-    <div class="grid">
-      <input id="pName" placeholder="Product Name (e.g. Fresh Banana 1 Dozen)" />
-      <input id="pCategory" placeholder="Category (e.g. Fruits & Veg)" />
-      <input id="pMrp" type="number" placeholder="MRP (₹)" />
-      <input id="pPrice" type="number" placeholder="Selling Price (₹)" />
-      <input id="pImage" placeholder="Image URL" />
-      <select id="pAssignStore">
-        <option value="ALL">Assign to ALL Stores</option>
-      </select>
-    </div>
-    <button style="margin-top:12px; max-width:260px;" onclick="addMasterProduct()">+ Save & Sync to Store(s)</button>
-  </div>
-</div>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
-    authDomain: "jhatpat-22aa8.firebaseapp.com",
-    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-    projectId: "jhatpat-22aa8",
-    storageBucket: "jhatpat-22aa8.firebasestorage.app",
-    messagingSenderId: "51391257177",
-    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
-    measurementId: "G-VXRGH8Y5SX"
-  };
+        let uploadedBase64 = "";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+        if (sessionStorage.getItem('jhatpat_admin') === 'MOHIT@001') {
+            unlockUI();
+        }
 
-  window.unlockAdmin = () => {
-    if (document.getElementById("adminPass").value === "MOHIT@001") {
-      document.getElementById("loginScreen").style.display = "none";
-    } else {
-      alert("Invalid Admin Password!");
-    }
-  };
+        window.handleAdminLogin = (e) => {
+            e.preventDefault();
+            if (document.getElementById('admin-pass').value === 'MOHIT@001') {
+                sessionStorage.setItem('jhatpat_admin', 'MOHIT@001');
+                unlockUI();
+            } else {
+                document.getElementById('auth-error').classList.remove('hidden');
+            }
+        };
 
-  let allStores = {};
-  let allOrders = {};
+        window.logout = () => {
+            sessionStorage.removeItem('jhatpat_admin');
+            location.reload();
+        };
 
-  onValue(ref(db, "stores"), (snap) => {
-    allStores = snap.val() || {};
-    renderStores();
-  });
+        function unlockUI() {
+            document.getElementById('login-gate').classList.add('hidden');
+            document.getElementById('admin-app').classList.remove('hidden');
+            bindRealtimeListeners();
+        }
 
-  onValue(ref(db, "orders"), (snap) => {
-    allOrders = snap.val() || {};
-    renderOrders();
-  });
+        window.setTab = (name) => {
+            ['products', 'stores', 'kyc', 'ledger'].forEach(t => {
+                document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);
+                document.getElementById('btn-' + t).className = t === name 
+                    ? 'tab-btn bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap'
+                    : 'tab-btn bg-white text-slate-700 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap';
+            });
+        };
 
-  window.createStore = async () => {
-    const name = document.getElementById("sName").value.trim();
-    const area = document.getElementById("sArea").value.trim();
-    const address = document.getElementById("sAddress").value.trim();
-    const lat = parseFloat(document.getElementById("sLat").value);
-    const lng = parseFloat(document.getElementById("sLng").value);
-    const radiusKm = parseFloat(document.getElementById("sRadius").value) || 4;
-    const managerName = document.getElementById("sManager").value.trim();
-    const phone = document.getElementById("sPhone").value.trim();
-    const loginId = document.getElementById("sLoginId").value.trim();
-    const password = document.getElementById("sPassword").value.trim();
+        window.handleImageUpload = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const maxW = 400;
+                    const scale = maxW / img.width;
+                    canvas.width = maxW;
+                    canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    uploadedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    updatePreview();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
 
-    if (!name || isNaN(lat) || isNaN(lng) || !loginId || !password) return alert("Fill all required store fields!");
+        window.updatePreview = () => {
+            const name = document.getElementById('p-name').value || 'Fresh Farm Tomato (Desi)';
+            const price = Number(document.getElementById('p-price').value) || 38;
+            const mrp = Number(document.getElementById('p-mrp').value) || 50;
+            const unit = document.getElementById('p-unit').value || '500 g';
+            const sponsored = document.getElementById('p-sponsored').checked;
+            const imgSrc = uploadedBase64 || document.getElementById('p-url').value || 'https://placehold.co/240x180/f1f5f9/059669?text=' + encodeURIComponent(name);
 
-    const newStoreRef = push(ref(db, "stores"));
-    await set(newStoreRef, { name, area, address, lat, lng, radiusKm, managerName, phone, loginId, password, isOpen: true });
-    alert("Dark Store Created!");
-    document.querySelectorAll("#sName,#sArea,#sAddress,#sLat,#sLng,#sRadius,#sManager,#sPhone,#sLoginId,#sPassword").forEach(i => i.value = "");
-  };
+            const off = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
+            document.getElementById('prev-name').innerText = name;
+            document.getElementById('prev-price').innerText = '₹' + price;
+            document.getElementById('prev-mrp').innerText = '₹' + mrp;
+            document.getElementById('prev-unit').innerText = unit;
+            document.getElementById('prev-img').src = imgSrc;
+            document.getElementById('prev-off').innerText = off + '% OFF';
+            document.getElementById('prev-sponsored').classList.toggle('hidden', !sponsored);
+        };
 
-  window.toggleStore = (storeId, currentState) => {
-    update(ref(db, `stores/${storeId}`), { isOpen: !currentState });
-  };
+        window.saveProduct = async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('p-name').value.trim();
+            const price = Number(document.getElementById('p-price').value);
+            const mrp = Number(document.getElementById('p-mrp').value);
+            const unit = document.getElementById('p-unit').value.trim();
+            const category = document.getElementById('p-category').value;
+            const sponsored = document.getElementById('p-sponsored').checked;
+            const image = uploadedBase64 || document.getElementById('p-url').value.trim() || 'https://placehold.co/300x220/fef9c3/15803d?text=' + encodeURIComponent(name);
 
-  window.deleteStore = (storeId) => {
-    if (confirm("Delete this Dark Store?")) remove(ref(db, `stores/${storeId}`));
-  };
+            const newRef = push(ref(db, 'products'));
+            await set(newRef, {
+                name, price, mrp, unit, category, sponsored, image, inStock: true, createdAt: Date.now()
+            });
+            uploadedBase64 = "";
+            e.target.reset();
+            updatePreview();
+        };
 
-  function renderStores() {
-    const tbody = document.getElementById("storesTable");
-    const filterSelect = document.getElementById("analyticsStoreFilter");
-    const assignSelect = document.getElementById("pAssignStore");
-    tbody.innerHTML = "";
-    filterSelect.innerHTML = `<option value="ALL">All Dark Stores (Global)</option>`;
-    assignSelect.innerHTML = `<option value="ALL">Assign to ALL Stores</option>`;
+        window.toggleSponsored = async (id, current) => {
+            await update(ref(db, 'products/' + id), { sponsored: !current });
+        };
 
-    let activeCount = 0;
-    Object.entries(allStores).forEach(([id, s]) => {
-      if (s.isOpen) activeCount++;
-      filterSelect.innerHTML += `<option value="${id}">${s.name}</option>`;
-      assignSelect.innerHTML += `<option value="${id}">${s.name}</option>`;
+        window.deleteProduct = async (id) => {
+            await remove(ref(db, 'products/' + id));
+        };
 
-      tbody.innerHTML += `
-        <tr>
-          <td><strong>${s.name}</strong><br><small>${s.area} • ${s.address}</small></td>
-          <td>${s.managerName} (${s.phone})<br><small>ID: <b>${s.loginId}</b> | Pass: <b>${s.password}</b></small></td>
-          <td>${s.radiusKm} KM</td>
-          <td>
-            <button class="btn-toggle ${s.isOpen ? 'open' : 'closed'}" onclick="toggleStore('${id}', ${s.isOpen})">
-              ${s.isOpen ? 'OPEN (Live)' : 'CLOSED'}
-            </button>
-          </td>
-          <td><button class="btn-danger" onclick="deleteStore('${id}')">Delete</button></td>
-        </tr>`;
-    });
-    document.getElementById("statStores").innerText = activeCount;
-  }
+        window.captureAdminGPS = () => {
+            if (!navigator.geolocation) return alert('GPS not supported');
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('s-lat').value = pos.coords.latitude.toFixed(6);
+                document.getElementById('s-lng').value = pos.coords.longitude.toFixed(6);
+            });
+        };
 
-  window.addMasterProduct = async () => {
-    const name = document.getElementById("pName").value.trim();
-    const category = document.getElementById("pCategory").value.trim() || "Groceries";
-    const mrp = parseFloat(document.getElementById("pMrp").value);
-    const price = parseFloat(document.getElementById("pPrice").value);
-    const image = document.getElementById("pImage").value.trim() || "https://via.placeholder.com/150?text=Jhatpat";
-    const targetStore = document.getElementById("pAssignStore").value;
+        window.saveStore = async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('s-code').value.trim().toUpperCase();
+            await set(ref(db, 'stores/' + code), {
+                code,
+                name: document.getElementById('s-name').value.trim(),
+                lat: Number(document.getElementById('s-lat').value),
+                lng: Number(document.getElementById('s-lng').value),
+                radius: Number(document.getElementById('s-radius').value),
+                active: true
+            });
+            e.target.reset();
+        };
 
-    if (!name || !mrp || !price) return alert("Enter product name, MRP, and selling price.");
-    const discount = Math.round(((mrp - price) / mrp) * 100);
+        window.approveKYC = async (kycId, kycData) => {
+            await update(ref(db, 'kycRequests/' + kycId), { status: 'Approved' });
+            await set(ref(db, 'stores/' + kycData.storeCode), {
+                code: kycData.storeCode,
+                name: kycData.storeName,
+                owner: kycData.ownerName,
+                phone: kycData.phone,
+                gst: kycData.gst,
+                lat: Number(kycData.lat || 19.2403),
+                lng: Number(kycData.lng || 73.1305),
+                radius: 5,
+                active: true
+            });
+        };
 
-    const prodRef = push(ref(db, "master_products"));
-    const prodId = prodRef.key;
-    await set(prodRef, { name, category, mrp, price, discount, image });
+        window.rejectKYC = async (kycId) => {
+            await update(ref(db, 'kycRequests/' + kycId), { status: 'Rejected' });
+        };
 
-    if (targetStore === "ALL") {
-      for (const storeId of Object.keys(allStores)) {
-        await set(ref(db, `store_inventory/${storeId}/${prodId}`), true);
-      }
-    } else {
-      await set(ref(db, `store_inventory/${targetStore}/${prodId}`), true);
-    }
+        window.seedSampleData = async () => {
+            await set(ref(db, 'stores/KYN01'), {
+                code: 'KYN01', name: 'Kalyan Central Dark Store', lat: 19.2403, lng: 73.1305, radius: 8, active: true
+            });
+            const samples = [
+                { name: 'Alphonso Ratnagiri Mango (1 Dozen)', price: 499, mrp: 650, unit: '12 pcs', category: 'Fruits', sponsored: true, inStock: true, image: 'https://placehold.co/300x220/fef08a/854d0e?text=Alphonso+Mango' },
+                { name: 'Farm Fresh Nashik Onion', price: 32, mrp: 45, unit: '1 kg', category: 'Vegetables', sponsored: true, inStock: true, image: 'https://placehold.co/300x220/fce7f3/9d174d?text=Nashik+Onion' },
+                { name: 'Hybrid Red Tomato', price: 28, mrp: 40, unit: '500 g', category: 'Vegetables', sponsored: false, inStock: true, image: 'https://placehold.co/300x220/fee2e2/b91c1c?text=Fresh+Tomato' },
+                { name: 'Fresh Coriander & Mint Combo', price: 15, mrp: 25, unit: '200 g', category: 'Leafy & Herbs', sponsored: false, inStock: true, image: 'https://placehold.co/300x220/dcfce7/15803d?text=Coriander+Mint' }
+            ];
+            for (const item of samples) {
+                await set(push(ref(db, 'products')), { ...item, createdAt: Date.now() });
+            }
+            alert('Demo Dark Store & Blinkit Products seeded into jhatpat-22aa8!');
+        };
 
-    alert("Product added & assigned!");
-    document.querySelectorAll("#pName,#pCategory,#pMrp,#pPrice,#pImage").forEach(i => i.value = "");
-  };
+        function bindRealtimeListeners() {
+            // Products
+            onValue(ref(db, 'products'), snap => {
+                const list = document.getElementById('admin-catalog-list');
+                list.innerHTML = '';
+                const data = snap.val() || {};
+                Object.entries(data).forEach(([id, p]) => {
+                    list.innerHTML += `
+                        <div class="py-3 flex items-center justify-between gap-3">
+                            <div class="flex items-center space-x-3">
+                                <img src="${p.image}" class="w-11 h-11 rounded-lg object-cover border">
+                                <div>
+                                    <p class="font-bold text-xs text-slate-800">${p.name} <span class="text-slate-400">(${p.unit})</span></p>
+                                    <p class="text-xs text-emerald-700 font-bold">₹${p.price} <span class="line-through text-slate-400 font-normal">₹${p.mrp || p.price}</span></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="toggleSponsored('${id}', ${!!p.sponsored})" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${p.sponsored ? 'bg-amber-400 text-slate-950' : 'bg-slate-100 text-slate-500'}">
+                                    ${p.sponsored ? '★ Sponsored' : '☆ Promote'}
+                                </button>
+                                <button onclick="deleteProduct('${id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg text-xs">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
 
-  window.renderOrders = () => {
-    const selectedStore = document.getElementById("analyticsStoreFilter").value;
-    const tbody = document.getElementById("adminOrdersTable");
-    tbody.innerHTML = "";
-    let count = 0, revenue = 0;
+            // Dark Stores
+            onValue(ref(db, 'stores'), snap => {
+                const container = document.getElementById('stores-list');
+                container.innerHTML = '';
+                const stores = snap.val() || {};
+                Object.values(stores).forEach(s => {
+                    container.innerHTML += `
+                        <div class="border rounded-xl p-4 bg-slate-50 flex justify-between items-start">
+                            <div>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded">${s.code}</span>
+                                <h4 class="font-bold text-sm mt-1">${s.name}</h4>
+                                <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-location-crosshairs text-emerald-600"></i> ${s.lat}, ${s.lng}</p>
+                                <p class="text-xs text-slate-500">Service Radius: <strong>${s.radius} km</strong></p>
+                            </div>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                    `;
+                });
+            });
 
-    Object.entries(allOrders).reverse().forEach(([id, o]) => {
-      if (selectedStore !== "ALL" && o.storeId !== selectedStore) return;
-      count++;
-      revenue += Number(o.total || 0);
-      tbody.innerHTML += `
-        <tr>
-          <td>#${id.slice(-5).toUpperCase()}</td>
-          <td>${o.storeName || o.storeId}</td>
-          <td>${o.customerName}<br><small>${o.dropAddress}</small></td>
-          <td><b>₹${o.total}</b></td>
-          <td><span style="padding:3px 8px; border-radius:6px; background:#eee; font-weight:600;">${o.status}</span></td>
-        </tr>`;
-    });
+            // KYC Requests
+            onValue(ref(db, 'kycRequests'), snap => {
+                const container = document.getElementById('kyc-list');
+                container.innerHTML = '';
+                const reqs = snap.val() || {};
+                let pendingCount = 0;
+                Object.entries(reqs).forEach(([id, k]) => {
+                    if (k.status === 'Pending') pendingCount++;
+                    const encoded = encodeURIComponent(JSON.stringify(k));
+                    container.innerHTML += `
+                        <div class="border rounded-xl p-4 bg-slate-50">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-sm">${k.storeName} (${k.storeCode})</span>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded-full ${k.status === 'Approved' ? 'bg-emerald-100 text-emerald-700' : k.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800'}">${k.status}</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Owner: <strong>${k.ownerName}</strong> • ${k.phone}</p>
+                            <p class="text-xs text-slate-600">FSSAI / GST: <strong>${k.gst}</strong></p>
+                            <p class="text-xs text-slate-500 mt-1">GPS: ${k.lat}, ${k.lng}</p>
+                            ${k.status === 'Pending' ? `
+                                <div class="flex gap-2 mt-3">
+                                    <button onclick='approveKYC("${id}", JSON.parse(decodeURIComponent("${encoded}")))' class="flex-1 bg-emerald-600 text-white text-xs font-bold py-2 rounded-lg">Approve & Activate Store</button>
+                                    <button onclick="rejectKYC('${id}')" class="flex-1 bg-red-100 text-red-700 text-xs font-bold py-2 rounded-lg">Reject</button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                document.getElementById('kyc-badge').innerText = pendingCount;
+            });
 
-    document.getElementById("statOrders").innerText = count;
-    document.getElementById("statRevenue").innerText = "₹" + revenue;
-  };
-</script>
+            // Commission & Payout Ledger
+            onValue(ref(db, 'orders'), snap => {
+                const orders = snap.val() || {};
+                let gmv = 0, comm = 0, seller = 0, rider = 0;
+                const rows = document.getElementById('ledger-rows');
+                rows.innerHTML = '';
+
+                Object.entries(orders).reverse().forEach(([id, o]) => {
+                    const amt = Number(o.totalAmount || 0);
+                    const cFee = Math.round(amt * 0.12);
+                    const sNet = amt - cFee;
+                    const rFee = 25;
+                    if (o.status !== 'Cancelled') {
+                        gmv += amt;
+                        comm += cFee;
+                        seller += sNet;
+                        rider += rFee;
+                    }
+                    rows.innerHTML += `
+                        <tr>
+                            <td class="py-2.5 font-mono font-bold">#${id.slice(-5).toUpperCase()}</td>
+                            <td class="py-2.5">${o.storeCode || 'KYN01'}</td>
+                            <td class="py-2.5 font-bold">₹${amt}</td>
+                            <td class="py-2.5 text-emerald-700 font-semibold">₹${cFee}</td>
+                            <td class="py-2.5 text-indigo-700 font-semibold">₹${sNet}</td>
+                            <td class="py-2.5 text-amber-700">₹${rFee}</td>
+                            <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold">${o.status}</span></td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('led-gmv').innerText = '₹' + gmv;
+                document.getElementById('led-comm').innerText = '₹' + comm;
+                document.getElementById('led-seller').innerText = '₹' + seller;
+                document.getElementById('led-rider').innerText = '₹' + rider;
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,137 +1,233 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat Delivery Partner App</title>
-  <style>
-    :root { --yellow: #F8CB46; --green: #0C831F; --bg: #121212; --card: #1E1E1E; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: #fff; }
-    header { background: var(--yellow); color: #000; padding: 15px 18px; display: flex; justify-content: space-between; align-items: center; }
-    .container { max-width: 600px; margin: 18px auto; padding: 0 15px; }
-    .control-box { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 18px; }
-    select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 1rem; font-weight: 700; margin-top: 8px; }
-    .duty-btn { background: #444; color: #fff; cursor: pointer; }
-    .duty-btn.online { background: var(--green); }
-    .task-card { background: var(--card); border-left: 5px solid var(--yellow); padding: 16px; border-radius: 12px; margin-bottom: 14px; }
-    .addr-block { background: #2A2A2A; padding: 10px; border-radius: 8px; margin: 8px 0; font-size: 0.9rem; }
-    .step-btn { background: var(--green); color: #fff; cursor: pointer; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhatpat Rider Fleet | Dark Mode</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-16">
 
-<header>
-  <h1 style="font-size:1.2rem;">🛵 Jhatpat Rider Partner</h1>
-  <span id="dutyBadge" style="font-weight:800; font-size:0.85rem;">OFFLINE</span>
-</header>
+    <!-- Dark Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3.5 sticky top-0 z-40 flex justify-between items-center">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-sm tracking-tight">JHATPAT FLEET</h1>
+                <p class="text-[11px] text-emerald-400 font-semibold" id="rider-status-bar">Online • Ready</p>
+            </div>
+        </div>
+        <button onclick="openProfile()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-yellow-400">
+            <i class="fa-solid fa-id-badge mr-1"></i> <span id="hdr-rider-name">Setup Rider</span>
+        </button>
+    </header>
 
-<div class="container">
-  <div class="control-box">
-    <label style="font-size:0.85rem; color:#bbb;">Select Your Assigned Dark Store Hub:</label>
-    <select id="riderStoreSelect" onchange="renderTasks()">
-      <option value="">-- Choose Dark Store Zone --</option>
-    </select>
-    <button id="dutyToggleBtn" class="duty-btn" onclick="toggleDuty()">Go ONLINE for Deliveries</button>
-  </div>
+    <main class="max-w-lg mx-auto p-4 space-y-5">
+        <!-- Store Zone Selector & Earnings Wallet -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
+                <label class="block text-[10px] font-bold uppercase text-slate-400">Active Store Zone</label>
+                <select id="zone-select" onchange="changeZone()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-yellow-400 mt-1.5">
+                    <option value="ALL">All Dark Stores</option>
+                </select>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between">
+                <span class="text-[10px] font-bold uppercase text-slate-400">Earnings Wallet</span>
+                <div class="flex items-baseline justify-between mt-1">
+                    <span id="wallet-balance" class="text-xl font-black text-emerald-400">₹0</span>
+                    <span id="wallet-trips" class="text-[11px] text-slate-400">0 trips</span>
+                </div>
+            </div>
+        </div>
 
-  <div id="riderFeed">
-    <p style="text-align:center; color:#888; margin-top:30px;">Select your Dark Store & go Online to receive pickup alerts.</p>
-  </div>
-</div>
+        <!-- Active Delivery Task -->
+        <section>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-yellow-400 mb-2.5">Active Drop-Off Task</h2>
+            <div id="active-task-box"></div>
+        </section>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        <!-- Available Store Pickups -->
+        <section>
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">Ready for Pickup in Zone</h2>
+            <div id="pickup-pool-box" class="space-y-3"></div>
+        </section>
+    </main>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
-    authDomain: "jhatpat-22aa8.firebaseapp.com",
-    databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-    projectId: "jhatpat-22aa8",
-    storageBucket: "jhatpat-22aa8.firebasestorage.app",
-    messagingSenderId: "51391257177",
-    appId: "1:51391257177:web:2537fdd28d123dd8d0ef48",
-    measurementId: "G-VXRGH8Y5SX"
-  };
+    <!-- Rider Setup Modal -->
+    <div id="rider-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm">
+            <h3 class="font-extrabold text-base text-white mb-1">Rider Duty Profile</h3>
+            <p class="text-xs text-slate-400 mb-4">Enter details to accept dark store dispatches</p>
+            <form onsubmit="saveRider(event)" class="space-y-3">
+                <input type="text" id="r-name" required placeholder="Rider Full Name" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                <input type="tel" id="r-phone" required pattern="[0-9]{10}" placeholder="10-Digit Mobile Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl text-sm">
+                    Go Online
+                </button>
+            </form>
+        </div>
+    </div>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    <script type="module">
+        
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+        getDatabase, ref, set, push, update, remove, onValue, get 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  let isOnline = false;
-  let allOrders = {};
+    const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        projectId: "jhatpat-22aa8",
+        storageBucket: "jhatpat-22aa8.appspot.com",
+        messagingSenderId: "000000000000",
+        appId: "1:000000000000:web:jhatpat22aa8app"
+    };
 
-  onValue(ref(db, "stores"), (snap) => {
-    const stores = snap.val() || {};
-    const sel = document.getElementById("riderStoreSelect");
-    const prev = sel.value;
-    sel.innerHTML = `<option value="">-- Choose Dark Store Zone --</option>`;
-    Object.entries(stores).forEach(([id, s]) => {
-      sel.innerHTML += `<option value="${id}">${s.name} (${s.area})</option>`;
-    });
-    sel.value = prev;
-  });
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  onValue(ref(db, "orders"), (snap) => {
-    allOrders = snap.val() || {};
-    renderTasks();
-  });
 
-  window.toggleDuty = () => {
-    const storeId = document.getElementById("riderStoreSelect").value;
-    if (!storeId) return alert("Select your Dark Store Hub first!");
-    isOnline = !isOnline;
+        let rider = JSON.parse(localStorage.getItem('jhatpat_dark_rider') || 'null');
+        let selectedZone = 'ALL';
 
-    const btn = document.getElementById("dutyToggleBtn");
-    const badge = document.getElementById("dutyBadge");
-    btn.classList.toggle("online", isOnline);
-    btn.innerText = isOnline ? "🟢 ONLINE (Tap to Go Offline)" : "Go ONLINE for Deliveries";
-    badge.innerText = isOnline ? "ONLINE" : "OFFLINE";
-    renderTasks();
-  };
+        if (!rider) {
+            document.getElementById('rider-modal').classList.remove('hidden');
+        } else {
+            document.getElementById('hdr-rider-name').innerText = rider.name;
+        }
 
-  window.renderTasks = () => {
-    const feed = document.getElementById("riderFeed");
-    const selectedStoreId = document.getElementById("riderStoreSelect").value;
+        window.openProfile = () => {
+            if (rider) {
+                document.getElementById('r-name').value = rider.name;
+                document.getElementById('r-phone').value = rider.phone;
+            }
+            document.getElementById('rider-modal').classList.remove('hidden');
+        };
 
-    if (!isOnline || !selectedStoreId) {
-      feed.innerHTML = `<p style="text-align:center; color:#888; margin-top:30px;">You are currently Offline.</p>`;
-      return;
-    }
+        window.saveRider = (e) => {
+            e.preventDefault();
+            rider = {
+                name: document.getElementById('r-name').value.trim(),
+                phone: document.getElementById('r-phone').value.trim()
+            };
+            localStorage.setItem('jhatpat_dark_rider', JSON.stringify(rider));
+            document.getElementById('hdr-rider-name').innerText = rider.name;
+            document.getElementById('rider-modal').classList.add('hidden');
+        };
 
-    const tasks = Object.entries(allOrders).filter(([_, o]) =>
-      o.storeId === selectedStoreId && (o.status === "Ready for Pickup" || o.status === "Picked Up")
-    );
+        window.changeZone = () => {
+            selectedZone = document.getElementById('zone-select').value;
+        };
 
-    feed.innerHTML = tasks.length === 0 ? `<p style="text-align:center; color:#aaa; margin-top:30px;">Waiting for packed orders from store...</p>` : "";
+        window.claimOrder = async (orderId) => {
+            if (!rider) return openProfile();
+            await update(ref(db, 'orders/' + orderId), {
+                status: 'Out for Delivery',
+                riderName: rider.name,
+                riderPhone: rider.phone
+            });
+        };
 
-    tasks.forEach(([orderId, o]) => {
-      const btnHtml = o.status === "Ready for Pickup"
-        ? `<button class="step-btn" style="background:#e67e22;" onclick="setDeliveryStatus('${orderId}', 'Picked Up')">📦 Confirm Order Picked Up</button>`
-        : `<button class="step-btn" onclick="setDeliveryStatus('${orderId}', 'Delivered')">✅ Mark Order Delivered (Collect ₹${o.total})</button>`;
+        window.finishDelivery = async (orderId) => {
+            await update(ref(db, 'orders/' + orderId), {
+                status: 'Delivered',
+                deliveredAt: Date.now()
+            });
+        };
 
-      feed.innerHTML += `
-        <div class="task-card">
-          <div style="display:flex; justify-content:space-between;">
-            <strong>Order #${orderId.slice(-5).toUpperCase()}</strong>
-            <span style="color:var(--yellow); font-weight:700;">${o.status}</span>
-          </div>
-          <div class="addr-block">
-            <small style="color:#aaa;">PICKUP FROM DARK STORE:</small><br>
-            <strong>${o.storeName}</strong><br>${o.storeAddress || "Assigned Hub"}
-          </div>
-          <div class="addr-block">
-            <small style="color:#aaa;">DROP TO CUSTOMER:</small><br>
-            <strong>${o.customerName} (${o.customerPhone})</strong><br>${o.dropAddress}
-          </div>
-          ${btnHtml}
-        </div>`;
-    });
-  };
+        // Populate Dark Store Zones
+        onValue(ref(db, 'stores'), snap => {
+            const sel = document.getElementById('zone-select');
+            const stores = snap.val() || {};
+            sel.innerHTML = `<option value="ALL">All Dark Stores</option>` + 
+                Object.values(stores).map(s => `<option value="${s.code}">${s.code} - ${s.name}</option>`).join('');
+        });
 
-  window.setDeliveryStatus = (orderId, status) => {
-    update(ref(db, `orders/${orderId}`), { status });
-  };
-</script>
+        // Live Orders & Wallet Calculation (₹25 base + 5% tip/incentive per delivery)
+        onValue(ref(db, 'orders'), snap => {
+            const orders = snap.val() || {};
+            const pool = [];
+            let activeJob = null;
+            let deliveredTrips = 0;
+
+            Object.entries(orders).forEach(([id, o]) => {
+                const zoneMatch = selectedZone === 'ALL' || o.storeCode === selectedZone;
+                if (o.status === 'Ready for Pickup' && zoneMatch) {
+                    pool.push({ id, ...o });
+                }
+                if (rider && o.riderPhone === rider.phone) {
+                    if (o.status === 'Out for Delivery') activeJob = { id, ...o };
+                    if (o.status === 'Delivered') deliveredTrips++;
+                }
+            });
+
+            document.getElementById('wallet-trips').innerText = `${deliveredTrips} trips`;
+            document.getElementById('wallet-balance').innerText = '₹' + (deliveredTrips * 25);
+
+            // Render Active Task with Google Maps Turn-by-Turn Link
+            const activeBox = document.getElementById('active-task-box');
+            if (!activeJob) {
+                activeBox.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-500">No active delivery. Claim a packed bag below.</div>`;
+            } else {
+                const destQuery = activeJob.customerLat && activeJob.customerLng
+                    ? `${activeJob.customerLat},${activeJob.customerLng}`
+                    : encodeURIComponent(activeJob.customerAddress);
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destQuery}&travelmode=two-wheeler`;
+
+                activeBox.innerHTML = `
+                    <div class="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-4 shadow-xl">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded-full">IN TRANSIT • #${activeJob.id.slice(-5).toUpperCase()}</span>
+                            <span class="text-sm font-black text-yellow-400">Collect ₹${activeJob.totalAmount} (${activeJob.paymentMode})</span>
+                        </div>
+                        <h3 class="font-bold text-base text-white">${activeJob.customerName}</h3>
+                        <p class="text-xs text-slate-300 mt-1"><i class="fa-solid fa-location-dot text-red-400 mr-1"></i> ${activeJob.customerAddress}</p>
+                        
+                        <div class="grid grid-cols-3 gap-2 mt-4">
+                            <a href="${mapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs text-center">
+                                <i class="fa-solid fa-diamond-turn-right mr-1"></i> Maps
+                            </a>
+                            <a href="tel:${activeJob.customerPhone}" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs text-center">
+                                <i class="fa-solid fa-phone mr-1"></i> Call
+                            </a>
+                            <button onclick="finishDelivery('${activeJob.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                                Delivered
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render Pickup Pool
+            document.getElementById('pickup-pool-box').innerHTML = pool.length === 0
+                ? `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-500">No packed orders waiting in this store zone.</div>`
+                : pool.map(o => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[11px] font-bold text-yellow-400">${o.storeCode || 'KYN01'} • #${o.id.slice(-5).toUpperCase()}</span>
+                            <span class="text-xs font-extrabold text-emerald-400">+₹25 Payout</span>
+                        </div>
+                        <p class="font-bold text-sm text-white">${o.customerName}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">${o.customerAddress}</p>
+                        <button onclick="claimOrder('${o.id}')" class="w-full mt-3 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">
+                            Accept Pickup (₹${o.totalAmount} ${o.paymentMode})
+                        </button>
+                    </div>
+                `).join('');
+        });
+    </script>
 </body>
 </html>
