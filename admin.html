@@ -27,16 +27,71 @@
       </div>
       <h1 class="text-2xl font-extrabold text-slate-900">Jhatpat <span class="blinkit-green-text">Admin</span></h1>
       <p class="text-xs text-slate-500 mt-1 mb-6">Multi-Store Dark Store & Operations Console</p>
-      <input id="adminPassInput" type="password" placeholder="Enter Admin Password"
-        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0C831F] mb-3 text-center font-semibold tracking-widest"
-        onkeydown="if(event.key==='Enter') verifyLogin()" />
-      <button onclick="verifyLogin()"
-        class="w-full blinkit-green hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-md">
-        Unlock Command Center
-      </button>
-      <p id="loginErr" class="text-red-600 text-xs mt-3 hidden font-semibold">Invalid password. Please try again.</p>
+      <form onsubmit="event.preventDefault(); verifyLogin();">
+        <div class="relative mb-3">
+          <input id="adminPassInput" type="password" placeholder="Enter Admin Password" autocomplete="current-password"
+            class="w-full px-4 py-3 pr-11 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0C831F] text-center font-semibold tracking-widest" />
+          <button type="button" onclick="togglePassVisibility()" title="Show/Hide Password"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm">
+            <i id="passEyeIcon" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+        <button type="submit"
+          class="w-full blinkit-green hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-md cursor-pointer">
+          Unlock Command Center
+        </button>
+      </form>
+      <p id="loginErr" class="text-red-600 text-xs mt-3 hidden font-semibold">Invalid password. Please enter MOHIT@001.</p>
     </div>
   </div>
+
+  <!-- SYNCHRONOUS AUTH HANDLER (Works immediately even offline or before module scripts load) -->
+  <script>
+    window.togglePassVisibility = function() {
+      var inp = document.getElementById("adminPassInput");
+      var icon = document.getElementById("passEyeIcon");
+      if (!inp) return;
+      if (inp.type === "password") {
+        inp.type = "text";
+        if (icon) { icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash"); }
+      } else {
+        inp.type = "password";
+        if (icon) { icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye"); }
+      }
+    };
+
+    window.verifyLogin = function() {
+      var inp = document.getElementById("adminPassInput");
+      var err = document.getElementById("loginErr");
+      var raw = inp ? inp.value : "";
+      var cleaned = raw.trim().replace(/\s+/g, "").toUpperCase();
+      if (cleaned === "MOHIT@001") {
+        try { sessionStorage.setItem("jhatpat_admin_auth", "1"); } catch (e) {}
+        if (err) err.classList.add("hidden");
+        var overlay = document.getElementById("loginOverlay");
+        if (overlay) overlay.classList.add("hidden");
+        if (typeof window.initRealtimeListeners === "function") {
+          window.initRealtimeListeners();
+        }
+      } else {
+        if (err) err.classList.remove("hidden");
+      }
+    };
+
+    window.logoutAdmin = function() {
+      try { sessionStorage.removeItem("jhatpat_admin_auth"); } catch (e) {}
+      location.reload();
+    };
+
+    (function checkInitialAuth() {
+      try {
+        if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
+          var overlay = document.getElementById("loginOverlay");
+          if (overlay) overlay.classList.add("hidden");
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- TOP HEADER -->
   <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
@@ -48,7 +103,7 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="font-extrabold text-xl tracking-tight text-slate-900">jhatpat</span>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.0</span>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.1</span>
           </div>
           <p class="text-[11px] text-slate-500">RTDB: <span class="font-mono">jhatpat-22aa8</span> • UPI: <span class="font-mono">8305530240@kotakbank</span></p>
         </div>
@@ -548,6 +603,7 @@
     let hdPhotoCandidates = [];
     let hdPhotoIndex = 0;
     let photoDebounceTimer = null;
+    let listenersStarted = false;
 
     window.fallbackImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
 
@@ -559,28 +615,6 @@
       clearTimeout(window._toastT);
       window._toastT = setTimeout(() => t.classList.add("hidden"), 3000);
     };
-
-    // Auth
-    window.verifyLogin = () => {
-      const val = document.getElementById("adminPassInput").value.trim();
-      if (val === "MOHIT@001") {
-        sessionStorage.setItem("jhatpat_admin_auth", "1");
-        document.getElementById("loginOverlay").classList.add("hidden");
-        initRealtimeListeners();
-      } else {
-        document.getElementById("loginErr").classList.remove("hidden");
-      }
-    };
-
-    window.logoutAdmin = () => {
-      sessionStorage.removeItem("jhatpat_admin_auth");
-      location.reload();
-    };
-
-    if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
-      document.getElementById("loginOverlay").classList.add("hidden");
-      initRealtimeListeners();
-    }
 
     // Navigation
     window.switchTab = (tab) => {
@@ -611,17 +645,22 @@
     };
 
     // Init Firebase Listeners
-    async function initRealtimeListeners() {
-      // Ensure default settings (₹7 delivery, ₹199 free threshold)
-      const cfgSnap = await get(ref(db, "settings"));
-      if (!cfgSnap.exists()) {
-        await set(ref(db, "settings"), settings);
-      }
+    window.initRealtimeListeners = async function() {
+      if (listenersStarted) return;
+      listenersStarted = true;
 
-      // Ensure stores exist
-      const storeSnap = await get(ref(db, "stores"));
-      if (!storeSnap.exists()) {
-        await set(ref(db, "stores"), DEFAULT_STORES);
+      try {
+        const cfgSnap = await get(ref(db, "settings"));
+        if (!cfgSnap.exists()) {
+          await set(ref(db, "settings"), settings);
+        }
+
+        const storeSnap = await get(ref(db, "stores"));
+        if (!storeSnap.exists()) {
+          await set(ref(db, "stores"), DEFAULT_STORES);
+        }
+      } catch (err) {
+        console.warn("Firebase initial check:", err);
       }
 
       onValue(ref(db, "settings"), (snap) => {
@@ -658,7 +697,14 @@
         bannersMap = snap.val() || {};
         renderBanners();
       });
-    }
+    };
+
+    // Auto-start listeners if already unlocked in sessionStorage
+    try {
+      if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
+        window.initRealtimeListeners();
+      }
+    } catch (e) {}
 
     // ================= STORE-WISE ANALYTICS FILTER =================
     function populateStoreFilterDropdown() {
@@ -693,7 +739,6 @@
         ? allOrders
         : allOrders.filter(o => o.storeId === selectedStoreFilter);
 
-      // Update Banner Header
       if (selectedStoreFilter === "ALL") {
         document.getElementById("analyticsStoreTitle").textContent = `All Dark Stores (${Object.keys(storesMap).length} Stores Combined)`;
         document.getElementById("analyticsStoreMeta").textContent = "Network-wide live orders, gross sales, platform commission & store payouts";
@@ -705,7 +750,6 @@
         document.getElementById("analyticsCommRate").textContent = `${st.commission || 12}% Store Commission`;
       }
 
-      // Compute KPIs (excluding Cancelled from Sales/Commission/Payout)
       let totalOrders = filteredOrders.length;
       let grossSales = 0;
       let totalCommission = 0;
@@ -728,7 +772,6 @@
       document.getElementById("kpiCommission").textContent = `₹${totalCommission.toLocaleString("en-IN")}`;
       document.getElementById("kpiPayout").textContent = `₹${totalPayout.toLocaleString("en-IN")}`;
 
-      // Store-Wise Breakdown Table
       const breakdownBody = document.getElementById("storeBreakdownBody");
       breakdownBody.innerHTML = "";
       Object.values(storesMap).forEach(st => {
@@ -836,8 +879,7 @@
       list.forEach(o => {
         rows.push([o.id, o.storeId, o.customerName, o.customerPhone, o.subtotal, o.deliveryFee, o.totalAmount, o.status]);
       });
-      const csv = rows.map(r => r.join(",")).join("
-");
+      const csv = rows.map(r => r.join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -876,14 +918,12 @@
       const lower = query.toLowerCase();
       let candidates = [];
 
-      // 1. Check curated high-res grocery matches first
       for (const [key, urls] of Object.entries(CURATED_HD_KEYWORDS)) {
         if (lower.includes(key)) {
           candidates.push(...urls);
         }
       }
 
-      // 2. Also build dynamic HD Unsplash & Wikimedia/OpenFoodFacts queries so any product name gets multiple crisp HD options
       const cleanTerm = encodeURIComponent(query.replace(/[^a-zA-Z0-9 ]/g, " ").trim());
       try {
         const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${cleanTerm}&search_simple=1&action=process&json=1&page_size=6`);
@@ -893,9 +933,8 @@
             if (p.image_front_url) candidates.push(p.image_front_url);
           });
         }
-      } catch (e) { /* fallback smoothly */ }
+      } catch (e) {}
 
-      // Add high-resolution keyword image sources with distinct lock seeds for cycling
       for (let i = 1; i <= 5; i++) {
         candidates.push(`https://loremflickr.com/600/600/${cleanTerm},grocery,food/all?lock=${i * 17}`);
       }
@@ -930,7 +969,6 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (ev) => {
-        // Compress slightly via canvas so RTDB stays fast & light
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
@@ -973,7 +1011,7 @@
 
       if (publishToAllStores) {
         Object.keys(storesMap).forEach(stId => {
-          storeStock[stId] = true; // Published & In Stock in every store
+          storeStock[stId] = true;
         });
       }
 
@@ -1177,7 +1215,6 @@
       };
 
       const rawItems = [
-        // Mumbai Daily Sabzi (45 items)
         ["Nashik Red Onion (Kanda)", "Vegetables & Fruits", "1 kg", 45, 34, IMG.onion],
         ["Agra Jyoti Potato (Batata)", "Vegetables & Fruits", "1 kg", 40, 30, IMG.potato],
         ["Hybrid Red Tomato (Tamatar)", "Vegetables & Fruits", "500 g", 30, 22, IMG.tomato],
@@ -1224,7 +1261,6 @@
         ["Red Pumpkin (Bhopla)", "Vegetables & Fruits", "500 g", 28, 20, IMG.veg],
         ["Fresh Grated Coconut", "Vegetables & Fruits", "200 g", 45, 35, IMG.fruit],
 
-        // Fresh Fruits (30 items)
         ["Ratnagiri Alphonso Mango (Hapus)", "Vegetables & Fruits", "6 pcs", 599, 449, IMG.mango],
         ["Kesar Mango Box", "Vegetables & Fruits", "1 kg", 220, 169, IMG.mango],
         ["Elaichi Banana (Yelakki)", "Vegetables & Fruits", "500 g", 48, 36, IMG.banana],
@@ -1256,7 +1292,6 @@
         ["Sweet Tamarind Box (Imli)", "Vegetables & Fruits", "250 g", 65, 49, IMG.fruit],
         ["Cut Fruit Salad Bowl", "Vegetables & Fruits", "300 g", 89, 69, IMG.fruit],
 
-        // Fresh Juices & Shakes (30 items)
         ["Cold-Pressed Valencia Orange Juice", "Fresh Juices & Shakes", "250 ml", 85, 65, IMG.juice],
         ["Fresh Mosambi Juice (No Sugar)", "Fresh Juices & Shakes", "250 ml", 75, 55, IMG.juice],
         ["Fresh Pomegranate (Anar) Juice", "Fresh Juices & Shakes", "250 ml", 99, 79, IMG.juice],
