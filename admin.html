@@ -1,1532 +1,1269 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat Admin | Dark Store & Quick Commerce Command Center</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; background-color: #f4f6f8; }
-    .blinkit-yellow { background-color: #F8CB46; }
-    .blinkit-green { background-color: #0C831F; }
-    .blinkit-green-text { color: #0C831F; }
-    .tab-active { border-bottom: 3px solid #0C831F; color: #0C831F; font-weight: 700; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-  </style>
-</head>
-<body class="text-slate-800">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jhatpat — Super Admin HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #F1F5F9;
+    --sidebar: #0F172A;
+    --card: #FFFFFF;
+    --primary: #0C831F;
+    --accent: #F8CB46;
+    --text: #0F172A;
+    --muted: #64748B;
+    --border: #E2E8F0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
 
-  <!-- LOGIN OVERLAY -->
-  <div id="loginOverlay" class="fixed inset-0 bg-slate-900/90 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center border-t-8 border-[#F8CB46]">
-      <div class="w-16 h-16 blinkit-yellow rounded-2xl mx-auto flex items-center justify-center mb-4 shadow">
-        <i class="fa-solid fa-bolt text-3xl text-slate-900"></i>
-      </div>
-      <h1 class="text-2xl font-extrabold text-slate-900">Jhatpat <span class="blinkit-green-text">Admin</span></h1>
-      <p class="text-xs text-slate-500 mt-1 mb-6">Multi-Store Dark Store & Operations Console</p>
-      <form onsubmit="event.preventDefault(); verifyLogin();">
-        <div class="relative mb-3">
-          <input id="adminPassInput" type="password" placeholder="Enter Admin Password" autocomplete="current-password"
-            class="w-full px-4 py-3 pr-11 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0C831F] text-center font-semibold tracking-widest" />
-          <button type="button" onclick="togglePassVisibility()" title="Show/Hide Password"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm">
-            <i id="passEyeIcon" class="fa-solid fa-eye"></i>
-          </button>
+  /* Login Lock Screen */
+  .lock-screen {
+    position: fixed; inset: 0; background: #0F172A; display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px;
+  }
+  .lock-card {
+    background: #1E293B; color: #fff; padding: 32px; border-radius: 20px; width: 100%; max-width: 390px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+  .lock-card input {
+    width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 15px; margin: 16px 0 12px; outline: none;
+  }
+  .btn {
+    padding: 10px 16px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-yellow { background: var(--accent); color: #111; }
+  .btn-danger { background: #DC2626; color: #fff; }
+  .btn-dark { background: #1E293B; color: #fff; }
+  .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
+
+  /* Layout */
+  .topbar {
+    background: #0F172A; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 40;
+  }
+  .nav-tabs {
+    display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--border);
+  }
+  .nav-tab {
+    padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: #F8FAFC; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+  .nav-tab.active { background: #0F172A; color: #fff; border-color: #0F172A; }
+  .main-wrap { max-width: 1280px; margin: 0 auto; padding: 20px; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: #fff; border-radius: 16px; padding: 16px; border: 1px solid var(--border);
+  }
+  .kpi-label { font-size: 12px; color: var(--muted); font-weight: 700; }
+  .kpi-val { font-size: 24px; font-weight: 800; margin-top: 6px; }
+
+  .card {
+    background: #fff; border-radius: 16px; padding: 18px; border: 1px solid var(--border); margin-bottom: 18px;
+  }
+  .card-head {
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .form-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;
+  }
+  input, select {
+    width: 100%; padding: 9px 12px; border: 1px solid #CBD5E1; border-radius: 9px; font-family: inherit; font-size: 13px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: #F8FAFC; font-weight: 800; color: #475569; font-size: 12px; }
+  .table-wrap { overflow-x: auto; }
+  .badge {
+    padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-block;
+  }
+  .badge-green { background: #DCFCE7; color: #166534; }
+  .badge-red { background: #FEE2E2; color: #991B1B; }
+  .badge-amber { background: #FEF3C7; color: #92400E; }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.6); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 18px; padding: 22px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- Admin Authentication Gate -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card">
+    <div style="font-size:38px;">⚡</div>
+    <h2 style="margin-top:8px;">Jhatpat Super Admin HQ</h2>
+    <p style="font-size:13px;color:#94A3B8;margin-top:4px;">Enter Master Password to unlock command center</p>
+    <input type="password" id="adminPassInput" placeholder="Admin Password" onkeydown="if(event.key==='Enter') unlockAdmin()">
+    <button class="btn btn-yellow" style="width:100%;justify-content:center;padding:12px;" onclick="unlockAdmin()">Unlock Admin HQ ▸</button>
+  </div>
+</div>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="background:#F8CB46;color:#111;font-weight:800;padding:4px 10px;border-radius:8px;">⚡ JHATPAT</span>
+    <strong>Super Admin HQ</strong>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="dbCountPill" style="font-size:12px;background:#1E293B;padding:5px 10px;border-radius:8px;">0 Cities • 0 Stores</span>
+    <button class="btn btn-danger" onclick="logoutAdmin()">Lock</button>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('storesTab', this)">🏪 Multi-City Dark Stores</button>
+  <button class="nav-tab" onclick="switchTab('catalogTab', this)">🥦 Catalog & Store Stock</button>
+  <button class="nav-tab" onclick="switchTab('kycTab', this)">🪪 Seller KYC Approvals <span id="kycBadge" class="badge badge-amber" style="margin-left:4px;">0</span></button>
+  <button class="nav-tab" onclick="switchTab('financeTab', this)">💰 City & Store Financials</button>
+  <button class="nav-tab" onclick="switchTab('ordersTab', this)">📦 Live Orders Override</button>
+  <button class="nav-tab" onclick="switchTab('crmTab', this)">👥 Customer CRM & WhatsApp</button>
+  <button class="nav-tab" onclick="switchTab('marketingTab', this)">🎟️ Coupons & Banners</button>
+</nav>
+
+<div class="main-wrap">
+
+  <!-- TAB 1: MULTI-CITY DARK STORE CREATOR & MANAGER -->
+  <div class="tab-panel active" id="storesTab">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <h3>➕ Create Multi-City Dark Store</h3>
+          <p style="font-size:12px;color:var(--muted);">Database starts with 0 cities & 0 stores. Set custom Store ID & Store Password.</p>
         </div>
-        <button type="submit"
-          class="w-full blinkit-green hover:bg-green-800 text-white font-bold py-3 rounded-xl transition shadow-md cursor-pointer">
-          Unlock Command Center
-        </button>
-      </form>
-      <p id="loginErr" class="text-red-600 text-xs mt-3 hidden font-semibold">Invalid password. Please enter MOHIT@001.</p>
+        <button class="btn btn-danger" onclick="deleteAllStores()">🗑️ Delete All Existing Stores</button>
+      </div>
+      <div class="form-grid">
+        <input type="text" id="newStoreCity" placeholder="City Name (e.g. Mumbai, Indore) *">
+        <input type="text" id="newStoreArea" placeholder="Area / Locality (e.g. Kalyan West) *">
+        <input type="text" id="newStoreName" placeholder="Dark Store Name *">
+        <input type="text" id="newStoreId" placeholder="Custom Store ID (e.g. JHT-MUM-01) *">
+        <input type="text" id="newStorePass" placeholder="Custom Store Password *">
+        <input type="text" id="newStoreOwner" placeholder="Manager / Partner Name">
+        <input type="tel" id="newStorePhone" placeholder="Manager Phone">
+        <input type="number" step="any" id="newStoreLat" placeholder="Latitude (optional, e.g. 19.2403)">
+        <input type="number" step="any" id="newStoreLng" placeholder="Longitude (optional, e.g. 73.1305)">
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="createDarkStore()">✅ Create Dark Store</button>
+        <button class="btn btn-outline" onclick="fillAdminGPS()">📍 Use My Current Lat/Lng</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Active Dark Stores Directory</h3>
+        <select id="storeListCityFilter" style="width:200px;" onchange="renderStoresTable()">
+          <option value="ALL">All Cities</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Store ID</th>
+              <th>City & Area</th>
+              <th>Store Name</th>
+              <th>Store Password</th>
+              <th>Coordinates</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="storesTableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- SYNCHRONOUS AUTH HANDLER -->
-  <script>
-    window.togglePassVisibility = function() {
-      var inp = document.getElementById("adminPassInput");
-      var icon = document.getElementById("passEyeIcon");
-      if (!inp) return;
-      if (inp.type === "password") {
-        inp.type = "text";
-        if (icon) { icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash"); }
-      } else {
-        inp.type = "password";
-        if (icon) { icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye"); }
-      }
-    };
-
-    window.verifyLogin = function() {
-      var inp = document.getElementById("adminPassInput");
-      var err = document.getElementById("loginErr");
-      var raw = inp ? inp.value : "";
-      var cleaned = raw.trim().replace(/\s+/g, "").toUpperCase();
-      if (cleaned === "MOHIT@001") {
-        try { sessionStorage.setItem("jhatpat_admin_auth", "1"); } catch (e) {}
-        if (err) err.classList.add("hidden");
-        var overlay = document.getElementById("loginOverlay");
-        if (overlay) overlay.classList.add("hidden");
-        if (typeof window.initRealtimeListeners === "function") {
-          window.initRealtimeListeners();
-        }
-      } else {
-        if (err) err.classList.remove("hidden");
-      }
-    };
-
-    window.logoutAdmin = function() {
-      try { sessionStorage.removeItem("jhatpat_admin_auth"); } catch (e) {}
-      location.reload();
-    };
-
-    (function checkInitialAuth() {
-      try {
-        if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
-          var overlay = document.getElementById("loginOverlay");
-          if (overlay) overlay.classList.add("hidden");
-        }
-      } catch (e) {}
-    })();
-  </script>
-
-  <!-- TOP HEADER -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 blinkit-yellow rounded-xl flex items-center justify-center shadow-sm">
-          <i class="fa-solid fa-bolt text-xl text-slate-900"></i>
-        </div>
+  <!-- TAB 2: CATALOG & STORE-WISE OUT-OF-STOCK -->
+  <div class="tab-panel" id="catalogTab">
+    <div class="card">
+      <div class="card-head">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="font-extrabold text-xl tracking-tight text-slate-900">jhatpat</span>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.2</span>
-          </div>
-          <p class="text-[11px] text-slate-500">RTDB: <span class="font-mono">jhatpat-22aa8</span> • UPI: <span class="font-mono">8305530240@kotakbank</span></p>
+          <h3>🥦 Product Catalog & Auto-HD Image Fetcher</h3>
+          <p style="font-size:12px;color:var(--muted);">Type any product name to auto-fetch an HD photo, edit rates inline, or toggle store-wise availability.</p>
         </div>
+        <button class="btn btn-yellow" onclick="load100PlusPack()">⚡ Load 100+ Sabzi, Fruits & Juice Pack</button>
       </div>
 
-      <!-- STORE-WISE ANALYTICS FILTER -->
-      <div class="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-        <label class="text-xs font-bold text-slate-600 pl-2 flex items-center gap-1">
-          <i class="fa-solid fa-store text-[#0C831F]"></i> Store Filter:
-        </label>
-        <select id="globalStoreFilter" onchange="onStoreFilterChange()"
-          class="bg-white border border-slate-300 text-slate-800 text-xs font-bold rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0C831F]">
-          <option value="ALL">All Dark Stores (Combined)</option>
+      <div class="form-grid" style="align-items:center;">
+        <input type="text" id="prodNameInput" placeholder="Product Name (e.g. Alphonso Mango)" oninput="autoFetchProductPhoto()">
+        <select id="prodCatInput">
+          <option value="Fresh Vegetables">Fresh Vegetables</option>
+          <option value="Fresh Fruits">Fresh Fruits</option>
+          <option value="Cold Pressed Juices">Cold Pressed Juices</option>
+          <option value="Leafy & Herbs">Leafy & Herbs</option>
+          <option value="Exotic & Organic">Exotic & Organic</option>
         </select>
-        <button onclick="logoutAdmin()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold">
-          <i class="fa-solid fa-right-from-bracket"></i>
-        </button>
+        <input type="text" id="prodUnitInput" placeholder="Pack Size (e.g. 500 g, 1 L)">
+        <input type="number" id="prodPriceInput" placeholder="Selling Price ₹">
+        <input type="number" id="prodMrpInput" placeholder="MRP ₹">
+        <input type="text" id="prodImgInput" placeholder="HD Image URL (auto-filled)">
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+        <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" style="width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid #CBD5E1;">
+        <button class="btn btn-primary" onclick="addSingleProduct()">+ Add Product to Catalog</button>
       </div>
     </div>
 
-    <!-- NAV TABS -->
-    <div class="max-w-7xl mx-auto px-4 flex gap-6 overflow-x-auto text-sm font-medium text-slate-600 border-t border-slate-100">
-      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="py-3 whitespace-nowrap tab-active">
-        <i class="fa-solid fa-chart-line mr-1"></i> Dashboard & Orders
-      </button>
-      <button onclick="switchTab('products')" id="tab-products" class="py-3 whitespace-nowrap">
-        <i class="fa-solid fa-basket-shopping mr-1"></i> Catalog & Store Stock
-      </button>
-      <button onclick="switchTab('stores')" id="tab-stores" class="py-3 whitespace-nowrap">
-        <i class="fa-solid fa-warehouse mr-1"></i> Dark Stores & KYC
-      </button>
-      <button onclick="switchTab('customers')" id="tab-customers" class="py-3 whitespace-nowrap">
-        <i class="fa-solid fa-users mr-1"></i> Customer CRM & WhatsApp
-      </button>
-      <button onclick="switchTab('settings')" id="tab-settings" class="py-3 whitespace-nowrap">
-        <i class="fa-solid fa-sliders mr-1"></i> Delivery Fees, Banners & UPI
-      </button>
+    <div class="card">
+      <div class="card-head">
+        <h3>Live Catalog (<span id="catalogTotalCount">0</span> Items)</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input type="text" id="catalogSearch" placeholder="Filter products..." style="width:190px;" oninput="renderCatalogTable()">
+          <select id="catalogStoreOosFilter" style="width:220px;" onchange="renderCatalogTable()">
+            <option value="">Select Store for Stock Toggle</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Photo</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Unit</th>
+              <th>Inline Rate (₹)</th>
+              <th>Store Availability</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="catalogTableBody"></tbody>
+        </table>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <!-- MAIN CONTAINER -->
-  <main class="max-w-7xl mx-auto px-4 py-6">
+  <!-- TAB 3: 1-TAP EASY SELLER KYC APPROVAL -->
+  <div class="tab-panel" id="kycTab">
+    <div class="card">
+      <div class="card-head">
+        <h3>🪪 Seller Partner KYC Applications</h3>
+        <span style="font-size:12px;color:var(--muted);">1-Click Approve auto-provisions the dark store with the seller's chosen Store ID & Password.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Applicant & Business</th>
+              <th>City & Area</th>
+              <th>Chosen Store ID</th>
+              <th>Chosen Password</th>
+              <th>Docs / FSSAI</th>
+              <th>Status</th>
+              <th>1-Tap Action</th>
+            </tr>
+          </thead>
+          <tbody id="kycTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    <!-- ================= TAB 1: DASHBOARD & ORDERS ================= -->
-    <section id="sec-dashboard" class="space-y-6">
-      <div id="activeStoreAnalyticsBanner" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow">
+  <!-- TAB 4: FINANCIAL BREAKDOWN (12% COMMISSION / 88% PAYOUT) -->
+  <div class="tab-panel" id="financeTab">
+    <div class="card">
+      <div class="card-head">
+        <h3>💰 Store-Wise & City-Wise Financial Breakdown</h3>
+        <div style="display:flex;gap:8px;">
+          <select id="finCityFilter" style="width:180px;" onchange="renderFinancials()">
+            <option value="ALL">All Cities</option>
+          </select>
+          <select id="finStoreFilter" style="width:200px;" onchange="renderFinancials()">
+            <option value="ALL">All Dark Stores</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">TOTAL ORDERS</div>
+          <div class="kpi-val" id="finOrders">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">GROSS SALES (GMV)</div>
+          <div class="kpi-val" id="finSales">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">PLATFORM COMMISSION (12%)</div>
+          <div class="kpi-val" style="color:#0C831F;" id="finComm">₹0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">DARK STORE PAYOUT (88%)</div>
+          <div class="kpi-val" style="color:#2563EB;" id="finPayout">₹0</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Store ID</th>
+              <th>Store Name</th>
+              <th>City</th>
+              <th>Orders</th>
+              <th>Gross Sales</th>
+              <th>Jhatpat 12%</th>
+              <th>Store Payout 88%</th>
+            </tr>
+          </thead>
+          <tbody id="finTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: LIVE ORDER STATUS OVERRIDE -->
+  <div class="tab-panel" id="ordersTab">
+    <div class="card">
+      <div class="card-head">
+        <h3>📦 Live Orders Command & Status Override</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Store / City</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total & Pay</th>
+              <th>Status Override</th>
+            </tr>
+          </thead>
+          <tbody id="adminOrdersBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 6: CUSTOMER CRM & 1-CLICK WHATSAPP -->
+  <div class="tab-panel" id="crmTab">
+    <div class="card">
+      <div class="card-head">
+        <h3>👥 Customer CRM & 1-Click WhatsApp Engagement</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Customer Name</th>
+              <th>Phone</th>
+              <th>City & Address</th>
+              <th>Orders</th>
+              <th>Total Spend</th>
+              <th>1-Click WhatsApp SMS</th>
+            </tr>
+          </thead>
+          <tbody id="crmTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7: COUPON & BANNER MANAGER -->
+  <div class="tab-panel" id="marketingTab">
+    <div class="card">
+      <h3 style="margin-bottom:12px;">🎟️ Create Promo Coupon</h3>
+      <div class="form-grid">
+        <input type="text" id="cpCode" placeholder="Coupon Code (e.g. JHATPAT50)" style="text-transform:uppercase;">
+        <select id="cpType">
+          <option value="FLAT">Flat Discount (₹)</option>
+          <option value="PERCENT">Percentage (%)</option>
+        </select>
+        <input type="number" id="cpValue" placeholder="Discount Value (e.g. 50 or 15)">
+        <input type="number" id="cpMinOrder" placeholder="Min Order ₹ (e.g. 199)">
+        <input type="number" id="cpMaxDisc" placeholder="Max Discount ₹ (for %)">
+      </div>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="saveCoupon()">+ Save Coupon</button>
+      <div class="table-wrap" style="margin-top:14px;">
+        <table>
+          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Action</th></tr></thead>
+          <tbody id="couponsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;">🖼️ Add App Promo Banner</h3>
+      <div class="form-grid">
+        <input type="text" id="bnTag" placeholder="Badge Tag (e.g. FLASH SALE)">
+        <input type="text" id="bnTitle" placeholder="Banner Title (e.g. Fresh Alphonso Mangoes)">
+        <input type="text" id="bnSub" placeholder="Subtitle (e.g. Delivered in 10 mins flat)">
+        <input type="text" id="bnEmoji" placeholder="Emoji Icon (e.g. 🥭)">
+        <select id="bnBg">
+          <option value="linear-gradient(135deg,#0C831F,#16A34A)">Blinkit Green</option>
+          <option value="linear-gradient(135deg,#EA580C,#F59E0B)">Mango Orange</option>
+          <option value="linear-gradient(135deg,#1D4ED8,#3B82F6)">Royal Blue</option>
+          <option value="linear-gradient(135deg,#7C3AED,#EC4899)">Berry Purple</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="saveBanner()">+ Publish Banner</button>
+      <div id="bannersListAdmin" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Full Edit Dark Store Modal -->
+<div class="modal-bg" id="editStoreModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3>✏️ Edit Dark Store</h3>
+      <button class="btn btn-outline" onclick="closeEditModal()">✕</button>
+    </div>
+    <input type="hidden" id="editStoreOrigId">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <label style="font-size:12px;font-weight:700;">Store ID (Read-Only Key)</label>
+      <input type="text" id="editStoreIdDisplay" disabled style="background:#F1F5F9;">
+      <label style="font-size:12px;font-weight:700;">City</label>
+      <input type="text" id="editStoreCity">
+      <label style="font-size:12px;font-weight:700;">Area / Locality</label>
+      <input type="text" id="editStoreArea">
+      <label style="font-size:12px;font-weight:700;">Store Name</label>
+      <input type="text" id="editStoreName">
+      <label style="font-size:12px;font-weight:700;">Store Login Password</label>
+      <input type="text" id="editStorePass">
+      <label style="font-size:12px;font-weight:700;">Manager Name</label>
+      <input type="text" id="editStoreOwner">
+      <label style="font-size:12px;font-weight:700;">Manager Phone</label>
+      <input type="text" id="editStorePhone">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
         <div>
-          <span class="text-[11px] uppercase tracking-wider text-[#F8CB46] font-bold">Store-Wise Performance View</span>
-          <h2 id="analyticsStoreTitle" class="text-lg font-extrabold">All Dark Stores (Network Overview)</h2>
-          <p id="analyticsStoreMeta" class="text-xs text-slate-300">Showing combined orders, gross sales, platform commission & net store payouts.</p>
+          <label style="font-size:12px;font-weight:700;">Latitude</label>
+          <input type="number" step="any" id="editStoreLat">
         </div>
-        <div class="flex items-center gap-3">
-          <div class="text-right">
-            <div class="text-[11px] text-slate-400">Commission Rate</div>
-            <div id="analyticsCommRate" class="text-sm font-bold text-[#F8CB46]">12% Platform Fee</div>
-          </div>
-          <button onclick="exportOrdersCSV()" class="bg-[#0C831F] hover:bg-green-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
-            <i class="fa-solid fa-file-csv mr-1"></i> Export Report
-          </button>
-        </div>
-      </div>
-
-      <!-- KPI CARDS -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase">Total Orders</p>
-              <h3 id="kpiOrders" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
-            </div>
-            <span class="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><i class="fa-solid fa-bag-shopping"></i></span>
-          </div>
-          <p id="kpiOrdersSub" class="text-xs text-slate-500 mt-2">Delivered & Active</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase">Gross Sales</p>
-              <h3 id="kpiSales" class="text-2xl font-extrabold text-slate-900 mt-1">₹0</h3>
-            </div>
-            <span class="p-2.5 bg-green-50 text-[#0C831F] rounded-xl"><i class="fa-solid fa-indian-rupee-sign"></i></span>
-          </div>
-          <p id="kpiSalesSub" class="text-xs text-green-700 mt-2 font-medium">₹7 delivery &lt;₹199 • FREE ≥₹199</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase">Platform Commission</p>
-              <h3 id="kpiCommission" class="text-2xl font-extrabold text-amber-600 mt-1">₹0</h3>
-            </div>
-            <span class="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><i class="fa-solid fa-percent"></i></span>
-          </div>
-          <p id="kpiCommSub" class="text-xs text-slate-500 mt-2">Jhatpat Admin Earnings</p>
-        </div>
-
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-          <div class="flex justify-between items-start">
-            <div>
-              <p class="text-xs font-semibold text-slate-500 uppercase">Store Net Payout</p>
-              <h3 id="kpiPayout" class="text-2xl font-extrabold text-purple-700 mt-1">₹0</h3>
-            </div>
-            <span class="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><i class="fa-solid fa-wallet"></i></span>
-          </div>
-          <p id="kpiPayoutSub" class="text-xs text-slate-500 mt-2">Payable to Dark Store Partner</p>
-        </div>
-      </div>
-
-      <!-- STORE-WISE BREAKDOWN TABLE -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
-          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-chart-pie text-[#0C831F] mr-2"></i>Store-Wise Financial Breakdown</h3>
-          <span class="text-xs text-slate-500">Click any store row to filter dashboard</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="px-4 py-3">Dark Store</th>
-                <th class="px-4 py-3">Area / Pincode</th>
-                <th class="px-4 py-3 text-right">Orders</th>
-                <th class="px-4 py-3 text-right">Gross Sales</th>
-                <th class="px-4 py-3 text-right">Commission</th>
-                <th class="px-4 py-3 text-right">Net Payout</th>
-                <th class="px-4 py-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody id="storeBreakdownBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- LIVE ORDERS TABLE -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-receipt text-[#0C831F] mr-2"></i>Live Orders (Filtered by Store)</h3>
-          <div class="flex gap-2">
-            <select id="orderStatusFilter" onchange="renderOrders()" class="border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
-              <option value="ALL">All Statuses</option>
-              <option value="Placed">Placed</option>
-              <option value="Packed">Packed</option>
-              <option value="Out for Delivery">Out for Delivery</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
-          </div>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="px-4 py-3">Order ID</th>
-                <th class="px-4 py-3">Customer</th>
-                <th class="px-4 py-3">Assigned Dark Store</th>
-                <th class="px-4 py-3">Items</th>
-                <th class="px-4 py-3">Bill (Subtotal + Del)</th>
-                <th class="px-4 py-3">Payment</th>
-                <th class="px-4 py-3">Status</th>
-                <th class="px-4 py-3 text-center">1-Click WhatsApp</th>
-              </tr>
-            </thead>
-            <tbody id="ordersTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= TAB 2: CATALOG & STORE-WISE STOCK ================= -->
-    <section id="sec-products" class="hidden space-y-6">
-      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 class="font-extrabold text-lg text-slate-900">Product Catalog & Store-Wise Inventory</h2>
-          <p class="text-xs text-slate-500">Auto-HD photo fetch, 1-click publish to all stores, rate editor & per-store stock toggle.</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="loadMumbai100Pack()"
-            class="bg-[#F8CB46] hover:bg-yellow-400 text-slate-900 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2">
-            <i class="fa-solid fa-leaf text-[#0C831F]"></i> Load Mumbai 100+ Sabzi, Fruits & Juice Pack
-          </button>
-          <button onclick="publishAllProductsToAllStores()"
-            class="bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm flex items-center gap-2">
-            <i class="fa-solid fa-globe"></i> 1-Click Publish All to ALL Stores
-          </button>
+          <label style="font-size:12px;font-weight:700;">Longitude</label>
+          <input type="number" step="any" id="editStoreLng">
         </div>
       </div>
-
-      <!-- ADD / EDIT PRODUCT FORM WITH AUTO-HD PHOTO FETCH -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <h3 id="productFormTitle" class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-plus-circle text-[#0C831F]"></i> Add New Product (with Auto-HD Photo Fetch)
-        </h3>
-        <input type="hidden" id="editProductId" />
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Product Name *</label>
-              <input id="prodName" type="text" placeholder="e.g., Fresh Alphonso Mango, Amul Taaza Milk..."
-                oninput="debouncedAutoFetchHDPhoto(this.value)"
-                class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0C831F] focus:outline-none" />
-              <p class="text-[11px] text-green-700 mt-1"><i class="fa-solid fa-wand-magic-sparkles"></i> Type product name to auto-fetch HD photo</p>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
-              <select id="prodCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0C831F]">
-                <option value="Sabzi & Fruits">Sabzi & Fruits</option>
-                <option value="Juices">Juices</option>
-                <option value="Dairy">Dairy</option>
-                <option value="Staples">Staples</option>
-                <option value="Masala">Masala</option>
-                <option value="Munchies & Cold Drinks">Munchies & Cold Drinks</option>
-                <option value="Personal Care & Home">Personal Care & Home</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Pack Size / Unit *</label>
-              <input id="prodUnit" type="text" placeholder="e.g., 500 g, 1 kg, 1 L, 250 ml"
-                class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm" />
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">MRP (₹) *</label>
-                <input id="prodMrp" type="number" placeholder="60"
-                  class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Selling Price (₹) *</label>
-                <input id="prodPrice" type="number" placeholder="45"
-                  class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm font-bold text-[#0C831F]" />
-              </div>
-            </div>
-
-            <div class="sm:col-span-2">
-              <label class="block text-xs font-bold text-slate-700 mb-1">Image URL (Auto-filled or Paste Custom URL)</label>
-              <input id="prodImage" type="text" placeholder="https://..."
-                oninput="document.getElementById('prodPreviewImg').src = this.value || fallbackImg"
-                class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono" />
-            </div>
-
-            <div class="sm:col-span-2 flex flex-wrap items-center gap-3 pt-1">
-              <button onclick="saveProduct(true)"
-                class="bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs px-5 py-3 rounded-xl shadow flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i> Save & 1-Click Publish to ALL Stores
-              </button>
-              <button onclick="saveProduct(false)"
-                class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-3 rounded-xl">
-                Save Product Only
-              </button>
-              <button onclick="resetProductForm()"
-                class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-3 rounded-xl">
-                Clear
-              </button>
-            </div>
-          </div>
-
-          <!-- Right: HD Photo Preview + Cycle + Gallery Upload -->
-          <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-between">
-            <div class="w-full flex justify-between items-center mb-2">
-              <span class="text-xs font-bold text-slate-600">HD Photo Preview</span>
-              <span id="photoFetchBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-bold">Ready</span>
-            </div>
-            <div class="w-40 h-40 bg-white rounded-xl border border-slate-200 overflow-hidden flex items-center justify-center shadow-inner">
-              <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80"
-                alt="Preview" class="w-full h-full object-cover" />
-            </div>
-            <div class="w-full grid grid-cols-2 gap-2 mt-3">
-              <button type="button" onclick="cycleNextHDPhoto()"
-                class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold py-2 px-2 rounded-lg flex items-center justify-center gap-1">
-                <i class="fa-solid fa-rotate text-[#0C831F]"></i> Next HD Photo
-              </button>
-              <label class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-800 text-xs font-bold py-2 px-2 rounded-lg flex items-center justify-center gap-1 cursor-pointer">
-                <i class="fa-solid fa-image text-blue-600"></i> Upload Gallery
-                <input type="file" accept="image/*" class="hidden" onchange="handleGalleryUpload(event)" />
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CATALOG LIST -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-slate-800">All Products (<span id="productCountLabel">0</span>)</h3>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <input id="catalogSearch" type="text" placeholder="Search product or category..." oninput="renderProducts()"
-              class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs w-60" />
-            <select id="catalogCategoryFilter" onchange="renderProducts()" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold">
-              <option value="ALL">All Categories</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="px-4 py-3">Product</th>
-                <th class="px-4 py-3">Category & Unit</th>
-                <th class="px-4 py-3">Quick Rate Edit (₹)</th>
-                <th class="px-4 py-3">Store-Wise Stock Toggle (Click Store Chip to Toggle In/Out)</th>
-                <th class="px-4 py-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="productsTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= TAB 3: DARK STORES & KYC ================= -->
-    <section id="sec-stores" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <h3 class="font-bold text-base text-slate-900 mb-4"><i class="fa-solid fa-store text-[#0C831F] mr-2"></i>Add / Edit Dark Store & Partner KYC</h3>
-        <input type="hidden" id="editStoreId" />
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Store Name *</label>
-            <input id="storeName" type="text" placeholder="e.g., Jhatpat Andheri West Hub" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Area / Locality *</label>
-            <input id="storeArea" type="text" placeholder="e.g., Andheri West, Mumbai" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Service Pincodes (comma separated) *</label>
-            <input id="storePincodes" type="text" placeholder="400053, 400058, 400061" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Manager Name & Phone</label>
-            <input id="storeManager" type="text" placeholder="Rajesh Sharma - 9876543210" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Commission %</label>
-            <input id="storeComm" type="number" value="12" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">KYC Status (FSSAI / GST / PAN)</label>
-            <select id="storeKyc" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold">
-              <option value="Verified">Verified (FSSAI + GST + PAN)</option>
-              <option value="Pending">Pending Verification</option>
-              <option value="Rejected">Rejected / Incomplete</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">FSSAI License No.</label>
-            <input id="storeFssai" type="text" placeholder="11524001000892" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Partner UPI / Bank A/C</label>
-            <input id="storeUpi" type="text" placeholder="partner@kotakbank" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
-          </div>
-          <div class="flex items-end gap-2">
-            <button onclick="saveDarkStore()" class="w-full bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow">
-              Save Dark Store
-            </button>
-            <button onclick="resetStoreForm()" class="bg-slate-100 text-slate-700 font-semibold text-xs py-2.5 px-3 rounded-xl">
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-          <h3 class="font-bold text-slate-800">Active Dark Stores (<span id="storeCountLabel">0</span>)</h3>
-          <button onclick="seed10MumbaiStores()" class="text-xs font-bold text-[#0C831F] hover:underline">
-            + Restore 10 Default Mumbai Dark Stores
-          </button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="px-4 py-3">Store ID & Name</th>
-                <th class="px-4 py-3">Area & Pincodes</th>
-                <th class="px-4 py-3">Manager</th>
-                <th class="px-4 py-3">KYC & FSSAI</th>
-                <th class="px-4 py-3">Comm %</th>
-                <th class="px-4 py-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="storesTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= TAB 4: CUSTOMER CRM & 1-CLICK WHATSAPP ================= -->
-    <section id="sec-customers" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <div>
-            <h3 class="font-bold text-lg text-slate-900"><i class="fa-brands fa-whatsapp text-[#0C831F] mr-2"></i>Customer CRM & 1-Click WhatsApp</h3>
-            <p class="text-xs text-slate-500">Send instant order updates, coupon codes, or payment links on WhatsApp in 1 click.</p>
-          </div>
-          <input id="crmSearch" type="text" placeholder="Search name, phone, area..." oninput="renderCustomers()"
-            class="border border-slate-300 rounded-xl px-3 py-2 text-xs w-64" />
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-              <tr>
-                <th class="px-4 py-3">Customer Name</th>
-                <th class="px-4 py-3">Phone</th>
-                <th class="px-4 py-3">Address / Nearest Store</th>
-                <th class="px-4 py-3 text-right">Orders</th>
-                <th class="px-4 py-3 text-right">Total Spend</th>
-                <th class="px-4 py-3 text-center">1-Click WhatsApp Actions</th>
-              </tr>
-            </thead>
-            <tbody id="crmTableBody" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= TAB 5: DELIVERY FEES, BANNERS & KOTAK UPI ================= -->
-    <section id="sec-settings" class="hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-truck-fast text-[#0C831F] mr-2"></i>Delivery Fee & Kotak UPI Settings</h3>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Standard Delivery Fee (₹) — Default ₹7</label>
-            <input id="cfgDeliveryFee" type="number" value="7" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Free Delivery Threshold (₹) — Default ₹199</label>
-            <input id="cfgFreeThreshold" type="number" value="199" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-[#0C831F]" />
-            <p class="text-[11px] text-slate-500 mt-1">Orders below ₹199 automatically pay ₹7 delivery; orders ≥ ₹199 get FREE delivery.</p>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Kotak Merchant UPI ID</label>
-            <input id="cfgUpiId" type="text" value="8305530240@kotakbank" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-mono" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Merchant Payee Name</label>
-            <input id="cfgPayeeName" type="text" value="Jhatpat" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold" />
-          </div>
-          <button onclick="saveGlobalSettings()" class="w-full bg-[#0C831F] hover:bg-green-800 text-white font-bold text-xs py-3 rounded-xl shadow">
-            Save Delivery & Payment Settings
-          </button>
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-          <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-panorama text-[#0C831F] mr-2"></i>Storefront Banner Manager</h3>
-          <div class="grid grid-cols-1 gap-3">
-            <input id="bannerTitle" type="text" placeholder="Banner Headline (e.g., Fresh Mumbai Sabzi in 10 Mins!)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs" />
-            <input id="bannerSubtitle" type="text" placeholder="Subtitle (e.g., Free Delivery on orders ₹199+)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs" />
-            <input id="bannerImage" type="text" placeholder="Banner Image URL (optional)" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono" />
-            <button onclick="addBanner()" class="bg-[#F8CB46] hover:bg-yellow-400 text-slate-900 font-extrabold text-xs py-2.5 rounded-xl">
-              + Publish Banner to Storefront
-            </button>
-          </div>
-          <div id="bannersList" class="space-y-2 max-h-60 overflow-y-auto pt-2"></div>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl hidden z-50"></div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, update, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let storesMap = {};
-    let productsMap = {};
-    let ordersMap = {};
-    let bannersMap = {};
-    let settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat" };
-    let selectedStoreFilter = "ALL";
-    let hdPhotoCandidates = [];
-    let hdPhotoIndex = 0;
-    let photoDebounceTimer = null;
-    let listenersStarted = false;
-
-    window.fallbackImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
-
-    window.showToast = (msg) => {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.remove("hidden");
-      clearTimeout(window._toastT);
-      window._toastT = setTimeout(() => t.classList.add("hidden"), 3000);
-    };
-
-    window.switchTab = (tab) => {
-      ["dashboard", "products", "stores", "customers", "settings"].forEach(t => {
-        document.getElementById("sec-" + t).classList.toggle("hidden", t !== tab);
-        document.getElementById("tab-" + t).classList.toggle("tab-active", t === tab);
-      });
-    };
-
-    const DEFAULT_STORES = {
-      "DS_ANDHERI": { id: "DS_ANDHERI", name: "Jhatpat Andheri West Hub", area: "Andheri West, Mumbai", pincodes: "400053, 400058, 400061", manager: "Rohan Desai - 9820112233", commission: 12, kyc: "Verified", fssai: "11524001001101", upi: "andheri@kotakbank" },
-      "DS_BANDRA": { id: "DS_BANDRA", name: "Jhatpat Bandra Linking Hub", area: "Bandra West, Mumbai", pincodes: "400050, 400051, 400052", manager: "Farhan Shaikh - 9820112234", commission: 12, kyc: "Verified", fssai: "11524001001102", upi: "bandra@kotakbank" },
-      "DS_DADAR": { id: "DS_DADAR", name: "Jhatpat Dadar Central Hub", area: "Dadar East, Mumbai", pincodes: "400014, 400028, 400019", manager: "Suresh Patil - 9820112235", commission: 12, kyc: "Verified", fssai: "11524001001103", upi: "dadar@kotakbank" },
-      "DS_POWAI": { id: "DS_POWAI", name: "Jhatpat Powai Hiranandani Hub", area: "Powai, Mumbai", pincodes: "400076, 400072, 400087", manager: "Amit Verma - 9820112236", commission: 12, kyc: "Verified", fssai: "11524001001104", upi: "powai@kotakbank" },
-      "DS_THANE": { id: "DS_THANE", name: "Jhatpat Thane Ghodbunder Hub", area: "Thane West", pincodes: "400601, 400607, 400615", manager: "Nitin Joshi - 9820112237", commission: 10, kyc: "Verified", fssai: "11524001001105", upi: "thane@kotakbank" },
-      "DS_KALYAN": { id: "DS_KALYAN", name: "Jhatpat Kalyan Khadakpada Hub", area: "Kalyan West", pincodes: "421301, 421306, 421201", manager: "Mohit Hub - 8305530240", commission: 10, kyc: "Verified", fssai: "11524001001106", upi: "8305530240@kotakbank" },
-      "DS_BORIVALI": { id: "DS_BORIVALI", name: "Jhatpat Borivali IC Colony Hub", area: "Borivali West, Mumbai", pincodes: "400092, 400103, 400066", manager: "Kiran Shah - 9820112238", commission: 12, kyc: "Verified", fssai: "11524001001107", upi: "borivali@kotakbank" },
-      "DS_MALAD": { id: "DS_MALAD", name: "Jhatpat Malad Mindspace Hub", area: "Malad West, Mumbai", pincodes: "400064, 400095, 400097", manager: "Deepak Nair - 9820112239", commission: 12, kyc: "Verified", fssai: "11524001001108", upi: "malad@kotakbank" },
-      "DS_GHATKOPAR": { id: "DS_GHATKOPAR", name: "Jhatpat Ghatkopar R-City Hub", area: "Ghatkopar West, Mumbai", pincodes: "400086, 400077, 400075", manager: "Prashant More - 9820112240", commission: 12, kyc: "Verified", fssai: "11524001001109", upi: "ghatkopar@kotakbank" },
-      "DS_NAVI": { id: "DS_NAVI", name: "Jhatpat Vashi Palm Beach Hub", area: "Vashi, Navi Mumbai", pincodes: "400703, 400705, 400706", manager: "Siddharth Kulkarni - 9820112241", commission: 11, kyc: "Verified", fssai: "11524001001110", upi: "vashi@kotakbank" },
-      "DS_LOWERPAREL": { id: "DS_LOWERPAREL", name: "Jhatpat Lower Parel Worli Hub", area: "Lower Parel, Mumbai", pincodes: "400013, 400018, 400011", manager: "Vikram Mehta - 9820112242", commission: 12, kyc: "Verified", fssai: "11524001001111", upi: "lowerparel@kotakbank" }
-    };
-
-    window.seed10MumbaiStores = async () => {
-      await update(ref(db, "stores"), DEFAULT_STORES);
-      showToast("11 Mumbai Dark Stores loaded into Firebase!");
-    };
-
-    window.initRealtimeListeners = async function() {
-      if (listenersStarted) return;
-      listenersStarted = true;
-
-      try {
-        const cfgSnap = await get(ref(db, "settings"));
-        if (!cfgSnap.exists()) {
-          await set(ref(db, "settings"), settings);
-        }
-
-        const storeSnap = await get(ref(db, "stores"));
-        if (!storeSnap.exists()) {
-          await set(ref(db, "stores"), DEFAULT_STORES);
-        }
-      } catch (err) {
-        console.warn("Firebase initial check:", err);
-      }
-
-      onValue(ref(db, "settings"), (snap) => {
-        if (snap.exists()) {
-          settings = { deliveryFee: 7, freeThreshold: 199, upiId: "8305530240@kotakbank", payeeName: "Jhatpat", ...snap.val() };
-          document.getElementById("cfgDeliveryFee").value = settings.deliveryFee;
-          document.getElementById("cfgFreeThreshold").value = settings.freeThreshold;
-          document.getElementById("cfgUpiId").value = settings.upiId;
-          document.getElementById("cfgPayeeName").value = settings.payeeName;
-        }
-      });
-
-      onValue(ref(db, "stores"), (snap) => {
-        storesMap = snap.val() || {};
-        populateStoreFilterDropdown();
-        renderStoresTable();
-        renderDashboard();
-        renderProducts();
-      });
-
-      onValue(ref(db, "products"), (snap) => {
-        productsMap = snap.val() || {};
-        populateCategoryDropdown();
-        renderProducts();
-      });
-
-      onValue(ref(db, "orders"), (snap) => {
-        ordersMap = snap.val() || {};
-        renderDashboard();
-        renderCustomers();
-      });
-
-      onValue(ref(db, "banners"), (snap) => {
-        bannersMap = snap.val() || {};
-        renderBanners();
-      });
-    };
-
-    try {
-      if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
-        window.initRealtimeListeners();
-      }
-    } catch (e) {}
-
-    function populateStoreFilterDropdown() {
-      const sel = document.getElementById("globalStoreFilter");
-      const current = sel.value || selectedStoreFilter;
-      sel.innerHTML = `<option value="ALL">All Dark Stores (${Object.keys(storesMap).length} Stores)</option>`;
-      Object.values(storesMap).forEach(st => {
-        const opt = document.createElement("option");
-        opt.value = st.id;
-        opt.textContent = `${st.name} (${st.area})`;
-        sel.appendChild(opt);
-      });
-      sel.value = storesMap[current] ? current : "ALL";
-      selectedStoreFilter = sel.value;
-    }
-
-    window.onStoreFilterChange = () => {
-      selectedStoreFilter = document.getElementById("globalStoreFilter").value;
-      renderDashboard();
-    };
-
-    window.selectStoreFromTable = (storeId) => {
-      selectedStoreFilter = storeId;
-      document.getElementById("globalStoreFilter").value = storeId;
-      renderDashboard();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    function renderDashboard() {
-      const allOrders = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }));
-      const filteredOrders = selectedStoreFilter === "ALL"
-        ? allOrders
-        : allOrders.filter(o => o.storeId === selectedStoreFilter);
-
-      if (selectedStoreFilter === "ALL") {
-        document.getElementById("analyticsStoreTitle").textContent = `All Dark Stores (${Object.keys(storesMap).length} Stores Combined)`;
-        document.getElementById("analyticsStoreMeta").textContent = "Network-wide live orders, gross sales, platform commission & store payouts";
-        document.getElementById("analyticsCommRate").textContent = "Avg 11.8% Commission";
-      } else {
-        const st = storesMap[selectedStoreFilter] || {};
-        document.getElementById("analyticsStoreTitle").textContent = st.name || selectedStoreFilter;
-        document.getElementById("analyticsStoreMeta").textContent = `Area: ${st.area || "-"} • Pincodes: ${st.pincodes || "-"} • Manager: ${st.manager || "-"}`;
-        document.getElementById("analyticsCommRate").textContent = `${st.commission || 12}% Store Commission`;
-      }
-
-      let totalOrders = filteredOrders.length;
-      let grossSales = 0;
-      let totalCommission = 0;
-      let totalPayout = 0;
-
-      filteredOrders.forEach(o => {
-        if (o.status !== "Cancelled") {
-          const amt = Number(o.totalAmount || o.grandTotal || 0);
-          const st = storesMap[o.storeId] || {};
-          const commPct = Number(st.commission || 12);
-          const commAmt = Math.round((amt * commPct) / 100);
-          grossSales += amt;
-          totalCommission += commAmt;
-          totalPayout += (amt - commAmt);
-        }
-      });
-
-      document.getElementById("kpiOrders").textContent = totalOrders;
-      document.getElementById("kpiSales").textContent = `₹${grossSales.toLocaleString("en-IN")}`;
-      document.getElementById("kpiCommission").textContent = `₹${totalCommission.toLocaleString("en-IN")}`;
-      document.getElementById("kpiPayout").textContent = `₹${totalPayout.toLocaleString("en-IN")}`;
-
-      const breakdownBody = document.getElementById("storeBreakdownBody");
-      breakdownBody.innerHTML = "";
-      Object.values(storesMap).forEach(st => {
-        const stOrders = allOrders.filter(o => o.storeId === st.id && o.status !== "Cancelled");
-        const stSales = stOrders.reduce((s, o) => s + Number(o.totalAmount || o.grandTotal || 0), 0);
-        const commPct = Number(st.commission || 12);
-        const stComm = Math.round((stSales * commPct) / 100);
-        const stPay = stSales - stComm;
-        const isSelected = selectedStoreFilter === st.id;
-
-        breakdownBody.innerHTML += `
-          <tr class="${isSelected ? 'bg-green-50/80 font-semibold' : 'hover:bg-slate-50'}">
-            <td class="px-4 py-3 font-bold text-slate-900">${st.name}</td>
-            <td class="px-4 py-3 text-slate-600">${st.area} <span class="text-[10px] text-slate-400">(${st.pincodes})</span></td>
-            <td class="px-4 py-3 text-right font-bold">${stOrders.length}</td>
-            <td class="px-4 py-3 text-right font-bold text-slate-900">₹${stSales.toLocaleString("en-IN")}</td>
-            <td class="px-4 py-3 text-right text-amber-700 font-semibold">₹${stComm.toLocaleString("en-IN")} (${commPct}%)</td>
-            <td class="px-4 py-3 text-right text-purple-700 font-bold">₹${stPay.toLocaleString("en-IN")}</td>
-            <td class="px-4 py-3 text-center">
-              <button onclick="selectStoreFromTable('${st.id}')"
-                class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${isSelected ? 'bg-[#0C831F] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
-                ${isSelected ? 'Selected' : 'View Store'}
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      renderOrders();
-    }
-
-    window.renderOrders = () => {
-      const statusFilter = document.getElementById("orderStatusFilter").value;
-      const tbody = document.getElementById("ordersTableBody");
-      let list = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }));
-
-      if (selectedStoreFilter !== "ALL") {
-        list = list.filter(o => o.storeId === selectedStoreFilter);
-      }
-      if (statusFilter !== "ALL") {
-        list = list.filter(o => o.status === statusFilter);
-      }
-      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">No orders found for this filter.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = list.map(o => {
-        const stName = (storesMap[o.storeId] && storesMap[o.storeId].name) || o.storeName || o.storeId || "Default Store";
-        const itemsText = (o.items || []).map(i => `${i.name} x${i.qty}`).join(", ");
-        const sub = Number(o.subtotal || 0);
-        const del = Number(o.deliveryFee ?? (sub >= 199 ? 0 : 7));
-        const tot = Number(o.totalAmount || (sub + del));
-        const phone = (o.customerPhone || "").replace(/\D/g, "");
-        const waMsg = encodeURIComponent(`Hi ${o.customerName || 'Customer'}, your Jhatpat order #${o.id.slice(-6).toUpperCase()} of ₹${tot} from ${stName} is currently *${o.status || 'Placed'}*. Thank you for ordering with Jhatpat!`);
-
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="px-4 py-3 font-mono font-bold text-slate-800">#${o.id.slice(-6).toUpperCase()}</td>
-            <td class="px-4 py-3">
-              <div class="font-bold text-slate-900">${o.customerName || "Guest"}</div>
-              <div class="text-[11px] text-slate-500">${o.customerPhone || "-"} • ${o.pincode || ""}</div>
-            </td>
-            <td class="px-4 py-3 font-semibold text-[#0C831F]">${stName}</td>
-            <td class="px-4 py-3 max-w-xs truncate" title="${itemsText}">${itemsText || "-"}</td>
-            <td class="px-4 py-3">
-              <div class="font-bold text-slate-900">₹${tot}</div>
-              <div class="text-[10px] text-slate-500">Items ₹${sub} + Del ${del === 0 ? 'FREE' : '₹' + del}</div>
-            </td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${o.paymentMethod === 'UPI' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800'}">
-                ${o.paymentMethod || 'COD'}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <select onchange="updateOrderStatus('${o.id}', this.value)"
-                class="border border-slate-300 rounded-lg px-2 py-1 text-[11px] font-bold bg-white">
-                ${["Placed", "Packed", "Out for Delivery", "Delivered", "Cancelled"].map(s =>
-                  `<option value="${s}" ${o.status === s ? 'selected' : ''}>${s}</option>`
-                ).join("")}
-              </select>
-            </td>
-            <td class="px-4 py-3 text-center">
-              <a href="https://wa.me/91${phone}?text=${waMsg}" target="_blank"
-                class="inline-flex items-center gap-1 bg-[#0C831F] hover:bg-green-800 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
-                <i class="fa-brands fa-whatsapp"></i> Update
-              </a>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    };
-
-    window.updateOrderStatus = async (orderId, newStatus) => {
-      await update(ref(db, `orders/${orderId}`), { status: newStatus });
-      showToast(`Order #${orderId.slice(-6).toUpperCase()} marked ${newStatus}`);
-    };
-
-    window.exportOrdersCSV = () => {
-      const list = Object.entries(ordersMap).map(([id, o]) => ({ id, ...o }))
-        .filter(o => selectedStoreFilter === "ALL" || o.storeId === selectedStoreFilter);
-      const rows = [["OrderID", "Store", "Customer", "Phone", "Subtotal", "DeliveryFee", "Total", "Status"]];
-      list.forEach(o => {
-        rows.push([o.id, o.storeId, o.customerName, o.customerPhone, o.subtotal, o.deliveryFee, o.totalAmount, o.status]);
-      });
-      const csv = rows.map(r => r.join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `jhatpat_orders_${selectedStoreFilter}.csv`;
-      a.click();
-    };
-
-    // ================= AUTO-HD PHOTO FETCH + GALLERY UPLOAD =================
-    const CURATED_HD_KEYWORDS = {
-      mango: ["https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?auto=format&fit=crop&w=600&q=85"],
-      banana: ["https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=600&q=85"],
-      apple: ["https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1570913149827-d2ac84ab3f9a?auto=format&fit=crop&w=600&q=85"],
-      tomato: ["https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=600&q=85"],
-      potato: ["https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1508313880080-c4bef0730395?auto=format&fit=crop&w=600&q=85"],
-      onion: ["https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1508747703725-719777637510?auto=format&fit=crop&w=600&q=85"],
-      milk: ["https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=85"],
-      juice: ["https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?auto=format&fit=crop&w=600&q=85"],
-      orange: ["https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=85", "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab5b?auto=format&fit=crop&w=600&q=85"],
-      spinach: ["https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85"],
-      palak: ["https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=85"],
-      coriander: ["https://images.unsplash.com/photo-1588879460618-9249e7d947d1?auto=format&fit=crop&w=600&q=85"],
-      paneer: ["https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=600&q=85"],
-      bread: ["https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=85"],
-      egg: ["https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?auto=format&fit=crop&w=600&q=85"]
-    };
-
-    window.debouncedAutoFetchHDPhoto = (query) => {
-      clearTimeout(photoDebounceTimer);
-      const q = query.trim();
-      if (q.length < 2) return;
-      document.getElementById("photoFetchBadge").textContent = "Fetching HD...";
-      photoDebounceTimer = setTimeout(() => fetchHDPhotosForProduct(q), 450);
-    };
-
-    async function fetchHDPhotosForProduct(query) {
-      const lower = query.toLowerCase();
-      let candidates = [];
-
-      for (const [key, urls] of Object.entries(CURATED_HD_KEYWORDS)) {
-        if (lower.includes(key)) {
-          candidates.push(...urls);
-        }
-      }
-
-      const cleanTerm = encodeURIComponent(query.replace(/[^a-zA-Z0-9 ]/g, " ").trim());
-      try {
-        const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${cleanTerm}&search_simple=1&action=process&json=1&page_size=6`);
-        if (res.ok) {
-          const data = await res.json();
-          (data.products || []).forEach(p => {
-            if (p.image_front_url) candidates.push(p.image_front_url);
-          });
-        }
-      } catch (e) {}
-
-      for (let i = 1; i <= 5; i++) {
-        candidates.push(`https://loremflickr.com/600/600/${cleanTerm},grocery,food/all?lock=${i * 17}`);
-      }
-
-      hdPhotoCandidates = [...new Set(candidates)];
-      hdPhotoIndex = 0;
-
-      if (hdPhotoCandidates.length > 0) {
-        applyHDPhoto(hdPhotoCandidates[0]);
-        document.getElementById("photoFetchBadge").textContent = `HD Found (1/${hdPhotoCandidates.length})`;
-      }
-    }
-
-    function applyHDPhoto(url) {
-      document.getElementById("prodImage").value = url;
-      document.getElementById("prodPreviewImg").src = url;
-    }
-
-    window.cycleNextHDPhoto = () => {
-      if (!hdPhotoCandidates.length) {
-        const name = document.getElementById("prodName").value.trim() || "fresh grocery";
-        fetchHDPhotosForProduct(name);
-        return;
-      }
-      hdPhotoIndex = (hdPhotoIndex + 1) % hdPhotoCandidates.length;
-      applyHDPhoto(hdPhotoCandidates[hdPhotoIndex]);
-      document.getElementById("photoFetchBadge").textContent = `HD (${hdPhotoIndex + 1}/${hdPhotoCandidates.length})`;
-    };
-
-    window.handleGalleryUpload = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const maxDim = 600;
-          let w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-            else { w = Math.round(w * maxDim / h); h = maxDim; }
+      <label style="font-size:12px;font-weight:700;">Store Operational Status</label>
+      <select id="editStoreOpen">
+        <option value="true">OPEN (Accepting 10m Orders)</option>
+        <option value="false">CLOSED (Temporarily Offline)</option>
+      </select>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditedStore()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDummyKeyForRTDBAccess",
+  authDomain: "jhatpat-22aa8.firebaseapp.com",
+  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+  projectId: "jhatpat-22aa8",
+  storageBucket: "jhatpat-22aa8.appspot.com",
+  messagingSenderId: "100000000000",
+  appId: "1:100000000000:web:jhatpat22aa8"
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showToast(msg, type = 'dark') {
+  let box = document.getElementById('toastBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'toastBox';
+    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
+    document.body.appendChild(box);
+  }
+  const el = document.createElement('div');
+  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
+  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
+}
+
+
+const ADMIN_MASTER_PASS = 'MOHIT@001';
+let storesData = {};
+let productsData = {};
+let kycData = {};
+let ordersData = {};
+let customersData = {};
+let couponsData = {};
+let bannersData = {};
+
+if (sessionStorage.getItem('jhatpat_admin_auth') === 'true') {
+  document.getElementById('lockScreen').style.display = 'none';
+  bootAdmin();
+}
+
+function unlockAdmin() {
+  const val = document.getElementById('adminPassInput').value.trim();
+  if (val === ADMIN_MASTER_PASS) {
+    sessionStorage.setItem('jhatpat_admin_auth', 'true');
+    document.getElementById('lockScreen').style.display = 'none';
+    bootAdmin();
+  } else {
+    showToast('Invalid Admin Password!', 'error');
+  }
+}
+
+function logoutAdmin() {
+  sessionStorage.removeItem('jhatpat_admin_auth');
+  location.reload();
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+}
+
+function bootAdmin() {
+  db.ref('stores').on('value', snap => {
+    storesData = snap.val() || {};
+    const storeCount = Object.keys(storesData).length;
+    const cityCount = new Set(Object.values(storesData).map(s => s.city).filter(Boolean)).size;
+    document.getElementById('dbCountPill').textContent = `${cityCount} Cities • ${storeCount} Stores`;
+    syncCityAndStoreDropdowns();
+    renderStoresTable();
+    renderCatalogTable();
+    renderFinancials();
+  });
+
+  db.ref('products').on('value', snap => {
+    productsData = snap.val() || {};
+    document.getElementById('catalogTotalCount').textContent = Object.keys(productsData).length;
+    renderCatalogTable();
+  });
+
+  db.ref('seller_kyc').on('value', snap => {
+    kycData = snap.val() || {};
+    const pendingCount = Object.values(kycData).filter(k => k.status === 'PENDING').length;
+    document.getElementById('kycBadge').textContent = pendingCount;
+    renderKycTable();
+  });
+
+  db.ref('orders').on('value', snap => {
+    ordersData = snap.val() || {};
+    renderAdminOrders();
+    renderFinancials();
+  });
+
+  db.ref('customers').on('value', snap => {
+    customersData = snap.val() || {};
+    renderCrmTable();
+  });
+
+  db.ref('coupons').on('value', snap => {
+    couponsData = snap.val() || {};
+    renderCouponsTable();
+  });
+
+  db.ref('banners').on('value', snap => {
+    bannersData = snap.val() || {};
+    renderBannersAdmin();
+  });
+}
+
+function syncCityAndStoreDropdowns() {
+  const cities = [...new Set(Object.values(storesData).map(s => s.city).filter(Boolean))];
+  const cityOpts = '<option value="ALL">All Cities</option>' + cities.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  document.getElementById('storeListCityFilter').innerHTML = cityOpts;
+  document.getElementById('finCityFilter').innerHTML = cityOpts;
+
+  const storeEntries = Object.entries(storesData);
+  const storeOpts = '<option value="ALL">All Dark Stores</option>' + storeEntries.map(([id, s]) => `<option value="${escapeHtml(id)}">${escapeHtml(s.name)} (${escapeHtml(s.city)})</option>`).join('');
+  document.getElementById('finStoreFilter').innerHTML = storeOpts;
+
+  const oosSel = document.getElementById('catalogStoreOosFilter');
+  const prevOos = oosSel.value;
+  oosSel.innerHTML = '<option value="">Select Store for Stock Toggle</option>' + storeEntries.map(([id, s]) => `<option value="${escapeHtml(id)}">${escapeHtml(s.name)} [${escapeHtml(id)}]</option>`).join('');
+  if (prevOos && storesData[prevOos]) oosSel.value = prevOos;
+  else if (storeEntries.length > 0) oosSel.value = storeEntries[0][0];
+}
+
+function fillAdminGPS() {
+  if (!navigator.geolocation) return showToast('Geolocation not supported', 'error');
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('newStoreLat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('newStoreLng').value = pos.coords.longitude.toFixed(6);
+    showToast('Coordinates captured!', 'success');
+  }, () => showToast('Unable to fetch GPS', 'error'));
+}
+
+function createDarkStore() {
+  const city = document.getElementById('newStoreCity').value.trim();
+  const area = document.getElementById('newStoreArea').value.trim();
+  const name = document.getElementById('newStoreName').value.trim();
+  const storeId = document.getElementById('newStoreId').value.trim().replace(/[.#$\[\]]/g, '_');
+  const password = document.getElementById('newStorePass').value.trim();
+  const owner = document.getElementById('newStoreOwner').value.trim();
+  const phone = document.getElementById('newStorePhone').value.trim();
+  const lat = parseFloat(document.getElementById('newStoreLat').value) || 0;
+  const lng = parseFloat(document.getElementById('newStoreLng').value) || 0;
+
+  if (!city || !area || !name || !storeId || !password) {
+    showToast('City, Area, Store Name, Store ID & Password are required!', 'error');
+    return;
+  }
+
+  db.ref('stores/' + storeId).set({
+    storeId, city, area, name, password, owner, phone, lat, lng, isOpen: true, createdAt: Date.now()
+  }).then(() => {
+    ['newStoreCity','newStoreArea','newStoreName','newStoreId','newStorePass','newStoreOwner','newStorePhone','newStoreLat','newStoreLng'].forEach(id => document.getElementById(id).value = '');
+    showToast(`Dark Store ${name} (${storeId}) created!`, 'success');
+  });
+}
+
+function deleteAllStores() {
+  if (!confirm('Are you sure you want to DELETE ALL dark stores? This resets cities & stores to 0.')) return;
+  db.ref('stores').remove().then(() => showToast('All dark stores deleted.', 'dark'));
+}
+
+function renderStoresTable() {
+  const filterCity = document.getElementById('storeListCityFilter').value;
+  const tbody = document.getElementById('storesTableBody');
+  const rows = Object.entries(storesData).filter(([, s]) => filterCity === 'ALL' || s.city === filterCity);
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748B;padding:24px;">0 Dark Stores in database. Create one above or approve a Seller KYC.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(([id, s]) => `
+    <tr>
+      <td><strong>${escapeHtml(id)}</strong></td>
+      <td>${escapeHtml(s.city)} — ${escapeHtml(s.area)}</td>
+      <td>${escapeHtml(s.name)}</td>
+      <td><code>${escapeHtml(s.password)}</code></td>
+      <td>${s.lat ? `${s.lat}, ${s.lng}` : 'Not set'}</td>
+      <td><span class="badge ${s.isOpen !== false ? 'badge-green' : 'badge-red'}">${s.isOpen !== false ? 'OPEN' : 'CLOSED'}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-outline" onclick="openEditStore('${id}')">✏️ Edit</button>
+        <button class="btn btn-danger" onclick="deleteSingleStore('${id}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openEditStore(id) {
+  const s = storesData[id];
+  if (!s) return;
+  document.getElementById('editStoreOrigId').value = id;
+  document.getElementById('editStoreIdDisplay').value = id;
+  document.getElementById('editStoreCity').value = s.city || '';
+  document.getElementById('editStoreArea').value = s.area || '';
+  document.getElementById('editStoreName').value = s.name || '';
+  document.getElementById('editStorePass').value = s.password || '';
+  document.getElementById('editStoreOwner').value = s.owner || '';
+  document.getElementById('editStorePhone').value = s.phone || '';
+  document.getElementById('editStoreLat').value = s.lat || '';
+  document.getElementById('editStoreLng').value = s.lng || '';
+  document.getElementById('editStoreOpen').value = String(s.isOpen !== false);
+  document.getElementById('editStoreModal').classList.add('open');
+}
+
+function closeEditModal() { document.getElementById('editStoreModal').classList.remove('open'); }
+
+function saveEditedStore() {
+  const id = document.getElementById('editStoreOrigId').value;
+  if (!id) return;
+  db.ref('stores/' + id).update({
+    city: document.getElementById('editStoreCity').value.trim(),
+    area: document.getElementById('editStoreArea').value.trim(),
+    name: document.getElementById('editStoreName').value.trim(),
+    password: document.getElementById('editStorePass').value.trim(),
+    owner: document.getElementById('editStoreOwner').value.trim(),
+    phone: document.getElementById('editStorePhone').value.trim(),
+    lat: parseFloat(document.getElementById('editStoreLat').value) || 0,
+    lng: parseFloat(document.getElementById('editStoreLng').value) || 0,
+    isOpen: document.getElementById('editStoreOpen').value === 'true'
+  }).then(() => {
+    closeEditModal();
+    showToast('Store updated!', 'success');
+  });
+}
+
+function deleteSingleStore(id) {
+  if (confirm(`Delete store ${id}?`)) {
+    db.ref('stores/' + id).remove();
+  }
+}
+
+// Auto-HD Photo Fetch on typing product name
+const HD_PHOTO_DICTIONARY = [
+  { keys: ['apple', 'seb'], url: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&q=80' },
+  { keys: ['banana', 'kela'], url: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&q=80' },
+  { keys: ['mango', 'alphonso', 'aam'], url: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=500&q=80' },
+  { keys: ['orange', 'santra', 'mosambi'], url: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=500&q=80' },
+  { keys: ['strawberry'], url: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=500&q=80' },
+  { keys: ['watermelon', 'tarbooz'], url: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=500&q=80' },
+  { keys: ['pineapple', 'ananas'], url: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=500&q=80' },
+  { keys: ['grapes', 'angoor'], url: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=500&q=80' },
+  { keys: ['pomegranate', 'anar'], url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&q=80' },
+  { keys: ['papaya', 'papita'], url: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=500&q=80' },
+  { keys: ['kiwi'], url: 'https://images.unsplash.com/photo-1585059895524-72359e06133a?w=500&q=80' },
+  { keys: ['avocado'], url: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=500&q=80' },
+  { keys: ['tomato', 'tamatar'], url: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=500&q=80' },
+  { keys: ['potato', 'aloo'], url: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&q=80' },
+  { keys: ['onion', 'pyaz'], url: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=500&q=80' },
+  { keys: ['carrot', 'gajar'], url: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=500&q=80' },
+  { keys: ['broccoli'], url: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=500&q=80' },
+  { keys: ['spinach', 'palak', 'coriander', 'dhaniya', 'mint', 'pudina', 'methi'], url: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=500&q=80' },
+  { keys: ['capsicum', 'bell pepper', 'shimla'], url: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=500&q=80' },
+  { keys: ['cucumber', 'kheera'], url: 'https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=500&q=80' },
+  { keys: ['cauliflower', 'gobi', 'cabbage'], url: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=500&q=80' },
+  { keys: ['garlic', 'lahsun', 'ginger', 'adrak'], url: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=500&q=80' },
+  { keys: ['lemon', 'nimbu', 'lime'], url: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=500&q=80' },
+  { keys: ['mushroom'], url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&q=80' },
+  { keys: ['juice', 'smoothie', 'shake', 'coconut water'], url: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=500&q=80' }
+];
+
+function getHdPhotoForName(name) {
+  const lower = (name || '').toLowerCase();
+  for (const entry of HD_PHOTO_DICTIONARY) {
+    if (entry.keys.some(k => lower.includes(k))) return entry.url;
+  }
+  const cleanKw = encodeURIComponent((name || 'fresh vegetables').split(' ').slice(0, 2).join(','));
+  return `https://source.unsplash.com/500x500/?${cleanKw},fresh`;
+}
+
+function autoFetchProductPhoto() {
+  const name = document.getElementById('prodNameInput').value.trim();
+  if (!name) return;
+  const url = getHdPhotoForName(name);
+  document.getElementById('prodImgInput').value = url;
+  document.getElementById('prodPreviewImg').src = url;
+}
+
+function addSingleProduct() {
+  const name = document.getElementById('prodNameInput').value.trim();
+  const category = document.getElementById('prodCatInput').value;
+  const unit = document.getElementById('prodUnitInput').value.trim() || '500 g';
+  const price = parseFloat(document.getElementById('prodPriceInput').value) || 0;
+  const mrp = parseFloat(document.getElementById('prodMrpInput').value) || Math.round(price * 1.2);
+  const image = document.getElementById('prodImgInput').value.trim() || getHdPhotoForName(name);
+
+  if (!name || price <= 0) {
+    showToast('Enter Product Name and valid Selling Price!', 'error');
+    return;
+  }
+  const id = 'PRD_' + Date.now();
+  db.ref('products/' + id).set({ name, category, unit, price, mrp, image }).then(() => {
+    ['prodNameInput','prodUnitInput','prodPriceInput','prodMrpInput','prodImgInput'].forEach(i => document.getElementById(i).value = '');
+    showToast(`Added ${name}!`, 'success');
+  });
+}
+
+function renderCatalogTable() {
+  const q = document.getElementById('catalogSearch').value.trim().toLowerCase();
+  const targetStore = document.getElementById('catalogStoreOosFilter').value;
+  const tbody = document.getElementById('catalogTableBody');
+  const rows = Object.entries(productsData).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q)));
+
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748B;">Catalog is empty. Click "Load 100+ Sabzi, Fruits & Juice Pack" above!</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(([id, p]) => {
+    const isOos = targetStore && p.outOfStock && p.outOfStock[targetStore] === true;
+    return `
+      <tr>
+        <td><img src="${escapeHtml(p.image)}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;"></td>
+        <td><strong>${escapeHtml(p.name)}</strong></td>
+        <td>${escapeHtml(p.category)}</td>
+        <td>${escapeHtml(p.unit)}</td>
+        <td>
+          <input type="number" value="${p.price}" style="width:82px;padding:5px 8px;" onchange="inlineRateEdit('${id}', this.value)">
+        </td>
+        <td>
+          ${targetStore
+            ? `<button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="toggleStoreProductOos('${id}', '${targetStore}', ${!isOos})">
+                 ${isOos ? '❌ Out of Stock' : '✅ In Stock'}
+               </button>`
+            : '<span style="font-size:11px;color:#64748B;">Create/Select store</span>'
           }
-          canvas.width = w; canvas.height = h;
-          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-          applyHDPhoto(dataUrl);
-          document.getElementById("photoFetchBadge").textContent = "Gallery Uploaded";
-          showToast("HD Photo uploaded from gallery!");
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+        </td>
+        <td><button class="btn btn-outline" style="padding:4px 8px;" onclick="db.ref('products/${id}').remove()">🗑️</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function inlineRateEdit(prodId, newPrice) {
+  const val = parseFloat(newPrice);
+  if (isNaN(val) || val <= 0) return;
+  db.ref('products/' + prodId).update({ price: val, mrp: Math.round(val * 1.2) })
+    .then(() => showToast('Price updated live!', 'success'));
+}
+
+function toggleStoreProductOos(prodId, storeId, markOos) {
+  db.ref(`products/${prodId}/outOfStock/${storeId}`).set(markOos ? true : null)
+    .then(() => showToast(markOos ? 'Marked Out of Stock for store' : 'Marked In Stock for store', 'dark'));
+}
+
+// 100+ Sabzi, Fruits & Juice Pack with Distinct HD Photos
+function load100PlusPack() {
+  const IMG = {
+    potato: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=450&q=80',
+    onion: 'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=450&q=80',
+    tomato: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=450&q=80',
+    carrot: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=450&q=80',
+    broccoli: 'https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=450&q=80',
+    spinach: 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=450&q=80',
+    capsicum: 'https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?w=450&q=80',
+    cucumber: 'https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=450&q=80',
+    cauliflower: 'https://images.unsplash.com/photo-1568584711075-3d021a7c3ca3?w=450&q=80',
+    cabbage: 'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=450&q=80',
+    garlic: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=450&q=80',
+    ginger: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=450&q=80',
+    lemon: 'https://images.unsplash.com/photo-1590502593747-42a996133562?w=450&q=80',
+    chili: 'https://images.unsplash.com/photo-1588252303782-cb80119abd6d?w=450&q=80',
+    okra: 'https://images.unsplash.com/photo-1425543103986-22abb7d7e8d2?w=450&q=80',
+    brinjal: 'https://images.unsplash.com/photo-1615484477778-ca3b77940c25?w=450&q=80',
+    peas: 'https://images.unsplash.com/photo-1587735243615-c03f25aaff15?w=450&q=80',
+    corn: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=450&q=80',
+    beetroot: 'https://images.unsplash.com/photo-1593105544559-ecb03bf76f82?w=450&q=80',
+    radish: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924?w=450&q=80',
+    pumpkin: 'https://images.unsplash.com/photo-1506917728037-b6af01a7d403?w=450&q=80',
+    beans: 'https://images.unsplash.com/photo-1567375698348-5d9d5ae99de0?w=450&q=80',
+    mushroom: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=450&q=80',
+    zucchini: 'https://images.unsplash.com/photo-1563252722-6434563a985d?w=450&q=80',
+    lettuce: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=450&q=80',
+    apple: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=450&q=80',
+    greenApple: 'https://images.unsplash.com/photo-1619546813926-a78fa6372cd2?w=450&q=80',
+    banana: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=450&q=80',
+    mango: 'https://images.unsplash.com/photo-1553279768-865429fa0078?w=450&q=80',
+    orange: 'https://images.unsplash.com/photo-1547514701-42782101795e?w=450&q=80',
+    strawberry: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=450&q=80',
+    watermelon: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=450&q=80',
+    pineapple: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=450&q=80',
+    grapes: 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=450&q=80',
+    pomegranate: 'https://images.unsplash.com/photo-1541344999736-83eca272f6fc?w=450&q=80',
+    papaya: 'https://images.unsplash.com/photo-1517282009859-f000ec3b26fe?w=450&q=80',
+    kiwi: 'https://images.unsplash.com/photo-1585059895524-72359e06133a?w=450&q=80',
+    avocado: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=450&q=80',
+    dragonfruit: 'https://images.unsplash.com/photo-1527325678964-54921661f888?w=450&q=80',
+    blueberry: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=450&q=80',
+    pear: 'https://images.unsplash.com/photo-1514756331096-242fdeb70d6a?w=450&q=80',
+    guava: 'https://images.unsplash.com/photo-1536511132770-e5058c7e8c46?w=450&q=80',
+    peach: 'https://images.unsplash.com/photo-1629828874514-c1e5103f2150?w=450&q=80',
+    plum: 'https://images.unsplash.com/photo-1596591606975-97ee5cef3a1e?w=450&q=80',
+    cherry: 'https://images.unsplash.com/photo-1528821128474-27f963b062bf?w=450&q=80',
+    coconut: 'https://images.unsplash.com/photo-1580984969071-a8da5656c2fb?w=450&q=80',
+    orangeJuice: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=450&q=80',
+    greenJuice: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=450&q=80',
+    berryJuice: 'https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=450&q=80',
+    mangoJuice: 'https://images.unsplash.com/photo-1546173159-315724a31696?w=450&q=80',
+    watermelonJuice: 'https://images.unsplash.com/photo-1589733955941-5eeaf752f6dd?w=450&q=80',
+    carrotJuice: 'https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=450&q=80',
+    pineappleJuice: 'https://images.unsplash.com/photo-1589733955941-5eeaf752f6dd?w=450&q=80',
+    appleJuice: 'https://images.unsplash.com/photo-1576673442511-7e39b6545c87?w=450&q=80'
+  };
+
+  const items = [
+    // 40 Fresh Vegetables (Sabzi)
+    ['Fresh Jyoti Potato (Aloo)', 'Fresh Vegetables', '1 kg', 34, IMG.potato],
+    ['Red Nashik Onion (Pyaz)', 'Fresh Vegetables', '1 kg', 38, IMG.onion],
+    ['Desi Hybrid Tomato (Tamatar)', 'Fresh Vegetables', '500 g', 24, IMG.tomato],
+    ['Ooty Red Carrot (Gajar)', 'Fresh Vegetables', '500 g', 32, IMG.carrot],
+    ['Tender Lady Finger (Bhindi)', 'Fresh Vegetables', '500 g', 29, IMG.okra],
+    ['Green Capsicum (Shimla Mirch)', 'Fresh Vegetables', '500 g', 36, IMG.capsicum],
+    ['Fresh Cauliflower (Phool Gobi)', 'Fresh Vegetables', '1 pc (500g)', 35, IMG.cauliflower],
+    ['Crisp Green Cabbage (Patta Gobi)', 'Fresh Vegetables', '1 pc (600g)', 28, IMG.cabbage],
+    ['English Cucumber (Kheera)', 'Fresh Vegetables', '500 g', 26, IMG.cucumber],
+    ['Purple Round Brinjal (Baingan)', 'Fresh Vegetables', '500 g', 30, IMG.brinjal],
+    ['Fresh Green Peas (Matar)', 'Fresh Vegetables', '500 g', 54, IMG.peas],
+    ['Sweet Corn Cob (Bhutta)', 'Fresh Vegetables', '2 pcs', 35, IMG.corn],
+    ['Organic Beetroot (Chukandar)', 'Fresh Vegetables', '500 g', 28, IMG.beetroot],
+    ['White Radish (Mooli)', 'Fresh Vegetables', '500 g', 22, IMG.radish],
+    ['Yellow Pumpkin (Kaddu)', 'Fresh Vegetables', '500 g', 25, IMG.pumpkin],
+    ['French Beans (Fansi)', 'Fresh Vegetables', '250 g', 24, IMG.beans],
+    ['Farm Garlic (Lahsun)', 'Fresh Vegetables', '250 g', 48, IMG.garlic],
+    ['Fresh Ginger (Adrak)', 'Fresh Vegetables', '250 g', 38, IMG.ginger],
+    ['Juicy Yellow Lemon (Nimbu)', 'Fresh Vegetables', '250 g', 29, IMG.lemon],
+    ['Spicy Green Chilli (Hari Mirch)', 'Fresh Vegetables', '100 g', 14, IMG.chili],
+    ['Bottle Gourd (Lauki / Dudhi)', 'Fresh Vegetables', '1 pc (600g)', 32, IMG.cucumber],
+    ['Bitter Gourd (Karela)', 'Fresh Vegetables', '500 g', 34, IMG.okra],
+    ['Ridge Gourd (Turai)', 'Fresh Vegetables', '500 g', 36, IMG.beans],
+    ['Pointed Gourd (Parwal)', 'Fresh Vegetables', '250 g', 28, IMG.okra],
+    ['Ivy Gourd (Tindora)', 'Fresh Vegetables', '500 g', 32, IMG.beans],
+    ['Taro Root (Arbi)', 'Fresh Vegetables', '500 g', 38, IMG.potato],
+    ['Sweet Potato (Shakarkandi)', 'Fresh Vegetables', '500 g', 35, IMG.carrot],
+    ['Raw Banana (Kacha Kela)', 'Fresh Vegetables', '500 g', 30, IMG.banana],
+    ['Drumstick (Sahjan)', 'Fresh Vegetables', '250 g', 26, IMG.beans],
+    ['Cluster Beans (Gawar)', 'Fresh Vegetables', '250 g', 24, IMG.beans],
+    ['Spring Onion (Hara Pyaz)', 'Fresh Vegetables', '250 g', 22, IMG.onion],
+    ['Baby Potato (Chota Aloo)', 'Fresh Vegetables', '500 g', 28, IMG.potato],
+    ['Cherry Tomato Pack', 'Fresh Vegetables', '250 g', 45, IMG.tomato],
+    ['Red Bell Pepper', 'Fresh Vegetables', '250 g', 65, IMG.capsicum],
+    ['Yellow Bell Pepper', 'Fresh Vegetables', '250 g', 65, IMG.capsicum],
+    ['Sambar Onion (Shallots)', 'Fresh Vegetables', '250 g', 32, IMG.onion],
+    ['Ash Gourd (Petha)', 'Fresh Vegetables', '500 g', 26, IMG.pumpkin],
+    ['Snake Gourd (Chichinda)', 'Fresh Vegetables', '500 g', 30, IMG.cucumber],
+    ['Elephant Yam (Suran)', 'Fresh Vegetables', '500 g', 42, IMG.potato],
+    ['Raw Papaya (Kacha Papita)', 'Fresh Vegetables', '500 g', 28, IMG.papaya],
+
+    // 15 Leafy & Herbs
+    ['Fresh Palak (Spinach Bunch)', 'Leafy & Herbs', '250 g', 22, IMG.spinach],
+    ['Fresh Coriander (Hara Dhaniya)', 'Leafy & Herbs', '100 g', 15, IMG.spinach],
+    ['Garden Mint Leaves (Pudina)', 'Leafy & Herbs', '100 g', 14, IMG.spinach],
+    ['Fresh Fenugreek (Methi Bunch)', 'Leafy & Herbs', '250 g', 24, IMG.spinach],
+    ['Curry Leaves (Kadi Patta)', 'Leafy & Herbs', '50 g', 10, IMG.spinach],
+    ['Red Amaranth (Lal Maath)', 'Leafy & Herbs', '250 g', 25, IMG.spinach],
+    ['Green Amaranth (Chaulai)', 'Leafy & Herbs', '250 g', 22, IMG.spinach],
+    ['Mustard Greens (Sarson Saag)', 'Leafy & Herbs', '500 g', 35, IMG.spinach],
+    ['Bathua Leaves', 'Leafy & Herbs', '250 g', 24, IMG.spinach],
+    ['Dill Leaves (Shepu)', 'Leafy & Herbs', '100 g', 18, IMG.spinach],
+    ['Iceberg Lettuce Head', 'Leafy & Herbs', '1 pc', 55, IMG.lettuce],
+    ['Romaine Lettuce', 'Leafy & Herbs', '200 g', 49, IMG.lettuce],
+    ['Fresh Basil Leaves', 'Leafy & Herbs', '50 g', 35, IMG.spinach],
+    ['Lemongrass Stalks', 'Leafy & Herbs', '100 g', 20, IMG.lettuce],
+    ['Baby Spinach Pack', 'Leafy & Herbs', '200 g', 45, IMG.spinach],
+
+    // 30 Fresh Fruits
+    ['Royal Gala Apple', 'Fresh Fruits', '4 pcs (550g)', 119, IMG.apple],
+    ['Kashmiri Red Delicious Apple', 'Fresh Fruits', '4 pcs (600g)', 109, IMG.apple],
+    ['Granny Smith Green Apple', 'Fresh Fruits', '2 pcs (320g)', 95, IMG.greenApple],
+    ['Robusta Yelakki Banana', 'Fresh Fruits', '6 pcs', 42, IMG.banana],
+    ['Regular Robusta Banana', 'Fresh Fruits', '6 pcs', 34, IMG.banana],
+    ['Ratnagiri Alphonso Mango', 'Fresh Fruits', '6 pcs (1.2kg)', 349, IMG.mango],
+    ['Kesar Sweet Mango', 'Fresh Fruits', '1 kg', 149, IMG.mango],
+    ['Nagpur Mandarin Orange', 'Fresh Fruits', '1 kg', 79, IMG.orange],
+    ['Sweet Mosambi (Sweet Lime)', 'Fresh Fruits', '1 kg', 68, IMG.orange],
+    ['Bhagwa Pomegranate (Anar)', 'Fresh Fruits', '4 pcs (800g)', 129, IMG.pomegranate],
+    ['Kiran Watermelon (Tarbooz)', 'Fresh Fruits', '1 pc (2.5kg)', 75, IMG.watermelon],
+    ['Sweet Muskmelon (Kharbooja)', 'Fresh Fruits', '1 pc (900g)', 59, IMG.papaya],
+    ['Ripe Papaya (Papita)', 'Fresh Fruits', '1 pc (1kg)', 54, IMG.papaya],
+    ['Queen Pineapple (Ananas)', 'Fresh Fruits', '1 pc (1.1kg)', 79, IMG.pineapple],
+    ['Sonaka Seedless Green Grapes', 'Fresh Fruits', '500 g', 69, IMG.grapes],
+    ['Jumbo Black Seedless Grapes', 'Fresh Fruits', '500 g', 89, IMG.grapes],
+    ['Mahabaleshwar Strawberry Box', 'Fresh Fruits', '200 g', 85, IMG.strawberry],
+    ['Zespri Green Kiwi (3 pcs)', 'Fresh Fruits', '3 pcs', 99, IMG.kiwi],
+    ['Allahabad Safeda Guava', 'Fresh Fruits', '500 g', 48, IMG.guava],
+    ['Pink Guava (Amrood)', 'Fresh Fruits', '500 g', 54, IMG.guava],
+    ['Sweet Chikoo (Sapota)', 'Fresh Fruits', '500 g', 46, IMG.kiwi],
+    ['Nashpati Green Pear', 'Fresh Fruits', '500 g', 74, IMG.pear],
+    ['Custard Apple (Sitaphal)', 'Fresh Fruits', '500 g', 89, IMG.guava],
+    ['Tender Coconut (Nariyal Pani)', 'Fresh Fruits', '1 pc', 49, IMG.coconut],
+    ['Fresh Figs (Anjeer)', 'Fresh Fruits', '250 g', 95, IMG.plum],
+    ['Red Plum (Aloo Bukhara)', 'Fresh Fruits', '250 g', 79, IMG.plum],
+    ['Juicy Peach (Aadu)', 'Fresh Fruits', '250 g', 85, IMG.peach],
+    ['Washington Red Apple', 'Fresh Fruits', '4 pcs', 139, IMG.apple],
+    ['Kinnow Mandarin', 'Fresh Fruits', '1 kg', 65, IMG.orange],
+    ['Sun Melon (Sarda)', 'Fresh Fruits', '1 pc', 69, IMG.papaya],
+
+    // 10 Exotic & Organic
+    ['Hass Imported Avocado', 'Exotic & Organic', '1 pc (200g)', 119, IMG.avocado],
+    ['Fresh Broccoli Florets', 'Exotic & Organic', '1 pc (300g)', 59, IMG.broccoli],
+    ['Button White Mushroom', 'Exotic & Organic', '200 g', 48, IMG.mushroom],
+    ['Pink Dragon Fruit', 'Exotic & Organic', '1 pc (350g)', 99, IMG.dragonfruit],
+    ['Imported Blueberry Punnet', 'Exotic & Organic', '125 g', 189, IMG.blueberry],
+    ['Red Cherry Pack', 'Exotic & Organic', '200 g', 169, IMG.cherry],
+    ['Green Zucchini', 'Exotic & Organic', '250 g', 44, IMG.zucchini],
+    ['Yellow Zucchini', 'Exotic & Organic', '250 g', 49, IMG.zucchini],
+    ['Asparagus Spears', 'Exotic & Organic', '200 g', 149, IMG.beans],
+    ['Purple Cabbage', 'Exotic & Organic', '1 pc (500g)', 55, IMG.cabbage],
+
+    // 15 Cold Pressed Juices
+    ['Cold Pressed Valencia Orange Juice', 'Cold Pressed Juices', '250 ml', 69, IMG.orangeJuice],
+    ['Cold Pressed Alphonso Mango Nectar', 'Cold Pressed Juices', '250 ml', 75, IMG.mangoJuice],
+    ['Cold Pressed Pomegranate Anar Juice', 'Cold Pressed Juices', '250 ml', 85, IMG.berryJuice],
+    ['Cold Pressed Watermelon Mint Cooler', 'Cold Pressed Juices', '250 ml', 59, IMG.watermelonJuice],
+    ['Cold Pressed Green Detox (Spinach Apple)', 'Cold Pressed Juices', '250 ml', 79, IMG.greenJuice],
+    ['Cold Pressed Carrot Ginger Immunity Shot', 'Cold Pressed Juices', '250 ml', 65, IMG.carrotJuice],
+    ['Cold Pressed Pineapple Basil Juice', 'Cold Pressed Juices', '250 ml', 69, IMG.pineappleJuice],
+    ['Cold Pressed Kashmiri Apple Juice', 'Cold Pressed Juices', '250 ml', 72, IMG.appleJuice],
+    ['Cold Pressed Mixed Berry Blast', 'Cold Pressed Juices', '250 ml', 89, IMG.berryJuice],
+    ['Cold Pressed Sugarcane Nimbu Juice', 'Cold Pressed Juices', '250 ml', 49, IMG.greenJuice],
+    ['Cold Pressed ABC (Apple Beet Carrot)', 'Cold Pressed Juices', '250 ml', 79, IMG.carrotJuice],
+    ['Cold Pressed Mosambi Citrus Juice', 'Cold Pressed Juices', '250 ml', 59, IMG.orangeJuice],
+    ['Cold Pressed Strawberry Banana Smoothie', 'Cold Pressed Juices', '300 ml', 95, IMG.berryJuice],
+    ['100% Pure Tender Coconut Water Bottle', 'Cold Pressed Juices', '300 ml', 55, IMG.greenJuice],
+    ['Family Pack Fresh Orange Juice (1L)', 'Cold Pressed Juices', '1 Litre', 199, IMG.orangeJuice]
+  ];
+
+  const updates = {};
+  items.forEach((item, idx) => {
+    const key = 'PACK_' + String(idx + 1).padStart(3, '0');
+    updates[key] = {
+      name: item[0],
+      category: item[1],
+      unit: item[2],
+      price: item[3],
+      mrp: Math.round(item[3] * 1.2),
+      image: item[4]
     };
+  });
 
-    window.saveProduct = async (publishToAllStores) => {
-      const editId = document.getElementById("editProductId").value;
-      const name = document.getElementById("prodName").value.trim();
-      const category = document.getElementById("prodCategory").value;
-      const unit = document.getElementById("prodUnit").value.trim() || "1 pc";
-      const mrp = Number(document.getElementById("prodMrp").value || 0);
-      const price = Number(document.getElementById("prodPrice").value || 0);
-      const image = document.getElementById("prodImage").value.trim() || window.fallbackImg;
+  db.ref('products').update(updates).then(() => {
+    showToast(`🎉 Loaded ${items.length} Sabzi, Fruits & Cold-Pressed Juices!`, 'success');
+  });
+}
 
-      if (!name || !price) {
-        alert("Please enter Product Name and Selling Price.");
-        return;
-      }
-
-      const id = editId || ("PROD_" + Date.now());
-      const existing = productsMap[id] || {};
-      const storeStock = { ...(existing.storeStock || {}) };
-
-      if (publishToAllStores) {
-        Object.keys(storesMap).forEach(stId => {
-          storeStock[stId] = true;
-        });
-      }
-
-      const payload = {
-        id,
-        name,
-        category,
-        unit,
-        mrp: mrp || price,
-        price,
-        image,
-        inStock: true,
-        storeStock,
-        updatedAt: Date.now()
-      };
-
-      await set(ref(db, `products/${id}`), payload);
-      resetProductForm();
-      showToast(publishToAllStores
-        ? `"${name}" published & marked IN STOCK across all ${Object.keys(storesMap).length} stores!`
-        : `"${name}" saved!`);
-    };
-
-    window.resetProductForm = () => {
-      document.getElementById("editProductId").value = "";
-      document.getElementById("productFormTitle").innerHTML = `<i class="fa-solid fa-plus-circle text-[#0C831F]"></i> Add New Product (with Auto-HD Photo Fetch)`;
-      document.getElementById("prodName").value = "";
-      document.getElementById("prodUnit").value = "";
-      document.getElementById("prodMrp").value = "";
-      document.getElementById("prodPrice").value = "";
-      document.getElementById("prodImage").value = "";
-      document.getElementById("prodPreviewImg").src = window.fallbackImg;
-      document.getElementById("photoFetchBadge").textContent = "Ready";
-      hdPhotoCandidates = [];
-    };
-
-    window.editProduct = (id) => {
-      const p = productsMap[id];
-      if (!p) return;
-      document.getElementById("editProductId").value = id;
-      document.getElementById("productFormTitle").innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-600"></i> Editing: ${p.name}`;
-      document.getElementById("prodName").value = p.name;
-      document.getElementById("prodCategory").value = p.category || "Sabzi & Fruits";
-      document.getElementById("prodUnit").value = p.unit || "";
-      document.getElementById("prodMrp").value = p.mrp || p.price;
-      document.getElementById("prodPrice").value = p.price;
-      document.getElementById("prodImage").value = p.image || "";
-      document.getElementById("prodPreviewImg").src = p.image || window.fallbackImg;
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    window.deleteProduct = async (id) => {
-      if (!confirm("Delete this product permanently?")) return;
-      await remove(ref(db, `products/${id}`));
-      showToast("Product removed.");
-    };
-
-    window.quickUpdateRate = async (id, newPrice) => {
-      const val = Number(newPrice);
-      if (val <= 0) return;
-      await update(ref(db, `products/${id}`), { price: val });
-      showToast("Selling rate updated to ₹" + val);
-    };
-
-    window.toggleStoreStock = async (prodId, storeId) => {
-      const p = productsMap[prodId];
-      if (!p) return;
-      const current = (p.storeStock && p.storeStock[storeId] !== undefined) ? p.storeStock[storeId] : true;
-      const nextVal = !current;
-      await update(ref(db, `products/${prodId}/storeStock`), { [storeId]: nextVal });
-      const stName = (storesMap[storeId] && storesMap[storeId].name) || storeId;
-      showToast(`${p.name}: ${nextVal ? 'IN STOCK ✅' : 'OUT OF STOCK ❌'} at ${stName}`);
-    };
-
-    window.publishSingleProductAllStores = async (prodId) => {
-      const allTrue = {};
-      Object.keys(storesMap).forEach(stId => { allTrue[stId] = true; });
-      await update(ref(db, `products/${prodId}`), { inStock: true, storeStock: allTrue });
-      showToast("Published IN STOCK to all stores!");
-    };
-
-    window.publishAllProductsToAllStores = async () => {
-      const storeIds = Object.keys(storesMap);
-      if (!storeIds.length) return alert("Add dark stores first.");
-      const updates = {};
-      Object.keys(productsMap).forEach(pId => {
-        updates[`products/${pId}/inStock`] = true;
-        storeIds.forEach(stId => {
-          updates[`products/${pId}/storeStock/${stId}`] = true;
-        });
-      });
-      await update(ref(db), updates);
-      showToast(`All ${Object.keys(productsMap).length} products published IN STOCK across ${storeIds.length} stores!`);
-    };
-
-    function populateCategoryDropdown() {
-      const sel = document.getElementById("catalogCategoryFilter");
-      const cur = sel.value;
-      const cats = [...new Set(Object.values(productsMap).map(p => p.category).filter(Boolean))];
-      sel.innerHTML = `<option value="ALL">All Categories (${cats.length})</option>` +
-        cats.map(c => `<option value="${c}">${c}</option>`).join("");
-      sel.value = cats.includes(cur) ? cur : "ALL";
-    }
-
-    window.renderProducts = () => {
-      const search = (document.getElementById("catalogSearch").value || "").toLowerCase();
-      const catFilter = document.getElementById("catalogCategoryFilter").value;
-      const tbody = document.getElementById("productsTableBody");
-      const storeList = Object.values(storesMap);
-
-      let list = Object.values(productsMap).filter(p => {
-        const matchSearch = !search || (p.name || "").toLowerCase().includes(search) || (p.category || "").toLowerCase().includes(search);
-        const matchCat = catFilter === "ALL" || p.category === catFilter;
-        return matchSearch && matchCat;
-      });
-
-      document.getElementById("productCountLabel").textContent = list.length;
-
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-slate-400">No products found. Click "Load Mumbai 100+ Sabzi, Fruits & Juice Pack" above to populate instantly!</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = list.map(p => {
-        const storeChips = storeList.map(st => {
-          const isInStock = (p.storeStock && p.storeStock[st.id] !== undefined) ? p.storeStock[st.id] : true;
-          const shortName = st.name.replace("Jhatpat ", "").replace(" Hub", "");
-          return `
-            <button onclick="toggleStoreStock('${p.id}', '${st.id}')"
-              title="Click to toggle stock for ${st.name}"
-              class="px-2 py-0.5 rounded-md text-[10px] font-bold border transition ${
-                isInStock
-                  ? 'bg-green-50 text-green-800 border-green-300 hover:bg-green-100'
-                  : 'bg-red-50 text-red-700 border-red-300 line-through hover:bg-red-100'
-              }">
-              ${shortName}: ${isInStock ? 'IN' : 'OUT'}
-            </button>
-          `;
-        }).join(" ");
-
-        return `
-          <tr class="hover:bg-slate-50 align-top">
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <img src="${p.image || window.fallbackImg}" onerror="this.src=window.fallbackImg"
-                  class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" />
-                <div>
-                  <div class="font-bold text-slate-900">${p.name}</div>
-                  <div class="text-[10px] text-slate-400 font-mono">${p.id}</div>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-3">
-              <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[11px]">${p.category}</span>
-              <div class="text-slate-500 mt-1 font-medium">${p.unit}</div>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-1">
-                <span class="text-slate-400 line-through">₹${p.mrp || p.price}</span>
-                <input type="number" value="${p.price}" onchange="quickUpdateRate('${p.id}', this.value)"
-                  class="w-16 border border-slate-300 rounded-lg px-2 py-1 font-bold text-[#0C831F] text-xs" />
-              </div>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex flex-wrap gap-1 max-w-md">${storeChips}</div>
-            </td>
-            <td class="px-4 py-3 text-center whitespace-nowrap space-x-1">
-              <button onclick="publishSingleProductAllStores('${p.id}')" title="1-Click Publish In Stock to All Stores"
-                class="px-2 py-1.5 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-bold text-[11px]">
-                All In
-              </button>
-              <button onclick="editProduct('${p.id}')" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-bold">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button onclick="deleteProduct('${p.id}')" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg font-bold">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    };
-
-    window.loadMumbai100Pack = async () => {
-      const storeIds = Object.keys(storesMap);
-      const allInStock = {};
-      storeIds.forEach(s => allInStock[s] = true);
-
-      const IMG = {
-        veg: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80",
-        leafy: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=80",
-        fruit: "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=600&q=80",
-        juice: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80",
-        tomato: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&w=600&q=80",
-        onion: "https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&w=600&q=80",
-        potato: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80",
-        mango: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=80",
-        banana: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80",
-        apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
-        dairy: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80",
-        staples: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80",
-        masala: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80"
-      };
-
-      const rawItems = [
-        ["Nashik Red Onion (Kanda)", "Sabzi & Fruits", "1 kg", 45, 34, IMG.onion],
-        ["Agra Jyoti Potato (Batata)", "Sabzi & Fruits", "1 kg", 40, 30, IMG.potato],
-        ["Hybrid Red Tomato (Tamatar)", "Sabzi & Fruits", "500 g", 30, 22, IMG.tomato],
-        ["Fresh Coriander (Kothimbir)", "Sabzi & Fruits", "100 g", 18, 12, IMG.leafy],
-        ["Fresh Mint Leaves (Pudina)", "Sabzi & Fruits", "100 g", 15, 10, IMG.leafy],
-        ["Curry Leaves (Kadi Patta)", "Sabzi & Fruits", "50 g", 12, 8, IMG.leafy],
-        ["Green Chilli (Hirvi Mirchi)", "Sabzi & Fruits", "100 g", 16, 11, IMG.veg],
-        ["Fresh Ginger (Adrak)", "Sabzi & Fruits", "100 g", 24, 18, IMG.veg],
-        ["Indian Garlic (Lasun)", "Sabzi & Fruits", "200 g", 48, 36, IMG.veg],
-        ["Seedless Lemon (Nimbu)", "Sabzi & Fruits", "250 g", 32, 24, IMG.fruit],
-        ["Lady Finger (Bhindi)", "Sabzi & Fruits", "500 g", 38, 28, IMG.veg],
-        ["Bottle Gourd (Dudhi / Lauki)", "Sabzi & Fruits", "1 pc (500g)", 34, 25, IMG.veg],
-        ["Ridge Gourd (Dodka / Turai)", "Sabzi & Fruits", "500 g", 42, 32, IMG.veg],
-        ["Bitter Gourd (Karela)", "Sabzi & Fruits", "500 g", 40, 30, IMG.veg],
-        ["Sponge Gourd (Ghosale)", "Sabzi & Fruits", "500 g", 38, 28, IMG.veg],
-        ["Snake Gourd (Padwal)", "Sabzi & Fruits", "500 g", 36, 26, IMG.veg],
-        ["Ivy Gourd (Tendli)", "Sabzi & Fruits", "250 g", 26, 19, IMG.veg],
-        ["Cluster Beans (Gavar)", "Sabzi & Fruits", "250 g", 30, 22, IMG.veg],
-        ["French Beans (Farasbi)", "Sabzi & Fruits", "250 g", 32, 24, IMG.veg],
-        ["Green Peas (Matar)", "Sabzi & Fruits", "500 g", 55, 42, IMG.veg],
-        ["Cauliflower (Flower)", "Sabzi & Fruits", "1 pc (500g)", 45, 34, IMG.veg],
-        ["Green Cabbage (Kobi)", "Sabzi & Fruits", "1 pc (500g)", 32, 24, IMG.veg],
-        ["Green Capsicum (Shimla Mirchi)", "Sabzi & Fruits", "250 g", 28, 21, IMG.veg],
-        ["Red & Yellow Bell Pepper Combo", "Sabzi & Fruits", "2 pcs", 85, 65, IMG.veg],
-        ["Small Purple Brinjal (Vangi)", "Sabzi & Fruits", "250 g", 26, 19, IMG.veg],
-        ["Big Bharta Brinjal", "Sabzi & Fruits", "500 g", 35, 26, IMG.veg],
-        ["Drumstick (Shevga)", "Sabzi & Fruits", "250 g", 34, 25, IMG.veg],
-        ["Fresh Spinach (Palak Bunch)", "Sabzi & Fruits", "250 g", 24, 18, IMG.leafy],
-        ["Fresh Fenugreek (Methi Bunch)", "Sabzi & Fruits", "250 g", 26, 19, IMG.leafy],
-        ["Red Amaranth (Lal Math)", "Sabzi & Fruits", "250 g", 24, 18, IMG.leafy],
-        ["Spring Onion (Kanda Pat)", "Sabzi & Fruits", "250 g", 25, 18, IMG.leafy],
-        ["Red Carrot (Gajar)", "Sabzi & Fruits", "500 g", 36, 27, IMG.veg],
-        ["Beetroot (Chukandar)", "Sabzi & Fruits", "500 g", 34, 25, IMG.veg],
-        ["White Radish (Mula)", "Sabzi & Fruits", "500 g", 28, 20, IMG.veg],
-        ["English Cucumber (Kakdi)", "Sabzi & Fruits", "500 g", 32, 24, IMG.veg],
-        ["Sweet Corn Cob (Bhutta)", "Sabzi & Fruits", "2 pcs", 40, 29, IMG.veg],
-        ["Sweet Corn Kernels Pack", "Sabzi & Fruits", "200 g", 45, 35, IMG.veg],
-        ["Button Mushroom Pack", "Sabzi & Fruits", "200 g", 65, 49, IMG.veg],
-        ["Broccoli Florets", "Sabzi & Fruits", "250 g", 75, 58, IMG.veg],
-        ["Baby Corn Peeled", "Sabzi & Fruits", "200 g", 55, 42, IMG.veg],
-        ["Raw Banana (Kachcha Kela)", "Sabzi & Fruits", "500 g", 34, 25, IMG.banana],
-        ["Elephant Foot Yam (Suran)", "Sabzi & Fruits", "500 g", 42, 32, IMG.veg],
-        ["Sweet Potato (Ratalu)", "Sabzi & Fruits", "500 g", 40, 30, IMG.potato],
-        ["Red Pumpkin (Bhopla)", "Sabzi & Fruits", "500 g", 28, 20, IMG.veg],
-        ["Fresh Grated Coconut", "Sabzi & Fruits", "200 g", 45, 35, IMG.fruit],
-
-        ["Ratnagiri Alphonso Mango (Hapus)", "Sabzi & Fruits", "6 pcs", 599, 449, IMG.mango],
-        ["Kesar Mango Box", "Sabzi & Fruits", "1 kg", 220, 169, IMG.mango],
-        ["Elaichi Banana (Yelakki)", "Sabzi & Fruits", "500 g", 48, 36, IMG.banana],
-        ["Robusta Yellow Banana", "Sabzi & Fruits", "6 pcs", 42, 32, IMG.banana],
-        ["Shimla Royal Gala Apple", "Sabzi & Fruits", "4 pcs (500g)", 140, 109, IMG.apple],
-        ["Washington Red Apple", "Sabzi & Fruits", "4 pcs", 180, 145, IMG.apple],
-        ["Green Granny Smith Apple", "Sabzi & Fruits", "2 pcs", 110, 89, IMG.apple],
-        ["Bhagwa Pomegranate (Anar)", "Sabzi & Fruits", "500 g", 110, 85, IMG.fruit],
-        ["Nagpur Mandarin Orange", "Sabzi & Fruits", "500 g", 65, 49, IMG.fruit],
-        ["Imported Valencia Orange", "Sabzi & Fruits", "2 pcs", 90, 69, IMG.fruit],
-        ["Sweet Lime (Mosambi)", "Sabzi & Fruits", "1 kg", 85, 64, IMG.fruit],
-        ["Kiran Watermelon (Tarbuj)", "Sabzi & Fruits", "1 pc (2.5kg)", 95, 69, IMG.fruit],
-        ["Muskmelon (Kharbuja)", "Sabzi & Fruits", "1 pc (800g)", 65, 48, IMG.fruit],
-        ["Ripe Papaya (Papai)", "Sabzi & Fruits", "1 pc (1kg)", 68, 52, IMG.fruit],
-        ["Rani Pineapple (Ananas)", "Sabzi & Fruits", "1 pc", 80, 59, IMG.fruit],
-        ["Nashik Green Seedless Grapes", "Sabzi & Fruits", "500 g", 75, 56, IMG.fruit],
-        ["Black Seedless Grapes", "Sabzi & Fruits", "500 g", 90, 69, IMG.fruit],
-        ["Dahanu Chikoo (Sapota)", "Sabzi & Fruits", "500 g", 55, 42, IMG.fruit],
-        ["Allahabad Pink Guava (Peru)", "Sabzi & Fruits", "500 g", 52, 39, IMG.fruit],
-        ["Green Kiwi Pack", "Sabzi & Fruits", "3 pcs", 115, 89, IMG.fruit],
-        ["Dragon Fruit (Pitaya)", "Sabzi & Fruits", "1 pc", 95, 74, IMG.fruit],
-        ["Fresh Strawberry Punnet", "Sabzi & Fruits", "200 g", 99, 75, IMG.fruit],
-        ["Imported Blueberry Pack", "Sabzi & Fruits", "125 g", 240, 189, IMG.fruit],
-        ["Hass Avocado", "Sabzi & Fruits", "1 pc", 140, 109, IMG.fruit],
-        ["Tender Coconut (Nariyal Pani)", "Sabzi & Fruits", "1 pc", 65, 49, IMG.fruit],
-        ["Custard Apple (Sitaphal)", "Sabzi & Fruits", "500 g", 95, 72, IMG.fruit],
-        ["Indian Pear (Nashpati)", "Sabzi & Fruits", "500 g", 85, 64, IMG.fruit],
-        ["Red Plum (Aloobukhara)", "Sabzi & Fruits", "250 g", 90, 69, IMG.fruit],
-        ["Sweet Tamarind Box (Imli)", "Sabzi & Fruits", "250 g", 65, 49, IMG.fruit],
-        ["Cut Fruit Salad Bowl", "Sabzi & Fruits", "300 g", 89, 69, IMG.fruit],
-
-        ["Cold-Pressed Valencia Orange Juice", "Juices", "250 ml", 85, 65, IMG.juice],
-        ["Fresh Mosambi Juice (No Sugar)", "Juices", "250 ml", 75, 55, IMG.juice],
-        ["Fresh Pomegranate (Anar) Juice", "Juices", "250 ml", 99, 79, IMG.juice],
-        ["Watermelon Mint Cooler Juice", "Juices", "300 ml", 65, 49, IMG.juice],
-        ["Pineapple Ginger Detox Juice", "Juices", "250 ml", 75, 58, IMG.juice],
-        ["Sugarcane Lemon Ginger Juice", "Juices", "300 ml", 55, 39, IMG.juice],
-        ["ABC (Apple Beetroot Carrot) Juice", "Juices", "250 ml", 89, 69, IMG.juice],
-        ["Green Spinach Cucumber Detox", "Juices", "250 ml", 85, 65, IMG.juice],
-        ["Alphonso Mango Thick Shake", "Juices", "300 ml", 110, 85, IMG.juice],
-        ["Sitaphal Cream Thick Shake", "Juices", "300 ml", 120, 95, IMG.juice],
-        ["Strawberry Milkshake", "Juices", "300 ml", 105, 79, IMG.juice],
-        ["Chikoo Chocolate Shake", "Juices", "300 ml", 95, 74, IMG.juice],
-        ["Dry Fruit Anjeer Badam Shake", "Juices", "300 ml", 130, 99, IMG.juice],
-        ["Cold Coffee Frappe Bottle", "Juices", "250 ml", 90, 69, IMG.juice],
-        ["Fresh Tender Coconut Water Bottle", "Juices", "300 ml", 75, 59, IMG.juice],
-        ["Kokum Jeera Mumbai Cooler", "Juices", "250 ml", 55, 42, IMG.juice],
-        ["Aam Panna Mint Refresher", "Juices", "250 ml", 60, 45, IMG.juice],
-        ["Nimbu Pani Masala Shikanji", "Juices", "300 ml", 45, 35, IMG.juice],
-        ["Jamun Shots Immunity Bottle", "Juices", "200 ml", 85, 65, IMG.juice],
-        ["Amla Giloy Tulsi Wellness Shot", "Juices", "100 ml", 45, 32, IMG.juice],
-        ["Wheatgrass Aloe Vera Shot", "Juices", "100 ml", 50, 38, IMG.juice],
-        ["Mixed Berry Smoothie", "Juices", "250 ml", 125, 95, IMG.juice],
-        ["Banana Peanut Butter Protein Shake", "Juices", "300 ml", 115, 89, IMG.juice],
-        ["Rose Falooda Milk Bottle", "Juices", "250 ml", 80, 62, IMG.juice],
-        ["Kesar Pista Badam Milk", "Juices", "200 ml", 65, 49, IMG.juice],
-        ["Guava Chilli Masala Juice", "Juices", "250 ml", 70, 54, IMG.juice],
-        ["Kiwi Apple Cold-Pressed Juice", "Juices", "250 ml", 95, 74, IMG.juice],
-        ["Grape & Mint Sparkling Juice", "Juices", "250 ml", 80, 59, IMG.juice],
-        ["Punjabi Sweet Lassi Cup", "Juices", "250 ml", 50, 39, IMG.juice],
-        ["Masala Chaas (Spiced Buttermilk)", "Juices", "250 ml", 35, 25, IMG.juice],
-
-        ["Amul Taaza Toned Milk", "Dairy", "500 ml", 28, 27, IMG.dairy],
-        ["Fresh Malai Paneer Block", "Dairy", "200 g", 95, 79, IMG.dairy],
-        ["Indrayani Basmati Rice", "Staples", "1 kg", 110, 89, IMG.staples],
-        ["Sharbati Whole Wheat Chakki Atta", "Staples", "5 kg", 295, 245, IMG.staples],
-        ["Kanda Lasun Masala (Mumbai Special)", "Masala", "200 g", 85, 68, IMG.masala],
-        ["Turmeric Haldi Powder", "Masala", "200 g", 65, 52, IMG.masala]
-      ];
-
-      const updates = {};
-      rawItems.forEach((item, idx) => {
-        const id = `MUM_PACK_${String(idx + 1).padStart(3, "0")}`;
-        updates[`products/${id}`] = {
-          id,
-          name: item[0],
-          category: item[1],
-          unit: item[2],
-          mrp: item[3],
-          price: item[4],
-          image: item[5],
-          inStock: true,
-          storeStock: { ...allInStock },
-          updatedAt: Date.now()
-        };
-      });
-
-      await update(ref(db), updates);
-      showToast(`Loaded ${rawItems.length} Mumbai items across all stores!`);
-    };
-
-    window.saveDarkStore = async () => {
-      const editId = document.getElementById("editStoreId").value;
-      const name = document.getElementById("storeName").value.trim();
-      const area = document.getElementById("storeArea").value.trim();
-      const pincodes = document.getElementById("storePincodes").value.trim();
-      const manager = document.getElementById("storeManager").value.trim();
-      const commission = Number(document.getElementById("storeComm").value || 12);
-      const kyc = document.getElementById("storeKyc").value;
-      const fssai = document.getElementById("storeFssai").value.trim();
-      const upi = document.getElementById("storeUpi").value.trim();
-
-      if (!name || !area || !pincodes) {
-        alert("Store Name, Area, and Pincodes are required.");
-        return;
-      }
-
-      const id = editId || ("DS_" + Date.now());
-      await set(ref(db, `stores/${id}`), { id, name, area, pincodes, manager, commission, kyc, fssai, upi });
-      resetStoreForm();
-      showToast(`Dark Store "${name}" saved!`);
-    };
-
-    window.editDarkStore = (id) => {
-      const s = storesMap[id];
-      if (!s) return;
-      document.getElementById("editStoreId").value = id;
-      document.getElementById("storeName").value = s.name;
-      document.getElementById("storeArea").value = s.area;
-      document.getElementById("storePincodes").value = s.pincodes;
-      document.getElementById("storeManager").value = s.manager || "";
-      document.getElementById("storeComm").value = s.commission || 12;
-      document.getElementById("storeKyc").value = s.kyc || "Verified";
-      document.getElementById("storeFssai").value = s.fssai || "";
-      document.getElementById("storeUpi").value = s.upi || "";
-    };
-
-    window.resetStoreForm = () => {
-      document.getElementById("editStoreId").value = "";
-      ["storeName", "storeArea", "storePincodes", "storeManager", "storeFssai", "storeUpi"].forEach(i => document.getElementById(i).value = "");
-      document.getElementById("storeComm").value = 12;
-      document.getElementById("storeKyc").value = "Verified";
-    };
-
-    window.deleteDarkStore = async (id) => {
-      if (!confirm("Remove this Dark Store?")) return;
-      await remove(ref(db, `stores/${id}`));
-      showToast("Dark store deleted.");
-    };
-
-    function renderStoresTable() {
-      const list = Object.values(storesMap);
-      document.getElementById("storeCountLabel").textContent = list.length;
-      const tbody = document.getElementById("storesTableBody");
-      tbody.innerHTML = list.map(s => `
-        <tr class="hover:bg-slate-50">
-          <td class="px-4 py-3">
-            <div class="font-bold text-slate-900">${s.name}</div>
-            <div class="text-[10px] font-mono text-slate-400">${s.id}</div>
-          </td>
-          <td class="px-4 py-3">
-            <div class="font-semibold">${s.area}</div>
-            <div class="text-[11px] text-slate-500">Pincodes: ${s.pincodes}</div>
-          </td>
-          <td class="px-4 py-3">${s.manager || "-"}</td>
-          <td class="px-4 py-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
-              s.kyc === 'Verified' ? 'bg-green-100 text-green-800' : (s.kyc === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-700')
-            }">${s.kyc || 'Verified'}</span>
-            <div class="text-[10px] font-mono text-slate-500 mt-1">FSSAI: ${s.fssai || 'N/A'}</div>
-          </td>
-          <td class="px-4 py-3 font-bold">${s.commission || 12}%</td>
-          <td class="px-4 py-3 text-center space-x-1">
-            <button onclick="editDarkStore('${s.id}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg font-bold"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteDarkStore('${s.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    window.renderCustomers = () => {
-      const q = (document.getElementById("crmSearch").value || "").toLowerCase();
-      const custMap = {};
-
-      Object.values(ordersMap).forEach(o => {
-        const phone = (o.customerPhone || "").trim();
-        if (!phone) return;
-        if (!custMap[phone]) {
-          custMap[phone] = {
-            name: o.customerName || "Customer",
-            phone,
-            address: o.address || o.pincode || "Mumbai",
-            storeName: o.storeName || o.storeId || "Nearest Hub",
-            orders: 0,
-            spend: 0
-          };
+// Seller KYC 1-Tap Approval
+function renderKycTable() {
+  const tbody = document.getElementById('kycTableBody');
+  const rows = Object.entries(kycData).reverse();
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;color:#64748B;">No Seller KYC applications yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(([id, k]) => `
+    <tr>
+      <td><strong>${escapeHtml(k.storeName)}</strong><br><span style="font-size:11px;color:#64748B;">${escapeHtml(k.ownerName)} • ${escapeHtml(k.phone)}</span></td>
+      <td>${escapeHtml(k.city)} — ${escapeHtml(k.area)}</td>
+      <td><code>${escapeHtml(k.desiredStoreId)}</code></td>
+      <td><code>${escapeHtml(k.desiredPassword)}</code></td>
+      <td>FSSAI: ${escapeHtml(k.fssai || 'N/A')}<br>PAN: ${escapeHtml(k.pan || 'N/A')}</td>
+      <td><span class="badge ${k.status === 'APPROVED' ? 'badge-green' : (k.status === 'REJECTED' ? 'badge-red' : 'badge-amber')}">${escapeHtml(k.status)}</span></td>
+      <td>
+        ${k.status === 'PENDING'
+          ? `<div style="display:flex;gap:6px;">
+               <button class="btn btn-primary" onclick="approveSellerKyc('${id}')">✅ Approve</button>
+               <button class="btn btn-danger" onclick="rejectSellerKyc('${id}')">✕ Reject</button>
+             </div>`
+          : '—'
         }
-        custMap[phone].orders += 1;
-        if (o.status !== "Cancelled") {
-          custMap[phone].spend += Number(o.totalAmount || 0);
-        }
-      });
+      </td>
+    </tr>
+  `).join('');
+}
 
-      const list = Object.values(custMap).filter(c =>
-        !q || c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.address.toLowerCase().includes(q)
-      );
+function approveSellerKyc(kycId) {
+  const k = kycData[kycId];
+  if (!k) return;
+  const storeId = (k.desiredStoreId || ('JHT_' + Date.now())).replace(/[.#$\[\]]/g, '_');
+  const storeObj = {
+    storeId,
+    city: k.city,
+    area: k.area,
+    name: k.storeName,
+    password: k.desiredPassword,
+    owner: k.ownerName,
+    phone: k.phone,
+    lat: parseFloat(k.lat) || 0,
+    lng: parseFloat(k.lng) || 0,
+    isOpen: true,
+    createdAt: Date.now()
+  };
+  Promise.all([
+    db.ref('stores/' + storeId).set(storeObj),
+    db.ref('seller_kyc/' + kycId).update({ status: 'APPROVED', approvedStoreId: storeId, reviewedAt: Date.now() })
+  ]).then(() => showToast(`Approved! Store ${storeId} is now LIVE.`, 'success'));
+}
 
-      const tbody = document.getElementById("crmTableBody");
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">Customer CRM auto-populates as orders arrive.</td></tr>`;
-        return;
-      }
+function rejectSellerKyc(kycId) {
+  db.ref('seller_kyc/' + kycId).update({ status: 'REJECTED', reviewedAt: Date.now() })
+    .then(() => showToast('KYC Application Rejected.', 'dark'));
+}
 
-      tbody.innerHTML = list.map(c => {
-        const cleanPhone = c.phone.replace(/\D/g, "").slice(-10);
-        const promoMsg = encodeURIComponent(`Hi ${c.name}! Fresh Mumbai Sabzi, Fruits & Juices are stocked at ${c.storeName}. Order ₹199+ on Jhatpat for FREE 10-min delivery!`);
-        const upiMsg = encodeURIComponent(`Hi ${c.name}, pay seamlessly for your Jhatpat order via UPI: ${settings.upiId} (${settings.payeeName}).`);
+// Financial Breakdown (12% Commission / 88% Store Payout)
+function renderFinancials() {
+  const cityFilter = document.getElementById('finCityFilter').value;
+  const storeFilter = document.getElementById('finStoreFilter').value;
 
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="px-4 py-3 font-bold text-slate-900">${c.name}</td>
-            <td class="px-4 py-3 font-mono">${c.phone}</td>
-            <td class="px-4 py-3">
-              <div>${c.address}</div>
-              <div class="text-[10px] text-[#0C831F] font-semibold">${c.storeName}</div>
-            </td>
-            <td class="px-4 py-3 text-right font-bold">${c.orders}</td>
-            <td class="px-4 py-3 text-right font-bold text-slate-900">₹${c.spend.toLocaleString("en-IN")}</td>
-            <td class="px-4 py-3 text-center space-x-1 whitespace-nowrap">
-              <a href="https://wa.me/91${cleanPhone}?text=${promoMsg}" target="_blank"
-                class="inline-flex items-center gap-1 bg-[#0C831F] text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
-                <i class="fa-brands fa-whatsapp"></i> Offer
-              </a>
-              <a href="https://wa.me/91${cleanPhone}?text=${upiMsg}" target="_blank"
-                class="inline-flex items-center gap-1 bg-purple-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold">
-                <i class="fa-solid fa-qrcode"></i> UPI Link
-              </a>
-            </td>
-          </tr>
-        `;
-      }).join("");
-    };
+  const orders = Object.values(ordersData).filter(o => o && o.status !== 'CANCELLED');
+  const filteredOrders = orders.filter(o => {
+    const okCity = cityFilter === 'ALL' || o.city === cityFilter;
+    const okStore = storeFilter === 'ALL' || o.storeId === storeFilter;
+    return okCity && okStore;
+  });
 
-    window.saveGlobalSettings = async () => {
-      const payload = {
-        deliveryFee: Number(document.getElementById("cfgDeliveryFee").value ?? 7),
-        freeThreshold: Number(document.getElementById("cfgFreeThreshold").value ?? 199),
-        upiId: document.getElementById("cfgUpiId").value.trim() || "8305530240@kotakbank",
-        payeeName: document.getElementById("cfgPayeeName").value.trim() || "Jhatpat"
-      };
-      await set(ref(db, "settings"), payload);
-      showToast("Delivery Fee (₹" + payload.deliveryFee + "), Free Threshold (₹" + payload.freeThreshold + ") & UPI saved!");
-    };
+  const totalSales = filteredOrders.reduce((acc, o) => acc + (Number(o.totalAmount) || 0), 0);
+  const commission = Math.round(totalSales * 0.12);
+  const payout = totalSales - commission;
 
-    window.addBanner = async () => {
-      const title = document.getElementById("bannerTitle").value.trim();
-      const subtitle = document.getElementById("bannerSubtitle").value.trim();
-      const image = document.getElementById("bannerImage").value.trim();
-      if (!title) return alert("Enter banner headline.");
-      const id = "BAN_" + Date.now();
-      await set(ref(db, `banners/${id}`), { id, title, subtitle, image, active: true });
-      document.getElementById("bannerTitle").value = "";
-      document.getElementById("bannerSubtitle").value = "";
-      document.getElementById("bannerImage").value = "";
-      showToast("Banner published!");
-    };
+  document.getElementById('finOrders').textContent = filteredOrders.length;
+  document.getElementById('finSales').textContent = `₹${totalSales.toLocaleString('en-IN')}`;
+  document.getElementById('finComm').textContent = `₹${commission.toLocaleString('en-IN')}`;
+  document.getElementById('finPayout').textContent = `₹${payout.toLocaleString('en-IN')}`;
 
-    window.deleteBanner = async (id) => {
-      await remove(ref(db, `banners/${id}`));
-      showToast("Banner removed.");
-    };
+  const tbody = document.getElementById('finTableBody');
+  const storeList = Object.entries(storesData).filter(([id, s]) => {
+    const okCity = cityFilter === 'ALL' || s.city === cityFilter;
+    const okStore = storeFilter === 'ALL' || id === storeFilter;
+    return okCity && okStore;
+  });
 
-    function renderBanners() {
-      const el = document.getElementById("bannersList");
-      const list = Object.values(bannersMap);
-      if (!list.length) {
-        el.innerHTML = `<p class="text-xs text-slate-400">No custom banners yet. Default Blinkit-style promo banner is active.</p>`;
-        return;
-      }
-      el.innerHTML = list.map(b => `
-        <div class="p-3 border border-slate-200 rounded-xl flex justify-between items-center bg-slate-50">
-          <div>
-            <div class="font-bold text-xs text-slate-900">${b.title}</div>
-            <div class="text-[11px] text-slate-500">${b.subtitle || ""}</div>
-          </div>
-          <button onclick="deleteBanner('${b.id}')" class="text-red-600 text-xs font-bold px-2 py-1 hover:bg-red-50 rounded-lg">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      `).join("");
-    }
-  </script>
+  if (storeList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:#64748B;">No stores match selected filter.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = storeList.map(([id, s]) => {
+    const stOrders = orders.filter(o => o.storeId === id);
+    const sales = stOrders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const comm = Math.round(sales * 0.12);
+    const pay = sales - comm;
+    return `
+      <tr>
+        <td><strong>${escapeHtml(id)}</strong></td>
+        <td>${escapeHtml(s.name)}</td>
+        <td>${escapeHtml(s.city)}</td>
+        <td>${stOrders.length}</td>
+        <td>₹${sales.toLocaleString('en-IN')}</td>
+        <td style="color:#0C831F;font-weight:700;">₹${comm.toLocaleString('en-IN')}</td>
+        <td style="color:#2563EB;font-weight:700;">₹${pay.toLocaleString('en-IN')}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Live Order Status Override
+function renderAdminOrders() {
+  const tbody = document.getElementById('adminOrdersBody');
+  const rows = Object.entries(ordersData).reverse();
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748B;">No orders placed yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(([id, o]) => `
+    <tr>
+      <td><strong>#${escapeHtml(id)}</strong><br><span style="font-size:11px;color:#64748B;">${new Date(o.createdAt).toLocaleTimeString()}</span></td>
+      <td>${escapeHtml(o.storeName)}<br><span style="font-size:11px;color:#64748B;">${escapeHtml(o.city)}</span></td>
+      <td>${escapeHtml(o.customerName)}<br><span style="font-size:11px;">${escapeHtml(o.customerPhone)}</span></td>
+      <td style="max-width:220px;font-size:12px;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</td>
+      <td><strong>₹${o.totalAmount}</strong><br><span style="font-size:11px;">${escapeHtml(o.paymentMethod)}</span></td>
+      <td>
+        <select onchange="overrideOrderStatus('${id}', this.value)" style="width:165px;">
+          ${['PLACED','PACKING','OUT_FOR_DELIVERY','DELIVERED','CANCELLED'].map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function overrideOrderStatus(orderId, status) {
+  db.ref('orders/' + orderId).update({ status })
+    .then(() => showToast(`Order #${orderId} set to ${status}`, 'success'));
+}
+
+// Customer CRM & 1-Click WhatsApp
+function renderCrmTable() {
+  const tbody = document.getElementById('crmTableBody');
+  const rows = Object.values(customersData);
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#64748B;">No customer profiles yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(c => {
+    const cleanPhone = String(c.phone || '').replace(/\D/g, '');
+    const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+    const msg = encodeURIComponent(`Hi ${c.name}! ⚡ Fresh Sabzi, Fruits & Cold-Pressed Juices are ready at Jhatpat ${c.city || ''} with 10-minute delivery! Order now.`);
+    return `
+      <tr>
+        <td><strong>${escapeHtml(c.name)}</strong></td>
+        <td>${escapeHtml(c.phone)}</td>
+        <td>${escapeHtml(c.city || '')} — ${escapeHtml(c.address || '')}</td>
+        <td>${c.totalOrders || 1}</td>
+        <td><strong>₹${(c.totalSpend || 0).toLocaleString('en-IN')}</strong></td>
+        <td>
+          <a href="https://wa.me/${waPhone}?text=${msg}" target="_blank" class="btn btn-primary" style="text-decoration:none;background:#16A34A;">
+            💬 WhatsApp SMS
+          </a>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Coupons & Banners
+function saveCoupon() {
+  const code = document.getElementById('cpCode').value.trim().toUpperCase();
+  const type = document.getElementById('cpType').value;
+  const value = parseFloat(document.getElementById('cpValue').value) || 0;
+  const minOrder = parseFloat(document.getElementById('cpMinOrder').value) || 0;
+  const maxDisc = parseFloat(document.getElementById('cpMaxDisc').value) || 999;
+  if (!code || value <= 0) return showToast('Enter valid coupon code & value', 'error');
+
+  db.ref('coupons/' + code).set({ code, type, value, minOrder, maxDisc, active: true })
+    .then(() => {
+      ['cpCode','cpValue','cpMinOrder','cpMaxDisc'].forEach(i => document.getElementById(i).value = '');
+      showToast(`Coupon ${code} published!`, 'success');
+    });
+}
+
+function renderCouponsTable() {
+  const tbody = document.getElementById('couponsTableBody');
+  const rows = Object.values(couponsData);
+  tbody.innerHTML = rows.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:#64748B;">No active coupons.</td></tr>'
+    : rows.map(c => `
+      <tr>
+        <td><strong>${escapeHtml(c.code)}</strong></td>
+        <td>${escapeHtml(c.type)}</td>
+        <td>${c.type === 'PERCENT' ? c.value + '%' : '₹' + c.value}</td>
+        <td>₹${c.minOrder}</td>
+        <td><button class="btn btn-danger" style="padding:4px 10px;" onclick="db.ref('coupons/${c.code}').remove()">Delete</button></td>
+      </tr>
+    `).join('');
+}
+
+function saveBanner() {
+  const tag = document.getElementById('bnTag').value.trim() || 'JHATPAT SPECIAL';
+  const title = document.getElementById('bnTitle').value.trim();
+  const sub = document.getElementById('bnSub').value.trim();
+  const emoji = document.getElementById('bnEmoji').value.trim() || '⚡';
+  const bg = document.getElementById('bnBg').value;
+  if (!title) return showToast('Enter banner title', 'error');
+
+  const id = 'BN_' + Date.now();
+  db.ref('banners/' + id).set({ tag, title, sub, emoji, bg }).then(() => {
+    ['bnTag','bnTitle','bnSub','bnEmoji'].forEach(i => document.getElementById(i).value = '');
+    showToast('Promo banner added!', 'success');
+  });
+}
+
+function renderBannersAdmin() {
+  const box = document.getElementById('bannersListAdmin');
+  const rows = Object.entries(bannersData);
+  box.innerHTML = rows.map(([id, b]) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:12px;color:#fff;background:${b.bg};">
+      <div>
+        <strong>${escapeHtml(b.emoji)} ${escapeHtml(b.title)}</strong>
+        <div style="font-size:12px;opacity:0.9;">${escapeHtml(b.sub)}</div>
+      </div>
+      <button class="btn btn-dark" onclick="db.ref('banners/${id}').remove()">Remove</button>
+    </div>
+  `).join('');
+}
+</script>
 </body>
 </html>

@@ -1,233 +1,314 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jhatpat Rider Fleet | Dark Mode</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jhatpat — Rider Fleet Partner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+  :root {
+    --bg: #090D16;
+    --card: #111827;
+    --card2: #1F2937;
+    --green: #22C55E;
+    --yellow: #FACC15;
+    --text: #F9FAFB;
+    --muted: #9CA3AF;
+    --border: #1F2937;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #030712;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .shell {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+  .header {
+    background: var(--card);
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .wallet-card {
+    margin: 14px 16px;
+    background: linear-gradient(135deg, #065F46, #047857);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .zone-box {
+    margin: 0 16px 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  select, input {
+    width: 100%;
+    background: var(--card2);
+    color: #fff;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .task-card {
+    margin: 0 16px 12px;
+    background: var(--card);
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 15px;
+  }
+  .btn {
+    padding: 11px 14px;
+    border-radius: 11px;
+    border: none;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+  .btn-green { background: var(--green); color: #052E16; }
+  .btn-yellow { background: var(--yellow); color: #111; }
+  .btn-blue { background: #2563EB; color: #fff; }
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-16">
-
-    <!-- Dark Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3.5 sticky top-0 z-40 flex justify-between items-center">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-black">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <div>
-                <h1 class="font-extrabold text-sm tracking-tight">JHATPAT FLEET</h1>
-                <p class="text-[11px] text-emerald-400 font-semibold" id="rider-status-bar">Online • Ready</p>
-            </div>
-        </div>
-        <button onclick="openProfile()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold text-yellow-400">
-            <i class="fa-solid fa-id-badge mr-1"></i> <span id="hdr-rider-name">Setup Rider</span>
-        </button>
-    </header>
-
-    <main class="max-w-lg mx-auto p-4 space-y-5">
-        <!-- Store Zone Selector & Earnings Wallet -->
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
-                <label class="block text-[10px] font-bold uppercase text-slate-400">Active Store Zone</label>
-                <select id="zone-select" onchange="changeZone()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-yellow-400 mt-1.5">
-                    <option value="ALL">All Dark Stores</option>
-                </select>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-col justify-between">
-                <span class="text-[10px] font-bold uppercase text-slate-400">Earnings Wallet</span>
-                <div class="flex items-baseline justify-between mt-1">
-                    <span id="wallet-balance" class="text-xl font-black text-emerald-400">₹0</span>
-                    <span id="wallet-trips" class="text-[11px] text-slate-400">0 trips</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Delivery Task -->
-        <section>
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-yellow-400 mb-2.5">Active Drop-Off Task</h2>
-            <div id="active-task-box"></div>
-        </section>
-
-        <!-- Available Store Pickups -->
-        <section>
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2.5">Ready for Pickup in Zone</h2>
-            <div id="pickup-pool-box" class="space-y-3"></div>
-        </section>
-    </main>
-
-    <!-- Rider Setup Modal -->
-    <div id="rider-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm">
-            <h3 class="font-extrabold text-base text-white mb-1">Rider Duty Profile</h3>
-            <p class="text-xs text-slate-400 mb-4">Enter details to accept dark store dispatches</p>
-            <form onsubmit="saveRider(event)" class="space-y-3">
-                <input type="text" id="r-name" required placeholder="Rider Full Name" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
-                <input type="tel" id="r-phone" required pattern="[0-9]{10}" placeholder="10-Digit Mobile Number" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 rounded-xl text-sm">
-                    Go Online
-                </button>
-            </form>
-        </div>
+<body>
+<div class="shell">
+  <header class="header">
+    <div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:800;">⚡ JHATPAT FLEET</div>
+      <div style="font-size:17px;font-weight:800;">Rider Partner App</div>
     </div>
+    <span id="dutyBadge" style="background:#064E3B;color:#34D399;padding:5px 10px;border-radius:99px;font-size:11px;font-weight:800;">● ON DUTY</span>
+  </header>
 
-    <script type="module">
-        
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-        getDatabase, ref, set, push, update, remove, onValue, get 
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  <!-- Earnings Wallet -->
+  <div class="wallet-card">
+    <div>
+      <div style="font-size:11px;opacity:0.85;font-weight:700;">RIDER EARNINGS WALLET</div>
+      <div style="font-size:26px;font-weight:800;margin-top:2px;" id="riderWalletAmt">₹0</div>
+      <div style="font-size:11px;opacity:0.85;margin-top:2px;" id="riderTripCount">0 Completed Drops (₹35/drop)</div>
+    </div>
+    <div style="font-size:36px;">🛵</div>
+  </div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDummyKeyReplaceWithActualWebApiKey",
-        authDomain: "jhatpat-22aa8.firebaseapp.com",
-        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-        projectId: "jhatpat-22aa8",
-        storageBucket: "jhatpat-22aa8.appspot.com",
-        messagingSenderId: "000000000000",
-        appId: "1:000000000000:web:jhatpat22aa8app"
-    };
+  <!-- City / Store Zone Selection -->
+  <div class="zone-box">
+    <div style="font-size:12px;font-weight:800;color:var(--muted);">SELECT CITY & DARK STORE ZONE</div>
+    <input type="text" id="riderNameInput" placeholder="Your Rider Name (e.g. Rahul)" onchange="saveRiderProfile()">
+    <select id="riderCitySelect" onchange="populateRiderStores()">
+      <option value="">Select City</option>
+    </select>
+    <select id="riderStoreSelect" onchange="selectRiderZone()">
+      <option value="">Select Dark Store Zone</option>
+    </select>
+  </div>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+  <div style="padding:4px 16px 10px;display:flex;justify-content:space-between;align-items:center;">
+    <h3 style="font-size:15px;">Active Dispatch & Drops</h3>
+    <span style="font-size:12px;color:var(--green);font-weight:700;" id="activeDropCount">0 tasks</span>
+  </div>
+
+  <div id="riderTasksList"></div>
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDummyKeyForRTDBAccess",
+  authDomain: "jhatpat-22aa8.firebaseapp.com",
+  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+  projectId: "jhatpat-22aa8",
+  storageBucket: "jhatpat-22aa8.appspot.com",
+  messagingSenderId: "100000000000",
+  appId: "1:100000000000:web:jhatpat22aa8"
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function showToast(msg, type = 'dark') {
+  let box = document.getElementById('toastBox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'toastBox';
+    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:380px;';
+    document.body.appendChild(box);
+  }
+  const el = document.createElement('div');
+  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
+  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;transition:opacity 0.25s;`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 260); }, 2800);
+}
 
 
-        let rider = JSON.parse(localStorage.getItem('jhatpat_dark_rider') || 'null');
-        let selectedZone = 'ALL';
+let storesMap = {};
+let ordersMap = {};
+let selectedZoneStoreId = localStorage.getItem('jhatpat_rider_store') || '';
+const PER_DROP_PAY = 35;
 
-        if (!rider) {
-            document.getElementById('rider-modal').classList.remove('hidden');
-        } else {
-            document.getElementById('hdr-rider-name').innerText = rider.name;
-        }
+window.addEventListener('DOMContentLoaded', () => {
+  const savedName = localStorage.getItem('jhatpat_rider_name') || '';
+  if (savedName) document.getElementById('riderNameInput').value = savedName;
 
-        window.openProfile = () => {
-            if (rider) {
-                document.getElementById('r-name').value = rider.name;
-                document.getElementById('r-phone').value = rider.phone;
-            }
-            document.getElementById('rider-modal').classList.remove('hidden');
-        };
+  db.ref('stores').on('value', snap => {
+    storesMap = snap.val() || {};
+    populateRiderCities();
+  });
 
-        window.saveRider = (e) => {
-            e.preventDefault();
-            rider = {
-                name: document.getElementById('r-name').value.trim(),
-                phone: document.getElementById('r-phone').value.trim()
-            };
-            localStorage.setItem('jhatpat_dark_rider', JSON.stringify(rider));
-            document.getElementById('hdr-rider-name').innerText = rider.name;
-            document.getElementById('rider-modal').classList.add('hidden');
-        };
+  db.ref('orders').on('value', snap => {
+    ordersMap = snap.val() || {};
+    renderRiderTasks();
+  });
+});
 
-        window.changeZone = () => {
-            selectedZone = document.getElementById('zone-select').value;
-        };
+function saveRiderProfile() {
+  localStorage.setItem('jhatpat_rider_name', document.getElementById('riderNameInput').value.trim());
+}
 
-        window.claimOrder = async (orderId) => {
-            if (!rider) return openProfile();
-            await update(ref(db, 'orders/' + orderId), {
-                status: 'Out for Delivery',
-                riderName: rider.name,
-                riderPhone: rider.phone
-            });
-        };
+function populateRiderCities() {
+  const citySel = document.getElementById('riderCitySelect');
+  const cities = [...new Set(Object.values(storesMap).map(s => s.city).filter(Boolean))];
+  if (cities.length === 0) {
+    citySel.innerHTML = '<option value="">No active cities yet</option>';
+    document.getElementById('riderStoreSelect').innerHTML = '<option value="">No dark stores available</option>';
+    renderRiderTasks();
+    return;
+  }
+  const currentStore = storesMap[selectedZoneStoreId];
+  const activeCity = currentStore ? currentStore.city : cities[0];
+  citySel.innerHTML = cities.map(c => `<option value="${escapeHtml(c)}" ${c === activeCity ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+  populateRiderStores();
+}
 
-        window.finishDelivery = async (orderId) => {
-            await update(ref(db, 'orders/' + orderId), {
-                status: 'Delivered',
-                deliveredAt: Date.now()
-            });
-        };
+function populateRiderStores() {
+  const city = document.getElementById('riderCitySelect').value;
+  const storeSel = document.getElementById('riderStoreSelect');
+  const matching = Object.entries(storesMap).filter(([, s]) => s.city === city);
+  storeSel.innerHTML = matching.map(([id, s]) => `<option value="${escapeHtml(id)}" ${id === selectedZoneStoreId ? 'selected' : ''}>${escapeHtml(s.name)} (${escapeHtml(s.area || s.city)})</option>`).join('');
+  if (matching.length > 0 && (!selectedZoneStoreId || !storesMap[selectedZoneStoreId] || storesMap[selectedZoneStoreId].city !== city)) {
+    selectedZoneStoreId = matching[0][0];
+    localStorage.setItem('jhatpat_rider_store', selectedZoneStoreId);
+  }
+  renderRiderTasks();
+}
 
-        // Populate Dark Store Zones
-        onValue(ref(db, 'stores'), snap => {
-            const sel = document.getElementById('zone-select');
-            const stores = snap.val() || {};
-            sel.innerHTML = `<option value="ALL">All Dark Stores</option>` + 
-                Object.values(stores).map(s => `<option value="${s.code}">${s.code} - ${s.name}</option>`).join('');
-        });
+function selectRiderZone() {
+  selectedZoneStoreId = document.getElementById('riderStoreSelect').value;
+  localStorage.setItem('jhatpat_rider_store', selectedZoneStoreId);
+  renderRiderTasks();
+}
 
-        // Live Orders & Wallet Calculation (₹25 base + 5% tip/incentive per delivery)
-        onValue(ref(db, 'orders'), snap => {
-            const orders = snap.val() || {};
-            const pool = [];
-            let activeJob = null;
-            let deliveredTrips = 0;
+function renderRiderTasks() {
+  const listEl = document.getElementById('riderTasksList');
+  const allZoneOrders = Object.values(ordersMap).filter(o => o && o.storeId === selectedZoneStoreId);
 
-            Object.entries(orders).forEach(([id, o]) => {
-                const zoneMatch = selectedZone === 'ALL' || o.storeCode === selectedZone;
-                if (o.status === 'Ready for Pickup' && zoneMatch) {
-                    pool.push({ id, ...o });
-                }
-                if (rider && o.riderPhone === rider.phone) {
-                    if (o.status === 'Out for Delivery') activeJob = { id, ...o };
-                    if (o.status === 'Delivered') deliveredTrips++;
-                }
-            });
+  const delivered = allZoneOrders.filter(o => o.status === 'DELIVERED');
+  document.getElementById('riderTripCount').textContent = `${delivered.length} Completed Drops (₹${PER_DROP_PAY}/drop)`;
+  document.getElementById('riderWalletAmt').textContent = `₹${(delivered.length * PER_DROP_PAY).toLocaleString('en-IN')}`;
 
-            document.getElementById('wallet-trips').innerText = `${deliveredTrips} trips`;
-            document.getElementById('wallet-balance').innerText = '₹' + (deliveredTrips * 25);
+  const activeTasks = allZoneOrders.filter(o => o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY');
+  document.getElementById('activeDropCount').textContent = `${activeTasks.length} tasks`;
 
-            // Render Active Task with Google Maps Turn-by-Turn Link
-            const activeBox = document.getElementById('active-task-box');
-            if (!activeJob) {
-                activeBox.innerHTML = `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-500">No active delivery. Claim a packed bag below.</div>`;
-            } else {
-                const destQuery = activeJob.customerLat && activeJob.customerLng
-                    ? `${activeJob.customerLat},${activeJob.customerLng}`
-                    : encodeURIComponent(activeJob.customerAddress);
-                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destQuery}&travelmode=two-wheeler`;
+  if (!selectedZoneStoreId) {
+    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">Select a City & Dark Store Zone above to receive live delivery tasks.</div>';
+    return;
+  }
 
-                activeBox.innerHTML = `
-                    <div class="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-4 shadow-xl">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-black px-2.5 py-0.5 rounded-full">IN TRANSIT • #${activeJob.id.slice(-5).toUpperCase()}</span>
-                            <span class="text-sm font-black text-yellow-400">Collect ₹${activeJob.totalAmount} (${activeJob.paymentMode})</span>
-                        </div>
-                        <h3 class="font-bold text-base text-white">${activeJob.customerName}</h3>
-                        <p class="text-xs text-slate-300 mt-1"><i class="fa-solid fa-location-dot text-red-400 mr-1"></i> ${activeJob.customerAddress}</p>
-                        
-                        <div class="grid grid-cols-3 gap-2 mt-4">
-                            <a href="${mapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs text-center">
-                                <i class="fa-solid fa-diamond-turn-right mr-1"></i> Maps
-                            </a>
-                            <a href="tel:${activeJob.customerPhone}" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl text-xs text-center">
-                                <i class="fa-solid fa-phone mr-1"></i> Call
-                            </a>
-                            <button onclick="finishDelivery('${activeJob.id}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-xl text-xs">
-                                Delivered
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
+  if (activeTasks.length === 0) {
+    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">No active pickups in this zone right now. Waiting for store dispatch...</div>';
+    return;
+  }
 
-            // Render Pickup Pool
-            document.getElementById('pickup-pool-box').innerHTML = pool.length === 0
-                ? `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center text-xs text-slate-500">No packed orders waiting in this store zone.</div>`
-                : pool.map(o => `
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[11px] font-bold text-yellow-400">${o.storeCode || 'KYN01'} • #${o.id.slice(-5).toUpperCase()}</span>
-                            <span class="text-xs font-extrabold text-emerald-400">+₹25 Payout</span>
-                        </div>
-                        <p class="font-bold text-sm text-white">${o.customerName}</p>
-                        <p class="text-xs text-slate-400 mt-0.5">${o.customerAddress}</p>
-                        <button onclick="claimOrder('${o.id}')" class="w-full mt-3 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 rounded-xl text-xs">
-                            Accept Pickup (₹${o.totalAmount} ${o.paymentMode})
-                        </button>
-                    </div>
-                `).join('');
-        });
-    </script>
+  listEl.innerHTML = activeTasks.map(o => {
+    const mapsQuery = encodeURIComponent(`${o.customerAddress}, ${o.city || ''}`);
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+    const isOut = o.status === 'OUT_FOR_DELIVERY';
+    return `
+      <div class="task-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:800;font-size:15px;">#${escapeHtml(o.orderId)}</span>
+          <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:${isOut ? '#1E3A8A' : '#78350F'};color:#fff;">
+            ${isOut ? '🛵 OUT FOR DELIVERY' : '📦 READY AT STORE'}
+          </span>
+        </div>
+        <div style="margin-top:8px;font-size:13px;">
+          <div><strong>Customer:</strong> ${escapeHtml(o.customerName)} (${escapeHtml(o.customerPhone)})</div>
+          <div style="color:#D1D5DB;margin-top:3px;">📍 ${escapeHtml(o.customerAddress)}</div>
+          <div style="color:#9CA3AF;font-size:12px;margin-top:4px;">Collect: <strong>${o.paymentMethod === 'COD' ? '₹' + o.totalAmount + ' CASH' : 'PAID ONLINE (UPI)'}</strong></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+          <a href="${mapsUrl}" target="_blank" class="btn btn-blue">🗺️ Google Maps</a>
+          ${!isOut
+            ? `<button class="btn btn-yellow" onclick="riderUpdateOrder('${o.orderId}','OUT_FOR_DELIVERY')">📦 Picked Up</button>`
+            : `<button class="btn btn-green" onclick="riderUpdateOrder('${o.orderId}','DELIVERED')">✅ Mark Delivered</button>`
+          }
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function riderUpdateOrder(orderId, status) {
+  const riderName = document.getElementById('riderNameInput').value.trim() || 'Jhatpat Rider';
+  db.ref('orders/' + orderId).update({
+    status,
+    riderName,
+    updatedAt: Date.now()
+  }).then(() => {
+    showToast(status === 'DELIVERED' ? '🎉 Drop Completed! +₹35 added to wallet' : '🛵 Order Picked Up! Navigate to customer', 'success');
+  });
+}
+</script>
 </body>
 </html>
