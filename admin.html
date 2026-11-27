@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <!-- SYNCHRONOUS AUTH HANDLER (Works immediately even offline or before module scripts load) -->
+  <!-- SYNCHRONOUS AUTH HANDLER -->
   <script>
     window.togglePassVisibility = function() {
       var inp = document.getElementById("adminPassInput");
@@ -103,7 +103,7 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="font-extrabold text-xl tracking-tight text-slate-900">jhatpat</span>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.1</span>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-100 text-green-800">Admin v3.2</span>
           </div>
           <p class="text-[11px] text-slate-500">RTDB: <span class="font-mono">jhatpat-22aa8</span> • UPI: <span class="font-mono">8305530240@kotakbank</span></p>
         </div>
@@ -149,7 +149,6 @@
 
     <!-- ================= TAB 1: DASHBOARD & ORDERS ================= -->
     <section id="sec-dashboard" class="space-y-6">
-      <!-- Selected Store Banner -->
       <div id="activeStoreAnalyticsBanner" class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow">
         <div>
           <span class="text-[11px] uppercase tracking-wider text-[#F8CB46] font-bold">Store-Wise Performance View</span>
@@ -188,7 +187,7 @@
             </div>
             <span class="p-2.5 bg-green-50 text-[#0C831F] rounded-xl"><i class="fa-solid fa-indian-rupee-sign"></i></span>
           </div>
-          <p id="kpiSalesSub" class="text-xs text-green-700 mt-2 font-medium">Includes ₹7 delivery on &lt;₹199</p>
+          <p id="kpiSalesSub" class="text-xs text-green-700 mt-2 font-medium">₹7 delivery &lt;₹199 • FREE ≥₹199</p>
         </div>
 
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
@@ -275,7 +274,6 @@
 
     <!-- ================= TAB 2: CATALOG & STORE-WISE STOCK ================= -->
     <section id="sec-products" class="hidden space-y-6">
-      <!-- Top Action Bar -->
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 class="font-extrabold text-lg text-slate-900">Product Catalog & Store-Wise Inventory</h2>
@@ -301,7 +299,6 @@
         <input type="hidden" id="editProductId" />
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Left & Middle Inputs -->
           <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Product Name *</label>
@@ -314,13 +311,12 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
               <select id="prodCategory" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-[#0C831F]">
-                <option value="Vegetables & Fruits">Vegetables & Fruits</option>
-                <option value="Fresh Juices & Shakes">Fresh Juices & Shakes</option>
-                <option value="Dairy, Bread & Eggs">Dairy, Bread & Eggs</option>
+                <option value="Sabzi & Fruits">Sabzi & Fruits</option>
+                <option value="Juices">Juices</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Staples">Staples</option>
+                <option value="Masala">Masala</option>
                 <option value="Munchies & Cold Drinks">Munchies & Cold Drinks</option>
-                <option value="Atta, Rice & Dal">Atta, Rice & Dal</option>
-                <option value="Masala, Oil & More">Masala, Oil & More</option>
-                <option value="Tea, Coffee & Health">Tea, Coffee & Health</option>
                 <option value="Personal Care & Home">Personal Care & Home</option>
               </select>
             </div>
@@ -391,7 +387,7 @@
         </div>
       </div>
 
-      <!-- CATALOG LIST WITH QUICK RATE EDIT & STORE-WISE STOCK TOGGLE -->
+      <!-- CATALOG LIST -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
           <div class="flex items-center gap-2">
@@ -476,7 +472,6 @@
         </div>
       </div>
 
-      <!-- DARK STORES LIST -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center">
           <h3 class="font-bold text-slate-800">Active Dark Stores (<span id="storeCountLabel">0</span>)</h3>
@@ -535,7 +530,6 @@
     <!-- ================= TAB 5: DELIVERY FEES, BANNERS & KOTAK UPI ================= -->
     <section id="sec-settings" class="hidden space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Delivery & UPI Settings -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-truck-fast text-[#0C831F] mr-2"></i>Delivery Fee & Kotak UPI Settings</h3>
           <div>
@@ -545,7 +539,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Free Delivery Threshold (₹) — Default ₹199</label>
             <input id="cfgFreeThreshold" type="number" value="199" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold text-[#0C831F]" />
-            <p class="text-[11px] text-slate-500 mt-1">Orders below this amount automatically pay ₹7 delivery; orders ≥ ₹199 get FREE delivery.</p>
+            <p class="text-[11px] text-slate-500 mt-1">Orders below ₹199 automatically pay ₹7 delivery; orders ≥ ₹199 get FREE delivery.</p>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Kotak Merchant UPI ID</label>
@@ -560,7 +554,6 @@
           </button>
         </div>
 
-        <!-- Banner Manager -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
           <h3 class="font-bold text-base text-slate-900"><i class="fa-solid fa-panorama text-[#0C831F] mr-2"></i>Storefront Banner Manager</h3>
           <div class="grid grid-cols-1 gap-3">
@@ -578,13 +571,11 @@
 
   </main>
 
-  <!-- TOAST NOTIFICATION -->
   <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl hidden z-50"></div>
 
-  <!-- FIREBASE + APPLICATION SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, update, push, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, update, remove, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com"
@@ -593,7 +584,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // State
     let storesMap = {};
     let productsMap = {};
     let ordersMap = {};
@@ -607,7 +597,6 @@
 
     window.fallbackImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80";
 
-    // Toast helper
     window.showToast = (msg) => {
       const t = document.getElementById("toast");
       t.textContent = msg;
@@ -616,7 +605,6 @@
       window._toastT = setTimeout(() => t.classList.add("hidden"), 3000);
     };
 
-    // Navigation
     window.switchTab = (tab) => {
       ["dashboard", "products", "stores", "customers", "settings"].forEach(t => {
         document.getElementById("sec-" + t).classList.toggle("hidden", t !== tab);
@@ -624,7 +612,6 @@
       });
     };
 
-    // Default 10+ Mumbai Dark Stores
     const DEFAULT_STORES = {
       "DS_ANDHERI": { id: "DS_ANDHERI", name: "Jhatpat Andheri West Hub", area: "Andheri West, Mumbai", pincodes: "400053, 400058, 400061", manager: "Rohan Desai - 9820112233", commission: 12, kyc: "Verified", fssai: "11524001001101", upi: "andheri@kotakbank" },
       "DS_BANDRA": { id: "DS_BANDRA", name: "Jhatpat Bandra Linking Hub", area: "Bandra West, Mumbai", pincodes: "400050, 400051, 400052", manager: "Farhan Shaikh - 9820112234", commission: 12, kyc: "Verified", fssai: "11524001001102", upi: "bandra@kotakbank" },
@@ -644,7 +631,6 @@
       showToast("11 Mumbai Dark Stores loaded into Firebase!");
     };
 
-    // Init Firebase Listeners
     window.initRealtimeListeners = async function() {
       if (listenersStarted) return;
       listenersStarted = true;
@@ -699,14 +685,12 @@
       });
     };
 
-    // Auto-start listeners if already unlocked in sessionStorage
     try {
       if (sessionStorage.getItem("jhatpat_admin_auth") === "1") {
         window.initRealtimeListeners();
       }
     } catch (e) {}
 
-    // ================= STORE-WISE ANALYTICS FILTER =================
     function populateStoreFilterDropdown() {
       const sel = document.getElementById("globalStoreFilter");
       const current = sel.value || selectedStoreFilter;
@@ -990,7 +974,6 @@
       reader.readAsDataURL(file);
     };
 
-    // ================= PRODUCT SAVE, 1-CLICK PUBLISH ALL & STORE-WISE STOCK TOGGLE =================
     window.saveProduct = async (publishToAllStores) => {
       const editId = document.getElementById("editProductId").value;
       const name = document.getElementById("prodName").value.trim();
@@ -1054,7 +1037,7 @@
       document.getElementById("editProductId").value = id;
       document.getElementById("productFormTitle").innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-600"></i> Editing: ${p.name}`;
       document.getElementById("prodName").value = p.name;
-      document.getElementById("prodCategory").value = p.category || "Vegetables & Fruits";
+      document.getElementById("prodCategory").value = p.category || "Sabzi & Fruits";
       document.getElementById("prodUnit").value = p.unit || "";
       document.getElementById("prodMrp").value = p.mrp || p.price;
       document.getElementById("prodPrice").value = p.price;
@@ -1195,7 +1178,6 @@
       }).join("");
     };
 
-    // ================= MUMBAI 100+ SABZI, FRUITS & JUICE PACK =================
     window.loadMumbai100Pack = async () => {
       const storeIds = Object.keys(storesMap);
       const allInStock = {};
@@ -1211,117 +1193,127 @@
         potato: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80",
         mango: "https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=600&q=80",
         banana: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80",
-        apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80"
+        apple: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=600&q=80",
+        dairy: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80",
+        staples: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80",
+        masala: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80"
       };
 
       const rawItems = [
-        ["Nashik Red Onion (Kanda)", "Vegetables & Fruits", "1 kg", 45, 34, IMG.onion],
-        ["Agra Jyoti Potato (Batata)", "Vegetables & Fruits", "1 kg", 40, 30, IMG.potato],
-        ["Hybrid Red Tomato (Tamatar)", "Vegetables & Fruits", "500 g", 30, 22, IMG.tomato],
-        ["Fresh Coriander (Kothimbir)", "Vegetables & Fruits", "100 g", 18, 12, IMG.leafy],
-        ["Fresh Mint Leaves (Pudina)", "Vegetables & Fruits", "100 g", 15, 10, IMG.leafy],
-        ["Curry Leaves (Kadi Patta)", "Vegetables & Fruits", "50 g", 12, 8, IMG.leafy],
-        ["Green Chilli (Hirvi Mirchi)", "Vegetables & Fruits", "100 g", 16, 11, IMG.veg],
-        ["Fresh Ginger (Adrak)", "Vegetables & Fruits", "100 g", 24, 18, IMG.veg],
-        ["Indian Garlic (Lasun)", "Vegetables & Fruits", "200 g", 48, 36, IMG.veg],
-        ["Seedless Lemon (Nimbu)", "Vegetables & Fruits", "250 g", 32, 24, IMG.fruit],
-        ["Lady Finger (Bhindi)", "Vegetables & Fruits", "500 g", 38, 28, IMG.veg],
-        ["Bottle Gourd (Dudhi / Lauki)", "Vegetables & Fruits", "1 pc (500g)", 34, 25, IMG.veg],
-        ["Ridge Gourd (Dodka / Turai)", "Vegetables & Fruits", "500 g", 42, 32, IMG.veg],
-        ["Bitter Gourd (Karela)", "Vegetables & Fruits", "500 g", 40, 30, IMG.veg],
-        ["Sponge Gourd (Ghosale)", "Vegetables & Fruits", "500 g", 38, 28, IMG.veg],
-        ["Snake Gourd (Padwal)", "Vegetables & Fruits", "500 g", 36, 26, IMG.veg],
-        ["Ivy Gourd (Tendli)", "Vegetables & Fruits", "250 g", 26, 19, IMG.veg],
-        ["Cluster Beans (Gavar)", "Vegetables & Fruits", "250 g", 30, 22, IMG.veg],
-        ["French Beans (Farasbi)", "Vegetables & Fruits", "250 g", 32, 24, IMG.veg],
-        ["Green Peas (Matar)", "Vegetables & Fruits", "500 g", 55, 42, IMG.veg],
-        ["Cauliflower (Flower)", "Vegetables & Fruits", "1 pc (500g)", 45, 34, IMG.veg],
-        ["Green Cabbage (Kobi)", "Vegetables & Fruits", "1 pc (500g)", 32, 24, IMG.veg],
-        ["Green Capsicum (Shimla Mirchi)", "Vegetables & Fruits", "250 g", 28, 21, IMG.veg],
-        ["Red & Yellow Bell Pepper Combo", "Vegetables & Fruits", "2 pcs", 85, 65, IMG.veg],
-        ["Small Purple Brinjal (Vangi)", "Vegetables & Fruits", "250 g", 26, 19, IMG.veg],
-        ["Big Bharta Brinjal", "Vegetables & Fruits", "500 g", 35, 26, IMG.veg],
-        ["Drumstick (Shevga)", "Vegetables & Fruits", "250 g", 34, 25, IMG.veg],
-        ["Fresh Spinach (Palak Bunch)", "Vegetables & Fruits", "250 g", 24, 18, IMG.leafy],
-        ["Fresh Fenugreek (Methi Bunch)", "Vegetables & Fruits", "250 g", 26, 19, IMG.leafy],
-        ["Red Amaranth (Lal Math)", "Vegetables & Fruits", "250 g", 24, 18, IMG.leafy],
-        ["Spring Onion (Kanda Pat)", "Vegetables & Fruits", "250 g", 25, 18, IMG.leafy],
-        ["Red Carrot (Gajar)", "Vegetables & Fruits", "500 g", 36, 27, IMG.veg],
-        ["Beetroot (Chukandar)", "Vegetables & Fruits", "500 g", 34, 25, IMG.veg],
-        ["White Radish (Mula)", "Vegetables & Fruits", "500 g", 28, 20, IMG.veg],
-        ["English Cucumber (Kakdi)", "Vegetables & Fruits", "500 g", 32, 24, IMG.veg],
-        ["Sweet Corn Cob (Bhutta)", "Vegetables & Fruits", "2 pcs", 40, 29, IMG.veg],
-        ["Sweet Corn Kernels Pack", "Vegetables & Fruits", "200 g", 45, 35, IMG.veg],
-        ["Button Mushroom Pack", "Vegetables & Fruits", "200 g", 65, 49, IMG.veg],
-        ["Broccoli Florets", "Vegetables & Fruits", "250 g", 75, 58, IMG.veg],
-        ["Baby Corn Peeled", "Vegetables & Fruits", "200 g", 55, 42, IMG.veg],
-        ["Raw Banana (Kachcha Kela)", "Vegetables & Fruits", "500 g", 34, 25, IMG.banana],
-        ["Elephant Foot Yam (Suran)", "Vegetables & Fruits", "500 g", 42, 32, IMG.veg],
-        ["Sweet Potato (Ratalu)", "Vegetables & Fruits", "500 g", 40, 30, IMG.potato],
-        ["Red Pumpkin (Bhopla)", "Vegetables & Fruits", "500 g", 28, 20, IMG.veg],
-        ["Fresh Grated Coconut", "Vegetables & Fruits", "200 g", 45, 35, IMG.fruit],
+        ["Nashik Red Onion (Kanda)", "Sabzi & Fruits", "1 kg", 45, 34, IMG.onion],
+        ["Agra Jyoti Potato (Batata)", "Sabzi & Fruits", "1 kg", 40, 30, IMG.potato],
+        ["Hybrid Red Tomato (Tamatar)", "Sabzi & Fruits", "500 g", 30, 22, IMG.tomato],
+        ["Fresh Coriander (Kothimbir)", "Sabzi & Fruits", "100 g", 18, 12, IMG.leafy],
+        ["Fresh Mint Leaves (Pudina)", "Sabzi & Fruits", "100 g", 15, 10, IMG.leafy],
+        ["Curry Leaves (Kadi Patta)", "Sabzi & Fruits", "50 g", 12, 8, IMG.leafy],
+        ["Green Chilli (Hirvi Mirchi)", "Sabzi & Fruits", "100 g", 16, 11, IMG.veg],
+        ["Fresh Ginger (Adrak)", "Sabzi & Fruits", "100 g", 24, 18, IMG.veg],
+        ["Indian Garlic (Lasun)", "Sabzi & Fruits", "200 g", 48, 36, IMG.veg],
+        ["Seedless Lemon (Nimbu)", "Sabzi & Fruits", "250 g", 32, 24, IMG.fruit],
+        ["Lady Finger (Bhindi)", "Sabzi & Fruits", "500 g", 38, 28, IMG.veg],
+        ["Bottle Gourd (Dudhi / Lauki)", "Sabzi & Fruits", "1 pc (500g)", 34, 25, IMG.veg],
+        ["Ridge Gourd (Dodka / Turai)", "Sabzi & Fruits", "500 g", 42, 32, IMG.veg],
+        ["Bitter Gourd (Karela)", "Sabzi & Fruits", "500 g", 40, 30, IMG.veg],
+        ["Sponge Gourd (Ghosale)", "Sabzi & Fruits", "500 g", 38, 28, IMG.veg],
+        ["Snake Gourd (Padwal)", "Sabzi & Fruits", "500 g", 36, 26, IMG.veg],
+        ["Ivy Gourd (Tendli)", "Sabzi & Fruits", "250 g", 26, 19, IMG.veg],
+        ["Cluster Beans (Gavar)", "Sabzi & Fruits", "250 g", 30, 22, IMG.veg],
+        ["French Beans (Farasbi)", "Sabzi & Fruits", "250 g", 32, 24, IMG.veg],
+        ["Green Peas (Matar)", "Sabzi & Fruits", "500 g", 55, 42, IMG.veg],
+        ["Cauliflower (Flower)", "Sabzi & Fruits", "1 pc (500g)", 45, 34, IMG.veg],
+        ["Green Cabbage (Kobi)", "Sabzi & Fruits", "1 pc (500g)", 32, 24, IMG.veg],
+        ["Green Capsicum (Shimla Mirchi)", "Sabzi & Fruits", "250 g", 28, 21, IMG.veg],
+        ["Red & Yellow Bell Pepper Combo", "Sabzi & Fruits", "2 pcs", 85, 65, IMG.veg],
+        ["Small Purple Brinjal (Vangi)", "Sabzi & Fruits", "250 g", 26, 19, IMG.veg],
+        ["Big Bharta Brinjal", "Sabzi & Fruits", "500 g", 35, 26, IMG.veg],
+        ["Drumstick (Shevga)", "Sabzi & Fruits", "250 g", 34, 25, IMG.veg],
+        ["Fresh Spinach (Palak Bunch)", "Sabzi & Fruits", "250 g", 24, 18, IMG.leafy],
+        ["Fresh Fenugreek (Methi Bunch)", "Sabzi & Fruits", "250 g", 26, 19, IMG.leafy],
+        ["Red Amaranth (Lal Math)", "Sabzi & Fruits", "250 g", 24, 18, IMG.leafy],
+        ["Spring Onion (Kanda Pat)", "Sabzi & Fruits", "250 g", 25, 18, IMG.leafy],
+        ["Red Carrot (Gajar)", "Sabzi & Fruits", "500 g", 36, 27, IMG.veg],
+        ["Beetroot (Chukandar)", "Sabzi & Fruits", "500 g", 34, 25, IMG.veg],
+        ["White Radish (Mula)", "Sabzi & Fruits", "500 g", 28, 20, IMG.veg],
+        ["English Cucumber (Kakdi)", "Sabzi & Fruits", "500 g", 32, 24, IMG.veg],
+        ["Sweet Corn Cob (Bhutta)", "Sabzi & Fruits", "2 pcs", 40, 29, IMG.veg],
+        ["Sweet Corn Kernels Pack", "Sabzi & Fruits", "200 g", 45, 35, IMG.veg],
+        ["Button Mushroom Pack", "Sabzi & Fruits", "200 g", 65, 49, IMG.veg],
+        ["Broccoli Florets", "Sabzi & Fruits", "250 g", 75, 58, IMG.veg],
+        ["Baby Corn Peeled", "Sabzi & Fruits", "200 g", 55, 42, IMG.veg],
+        ["Raw Banana (Kachcha Kela)", "Sabzi & Fruits", "500 g", 34, 25, IMG.banana],
+        ["Elephant Foot Yam (Suran)", "Sabzi & Fruits", "500 g", 42, 32, IMG.veg],
+        ["Sweet Potato (Ratalu)", "Sabzi & Fruits", "500 g", 40, 30, IMG.potato],
+        ["Red Pumpkin (Bhopla)", "Sabzi & Fruits", "500 g", 28, 20, IMG.veg],
+        ["Fresh Grated Coconut", "Sabzi & Fruits", "200 g", 45, 35, IMG.fruit],
 
-        ["Ratnagiri Alphonso Mango (Hapus)", "Vegetables & Fruits", "6 pcs", 599, 449, IMG.mango],
-        ["Kesar Mango Box", "Vegetables & Fruits", "1 kg", 220, 169, IMG.mango],
-        ["Elaichi Banana (Yelakki)", "Vegetables & Fruits", "500 g", 48, 36, IMG.banana],
-        ["Robusta Yellow Banana", "Vegetables & Fruits", "6 pcs", 42, 32, IMG.banana],
-        ["Shimla Royal Gala Apple", "Vegetables & Fruits", "4 pcs (500g)", 140, 109, IMG.apple],
-        ["Washington Red Apple", "Vegetables & Fruits", "4 pcs", 180, 145, IMG.apple],
-        ["Green Granny Smith Apple", "Vegetables & Fruits", "2 pcs", 110, 89, IMG.apple],
-        ["Bhagwa Pomegranate (Anar)", "Vegetables & Fruits", "500 g", 110, 85, IMG.fruit],
-        ["Nagpur Mandarin Orange", "Vegetables & Fruits", "500 g", 65, 49, IMG.fruit],
-        ["Imported Valencia Orange", "Vegetables & Fruits", "2 pcs", 90, 69, IMG.fruit],
-        ["Sweet Lime (Mosambi)", "Vegetables & Fruits", "1 kg", 85, 64, IMG.fruit],
-        ["Kiran Watermelon (Tarbuj)", "Vegetables & Fruits", "1 pc (2.5kg)", 95, 69, IMG.fruit],
-        ["Muskmelon (Kharbuja)", "Vegetables & Fruits", "1 pc (800g)", 65, 48, IMG.fruit],
-        ["Ripe Papaya (Papai)", "Vegetables & Fruits", "1 pc (1kg)", 68, 52, IMG.fruit],
-        ["Rani Pineapple (Ananas)", "Vegetables & Fruits", "1 pc", 80, 59, IMG.fruit],
-        ["Nashik Green Seedless Grapes", "Vegetables & Fruits", "500 g", 75, 56, IMG.fruit],
-        ["Black Seedless Grapes", "Vegetables & Fruits", "500 g", 90, 69, IMG.fruit],
-        ["Dahanu Chikoo (Sapota)", "Vegetables & Fruits", "500 g", 55, 42, IMG.fruit],
-        ["Allahabad Pink Guava (Peru)", "Vegetables & Fruits", "500 g", 52, 39, IMG.fruit],
-        ["Green Kiwi Pack", "Vegetables & Fruits", "3 pcs", 115, 89, IMG.fruit],
-        ["Dragon Fruit (Pitaya)", "Vegetables & Fruits", "1 pc", 95, 74, IMG.fruit],
-        ["Fresh Strawberry Punnet", "Vegetables & Fruits", "200 g", 99, 75, IMG.fruit],
-        ["Imported Blueberry Pack", "Vegetables & Fruits", "125 g", 240, 189, IMG.fruit],
-        ["Hass Avocado", "Vegetables & Fruits", "1 pc", 140, 109, IMG.fruit],
-        ["Tender Coconut (Nariyal Pani)", "Vegetables & Fruits", "1 pc", 65, 49, IMG.fruit],
-        ["Custard Apple (Sitaphal)", "Vegetables & Fruits", "500 g", 95, 72, IMG.fruit],
-        ["Indian Pear (Nashpati)", "Vegetables & Fruits", "500 g", 85, 64, IMG.fruit],
-        ["Red Plum (Aloobukhara)", "Vegetables & Fruits", "250 g", 90, 69, IMG.fruit],
-        ["Sweet Tamarind Box (Imli)", "Vegetables & Fruits", "250 g", 65, 49, IMG.fruit],
-        ["Cut Fruit Salad Bowl", "Vegetables & Fruits", "300 g", 89, 69, IMG.fruit],
+        ["Ratnagiri Alphonso Mango (Hapus)", "Sabzi & Fruits", "6 pcs", 599, 449, IMG.mango],
+        ["Kesar Mango Box", "Sabzi & Fruits", "1 kg", 220, 169, IMG.mango],
+        ["Elaichi Banana (Yelakki)", "Sabzi & Fruits", "500 g", 48, 36, IMG.banana],
+        ["Robusta Yellow Banana", "Sabzi & Fruits", "6 pcs", 42, 32, IMG.banana],
+        ["Shimla Royal Gala Apple", "Sabzi & Fruits", "4 pcs (500g)", 140, 109, IMG.apple],
+        ["Washington Red Apple", "Sabzi & Fruits", "4 pcs", 180, 145, IMG.apple],
+        ["Green Granny Smith Apple", "Sabzi & Fruits", "2 pcs", 110, 89, IMG.apple],
+        ["Bhagwa Pomegranate (Anar)", "Sabzi & Fruits", "500 g", 110, 85, IMG.fruit],
+        ["Nagpur Mandarin Orange", "Sabzi & Fruits", "500 g", 65, 49, IMG.fruit],
+        ["Imported Valencia Orange", "Sabzi & Fruits", "2 pcs", 90, 69, IMG.fruit],
+        ["Sweet Lime (Mosambi)", "Sabzi & Fruits", "1 kg", 85, 64, IMG.fruit],
+        ["Kiran Watermelon (Tarbuj)", "Sabzi & Fruits", "1 pc (2.5kg)", 95, 69, IMG.fruit],
+        ["Muskmelon (Kharbuja)", "Sabzi & Fruits", "1 pc (800g)", 65, 48, IMG.fruit],
+        ["Ripe Papaya (Papai)", "Sabzi & Fruits", "1 pc (1kg)", 68, 52, IMG.fruit],
+        ["Rani Pineapple (Ananas)", "Sabzi & Fruits", "1 pc", 80, 59, IMG.fruit],
+        ["Nashik Green Seedless Grapes", "Sabzi & Fruits", "500 g", 75, 56, IMG.fruit],
+        ["Black Seedless Grapes", "Sabzi & Fruits", "500 g", 90, 69, IMG.fruit],
+        ["Dahanu Chikoo (Sapota)", "Sabzi & Fruits", "500 g", 55, 42, IMG.fruit],
+        ["Allahabad Pink Guava (Peru)", "Sabzi & Fruits", "500 g", 52, 39, IMG.fruit],
+        ["Green Kiwi Pack", "Sabzi & Fruits", "3 pcs", 115, 89, IMG.fruit],
+        ["Dragon Fruit (Pitaya)", "Sabzi & Fruits", "1 pc", 95, 74, IMG.fruit],
+        ["Fresh Strawberry Punnet", "Sabzi & Fruits", "200 g", 99, 75, IMG.fruit],
+        ["Imported Blueberry Pack", "Sabzi & Fruits", "125 g", 240, 189, IMG.fruit],
+        ["Hass Avocado", "Sabzi & Fruits", "1 pc", 140, 109, IMG.fruit],
+        ["Tender Coconut (Nariyal Pani)", "Sabzi & Fruits", "1 pc", 65, 49, IMG.fruit],
+        ["Custard Apple (Sitaphal)", "Sabzi & Fruits", "500 g", 95, 72, IMG.fruit],
+        ["Indian Pear (Nashpati)", "Sabzi & Fruits", "500 g", 85, 64, IMG.fruit],
+        ["Red Plum (Aloobukhara)", "Sabzi & Fruits", "250 g", 90, 69, IMG.fruit],
+        ["Sweet Tamarind Box (Imli)", "Sabzi & Fruits", "250 g", 65, 49, IMG.fruit],
+        ["Cut Fruit Salad Bowl", "Sabzi & Fruits", "300 g", 89, 69, IMG.fruit],
 
-        ["Cold-Pressed Valencia Orange Juice", "Fresh Juices & Shakes", "250 ml", 85, 65, IMG.juice],
-        ["Fresh Mosambi Juice (No Sugar)", "Fresh Juices & Shakes", "250 ml", 75, 55, IMG.juice],
-        ["Fresh Pomegranate (Anar) Juice", "Fresh Juices & Shakes", "250 ml", 99, 79, IMG.juice],
-        ["Watermelon Mint Cooler Juice", "Fresh Juices & Shakes", "300 ml", 65, 49, IMG.juice],
-        ["Pineapple Ginger Detox Juice", "Fresh Juices & Shakes", "250 ml", 75, 58, IMG.juice],
-        ["Sugarcane Lemon Ginger Juice", "Fresh Juices & Shakes", "300 ml", 55, 39, IMG.juice],
-        ["ABC (Apple Beetroot Carrot) Juice", "Fresh Juices & Shakes", "250 ml", 89, 69, IMG.juice],
-        ["Green Spinach Cucumber Detox", "Fresh Juices & Shakes", "250 ml", 85, 65, IMG.juice],
-        ["Alphonso Mango Thick Shake", "Fresh Juices & Shakes", "300 ml", 110, 85, IMG.juice],
-        ["Sitaphal Cream Thick Shake", "Fresh Juices & Shakes", "300 ml", 120, 95, IMG.juice],
-        ["Strawberry Milkshake", "Fresh Juices & Shakes", "300 ml", 105, 79, IMG.juice],
-        ["Chikoo Chocolate Shake", "Fresh Juices & Shakes", "300 ml", 95, 74, IMG.juice],
-        ["Dry Fruit Anjeer Badam Shake", "Fresh Juices & Shakes", "300 ml", 130, 99, IMG.juice],
-        ["Cold Coffee Frappe Bottle", "Fresh Juices & Shakes", "250 ml", 90, 69, IMG.juice],
-        ["Fresh Tender Coconut Water Bottle", "Fresh Juices & Shakes", "300 ml", 75, 59, IMG.juice],
-        ["Kokum Jeera Mumbai Cooler", "Fresh Juices & Shakes", "250 ml", 55, 42, IMG.juice],
-        ["Aam Panna Mint Refresher", "Fresh Juices & Shakes", "250 ml", 60, 45, IMG.juice],
-        ["Nimbu Pani Masala Shikanji", "Fresh Juices & Shakes", "300 ml", 45, 35, IMG.juice],
-        ["Jamun Shots Immunity Bottle", "Fresh Juices & Shakes", "200 ml", 85, 65, IMG.juice],
-        ["Amla Giloy Tulsi Wellness Shot", "Fresh Juices & Shakes", "100 ml", 45, 32, IMG.juice],
-        ["Wheatgrass Aloe Vera Shot", "Fresh Juices & Shakes", "100 ml", 50, 38, IMG.juice],
-        ["Mixed Berry Smoothie", "Fresh Juices & Shakes", "250 ml", 125, 95, IMG.juice],
-        ["Banana Peanut Butter Protein Shake", "Fresh Juices & Shakes", "300 ml", 115, 89, IMG.juice],
-        ["Rose Falooda Milk Bottle", "Fresh Juices & Shakes", "250 ml", 80, 62, IMG.juice],
-        ["Kesar Pista Badam Milk", "Fresh Juices & Shakes", "200 ml", 65, 49, IMG.juice],
-        ["Guava Chilli Masala Juice", "Fresh Juices & Shakes", "250 ml", 70, 54, IMG.juice],
-        ["Kiwi Apple Cold-Pressed Juice", "Fresh Juices & Shakes", "250 ml", 95, 74, IMG.juice],
-        ["Grape & Mint Sparkling Juice", "Fresh Juices & Shakes", "250 ml", 80, 59, IMG.juice],
-        ["Punjabi Sweet Lassi Cup", "Fresh Juices & Shakes", "250 ml", 50, 39, IMG.juice],
-        ["Masala Chaas (Spiced Buttermilk)", "Fresh Juices & Shakes", "250 ml", 35, 25, IMG.juice]
+        ["Cold-Pressed Valencia Orange Juice", "Juices", "250 ml", 85, 65, IMG.juice],
+        ["Fresh Mosambi Juice (No Sugar)", "Juices", "250 ml", 75, 55, IMG.juice],
+        ["Fresh Pomegranate (Anar) Juice", "Juices", "250 ml", 99, 79, IMG.juice],
+        ["Watermelon Mint Cooler Juice", "Juices", "300 ml", 65, 49, IMG.juice],
+        ["Pineapple Ginger Detox Juice", "Juices", "250 ml", 75, 58, IMG.juice],
+        ["Sugarcane Lemon Ginger Juice", "Juices", "300 ml", 55, 39, IMG.juice],
+        ["ABC (Apple Beetroot Carrot) Juice", "Juices", "250 ml", 89, 69, IMG.juice],
+        ["Green Spinach Cucumber Detox", "Juices", "250 ml", 85, 65, IMG.juice],
+        ["Alphonso Mango Thick Shake", "Juices", "300 ml", 110, 85, IMG.juice],
+        ["Sitaphal Cream Thick Shake", "Juices", "300 ml", 120, 95, IMG.juice],
+        ["Strawberry Milkshake", "Juices", "300 ml", 105, 79, IMG.juice],
+        ["Chikoo Chocolate Shake", "Juices", "300 ml", 95, 74, IMG.juice],
+        ["Dry Fruit Anjeer Badam Shake", "Juices", "300 ml", 130, 99, IMG.juice],
+        ["Cold Coffee Frappe Bottle", "Juices", "250 ml", 90, 69, IMG.juice],
+        ["Fresh Tender Coconut Water Bottle", "Juices", "300 ml", 75, 59, IMG.juice],
+        ["Kokum Jeera Mumbai Cooler", "Juices", "250 ml", 55, 42, IMG.juice],
+        ["Aam Panna Mint Refresher", "Juices", "250 ml", 60, 45, IMG.juice],
+        ["Nimbu Pani Masala Shikanji", "Juices", "300 ml", 45, 35, IMG.juice],
+        ["Jamun Shots Immunity Bottle", "Juices", "200 ml", 85, 65, IMG.juice],
+        ["Amla Giloy Tulsi Wellness Shot", "Juices", "100 ml", 45, 32, IMG.juice],
+        ["Wheatgrass Aloe Vera Shot", "Juices", "100 ml", 50, 38, IMG.juice],
+        ["Mixed Berry Smoothie", "Juices", "250 ml", 125, 95, IMG.juice],
+        ["Banana Peanut Butter Protein Shake", "Juices", "300 ml", 115, 89, IMG.juice],
+        ["Rose Falooda Milk Bottle", "Juices", "250 ml", 80, 62, IMG.juice],
+        ["Kesar Pista Badam Milk", "Juices", "200 ml", 65, 49, IMG.juice],
+        ["Guava Chilli Masala Juice", "Juices", "250 ml", 70, 54, IMG.juice],
+        ["Kiwi Apple Cold-Pressed Juice", "Juices", "250 ml", 95, 74, IMG.juice],
+        ["Grape & Mint Sparkling Juice", "Juices", "250 ml", 80, 59, IMG.juice],
+        ["Punjabi Sweet Lassi Cup", "Juices", "250 ml", 50, 39, IMG.juice],
+        ["Masala Chaas (Spiced Buttermilk)", "Juices", "250 ml", 35, 25, IMG.juice],
+
+        ["Amul Taaza Toned Milk", "Dairy", "500 ml", 28, 27, IMG.dairy],
+        ["Fresh Malai Paneer Block", "Dairy", "200 g", 95, 79, IMG.dairy],
+        ["Indrayani Basmati Rice", "Staples", "1 kg", 110, 89, IMG.staples],
+        ["Sharbati Whole Wheat Chakki Atta", "Staples", "5 kg", 295, 245, IMG.staples],
+        ["Kanda Lasun Masala (Mumbai Special)", "Masala", "200 g", 85, 68, IMG.masala],
+        ["Turmeric Haldi Powder", "Masala", "200 g", 65, 52, IMG.masala]
       ];
 
       const updates = {};
@@ -1342,10 +1334,9 @@
       });
 
       await update(ref(db), updates);
-      showToast(`Loaded ${rawItems.length} Mumbai Sabzi, Fruits & Juice items across all stores!`);
+      showToast(`Loaded ${rawItems.length} Mumbai items across all stores!`);
     };
 
-    // ================= DARK STORES & KYC =================
     window.saveDarkStore = async () => {
       const editId = document.getElementById("editStoreId").value;
       const name = document.getElementById("storeName").value.trim();
@@ -1425,7 +1416,6 @@
       `).join("");
     }
 
-    // ================= CUSTOMER CRM & 1-CLICK WHATSAPP =================
     window.renderCustomers = () => {
       const q = (document.getElementById("crmSearch").value || "").toLowerCase();
       const custMap = {};
@@ -1489,7 +1479,6 @@
       }).join("");
     };
 
-    // ================= SETTINGS & BANNERS =================
     window.saveGlobalSettings = async () => {
       const payload = {
         deliveryFee: Number(document.getElementById("cfgDeliveryFee").value ?? 7),
