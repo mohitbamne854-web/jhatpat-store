@@ -1,108 +1,314 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jhatpat Store Packing App</title>
-  <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: #f1f5f9; color: #0f172a; padding-bottom: 60px; }
-    .hidden { display: none !important; }
-    #loginBox { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: #1e293b; }
-    .login-card { background: #fff; padding: 28px; border-radius: 22px; width: 100%; max-width: 350px; text-align: center; }
-    .login-card h2 { margin: 0 0 6px; color: #2563eb; font-size: 24px; font-weight: 900; }
-    .login-card input { width: 100%; padding: 12px; margin: 14px 0; border: 2px solid #cbd5e1; border-radius: 12px; font-size: 15px; text-align: center; font-weight: 700; }
-    .btn { background: #2563eb; color: #fff; border: none; padding: 11px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-size: 13px; }
-    .btn-green { background: #16a34a; }
-    .btn-sm { padding: 8px 12px; width: auto; font-size: 12px; }
-    header { background: #1e3a8a; color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 18px; font-weight: 900; }
-    .wrap { max-width: 800px; margin: 14px auto; padding: 0 12px; }
-    .order-card { background: #fff; border-radius: 16px; padding: 15px; border: 1px solid #cbd5e1; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-    .badge { padding: 4px 9px; border-radius: 6px; font-size: 11px; font-weight: 800; background: #fef9c3; color: #854d0e; }
-    .items-box { background: #f8fafc; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 13px; border: 1px dashed #cbd5e1; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jhatpat - Dark Store Manager Panel</title>
+    <style>
+        :root {
+            --yellow: #f8cb46;
+            --green: #0c831f;
+            --dark: #1c1c1c;
+            --bg: #f4f6fb;
+            --white: #ffffff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: var(--bg); color: var(--dark); padding-bottom: 50px; }
+
+        header {
+            background: var(--dark);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        header h1 { font-size: 19px; font-weight: 800; color: var(--yellow); }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+
+        .tabs {
+            display: flex;
+            background: white;
+            padding: 10px;
+            gap: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #eee;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .tab-btn.active { background: var(--green); color: white; }
+
+        .container { max-width: 900px; margin: 18px auto; padding: 0 15px; }
+        .section { display: none; }
+        .section.active { display: block; }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--green);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 800;
+            background: #fef08a;
+            color: #854d0e;
+        }
+        .items-box {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .btn-group { display: flex; gap: 8px; margin-top: 12px; }
+        .act-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-pack { background: #3b82f6; color: white; }
+        .btn-ready { background: var(--green); color: white; }
+
+        .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+        .stock-card {
+            background: white;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Login Overlay */
+        #store-login {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .login-box {
+            background: white;
+            padding: 28px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: var(--green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
-  <div id="loginBox">
-    <div class="login-card">
-      <h2>📦 Jhatpat Store</h2>
-      <p style="font-size:12px;color:#64748b;margin:0;">स्टोर पैकिंग स्टाफ लॉगिन</p>
-      <input type="password" id="storePass" placeholder="पासवर्ड डालें" />
-      <button class="btn" onclick="checkStoreLogin()">स्टोर खोलें</button>
+    <!-- Store Manager Login -->
+    <div id="store-login">
+        <div class="login-box">
+            <h2 style="margin-bottom:5px;">🏪 Dark Store Login</h2>
+            <p style="font-size:13px; color:#666; margin-bottom:18px;">Admin dwara di gayi ID aur Password dalein</p>
+            <input type="text" id="login-id" placeholder="Store Login ID (e.g., dombivli01)">
+            <input type="password" id="login-pass" placeholder="Store Password">
+            <button onclick="loginStore()">Open Store Dashboard</button>
+        </div>
     </div>
-  </div>
 
-  <div id="storeApp" class="hidden">
     <header>
-      <h1>📦 Jhatpat Store Packing</h1>
-      <button class="btn btn-sm btn-green" onclick="loadStoreOrders()">🔄 रिफ्रेश</button>
+        <div>
+            <h1 id="header-store-name">🏪 Jhatpat Store</h1>
+            <small id="header-store-area" style="color:#ccc;">Area</small>
+        </div>
+        <button class="logout-btn" onclick="location.reload()">Logout</button>
     </header>
-    <div class="wrap">
-      <div id="storeOrdersList"><p style="text-align:center;color:#64748b;">ऑर्डर्स लोड हो रहे हैं...</p></div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('orders-sec', this)">📦 Live Packing Orders</button>
+        <button class="tab-btn" onclick="switchTab('stock-sec', this)">🥬 Store Stock Control</button>
     </div>
-  </div>
-  <script>
-    const FIREBASE_URL = "https://firebaseio.com";
-    const STORE_PASSWORD = "KING@001";
 
-    function checkStoreLogin() {
-      const val = document.getElementById("storePass").value.trim();
-      if (val === STORE_PASSWORD) {
-        document.getElementById("loginBox").classList.add("hidden");
-        document.getElementById("storeApp").classList.remove("hidden");
-        loadStoreOrders();
-        setInterval(loadStoreOrders, 15000);
-      } else {
-        alert("❌ गलत पासवर्ड! कृपया KING@001 डालें।");
-      }
-    }
-
-    async function loadStoreOrders() {
-      const box = document.getElementById("storeOrdersList");
-      try {
-        const res = await fetch(`${FIREBASE_URL}/orders.json`);
-        const data = await res.json();
-        if (!data) {
-          box.innerHTML = `<p style="text-align:center;color:#64748b;padding:30px;">अभी कोई नया ऑर्डर नहीं है।</p>`;
-          return;
-        }
-        const orders = Object.values(data).reverse().filter(o => o.status !== "Delivered");
-        if (orders.length === 0) {
-          box.innerHTML = `<p style="text-align:center;color:#16a34a;font-weight:700;padding:30px;">✅ सभी ऑर्डर पैक होकर डिलीवर हो चुके हैं!</p>`;
-          return;
-        }
-        box.innerHTML = "";
-        orders.forEach(o => {
-          const itemsHtml = (o.items || []).map(i => `<div>• <b>${i.name}</b> (${i.weight || ""}) × <b>${i.qty}</b></div>`).join("");
-          box.innerHTML += `
-            <div class="order-card">
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <b style="font-size:15px;">ऑर्डर #${o.id}</b>
-                <span class="badge">${o.status || "Order Placed"}</span>
-              </div>
-              <p style="font-size:12px;color:#475569;margin:6px 0;">👤 ${o.customerName} | 📞 ${o.phone}<br>📍 ${o.address}</p>
-              <div class="items-box">${itemsHtml || "सामान की लिस्ट"}</div>
-              <div style="display:flex;gap:8px;">
-                <button class="btn" onclick="updatePackStatus('${o.id}', 'Packing')">📦 पैकिंग चालू करें</button>
-                <button class="btn btn-green" onclick="updatePackStatus('${o.id}', 'Out for Delivery')">✅ पैक हो गया (Rider को दें)</button>
-              </div>
+    <div class="container">
+        <!-- Orders Section -->
+        <div id="orders-sec" class="section active">
+            <div id="store-orders-list">
+                <p style="color:#666;">Waiting for orders...</p>
             </div>
-          `;
-        });
-      } catch (e) {
-        box.innerHTML = `<p style="text-align:center;color:#ef4444;">नेटवर्क त्रुटि, रिफ्रेश दबाएं।</p>`;
-      }
-    }
+        </div>
 
-    async function updatePackStatus(id, status) {
-      await fetch(`${FIREBASE_URL}/orders/${id}.json`, {
-        method: "PATCH",
-        body: JSON.stringify({ status })
-      });
-      loadStoreOrders();
-    }
-  </script>
+        <!-- Stock Section -->
+        <div id="stock-sec" class="section">
+            <div id="store-stock-list" class="stock-grid"></div>
+        </div>
+    </div>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcxcKM6AA20FA3ka0f1LKlMX8JLLqXODQ",
+            authDomain: "://firebaseapp.com",
+            databaseURL: "https://firebaseio.com",
+            projectId: "jhatpat-22aa8",
+            storageBucket: "jhatpat-22aa8.firebasestorage.app",
+            messagingSenderId: "51391257177",
+            appId: "1:51391257177:web:2537fdd28d123dd8d0ef48"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentStore = null;
+
+        function switchTab(id, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function loginStore() {
+            const idInput = document.getElementById('login-id').value.trim();
+            const passInput = document.getElementById('login-pass').value.trim();
+
+            if (!idInput || !passInput) {
+                alert("Login ID aur Password dono dalein!");
+                return;
+            }
+
+            db.ref('stores').once('value', (snapshot) => {
+                let matched = null;
+                snapshot.forEach((child) => {
+                    const st = child.val();
+                    if (st.loginId === idInput && st.password === passInput) {
+                        matched = st;
+                    }
+                });
+
+                if (matched) {
+                    currentStore = matched;
+                    document.getElementById('store-login').style.display = 'none';
+                    document.getElementById('header-store-name').innerText = "🏪 " + matched.name;
+                    document.getElementById('header-store-area').innerText = "📍 " + matched.area;
+                    loadStoreData();
+                } else {
+                    alert("❌ Galat Store ID ya Password! Master Admin mein banayi gayi ID dalein.");
+                }
+            });
+        }
+
+        function loadStoreData() {
+            // 1. Load Orders for this Store (or ALL)
+            db.ref('orders').on('value', (snapshot) => {
+                const list = document.getElementById('store-orders-list');
+                list.innerHTML = '';
+                let found = 0;
+
+                snapshot.forEach((child) => {
+                    const ord = child.val();
+                    if (ord.storeId === currentStore.id || ord.storeId === "ALL") {
+                        found++;
+                        let itemsHtml = '';
+                        if (ord.items) {
+                            ord.items.forEach(i => {
+                                itemsHtml += `<div>• ${i.name} (${i.weight}) × <b>${i.qty}</b></div>`;
+                            });
+                        }
+
+                        list.innerHTML += `
+                            <div class="order-card">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong>Order #${child.key.slice(-5).toUpperCase()}</strong>
+                                    <span class="status-badge">${ord.status}</span>
+                                </div>
+                                <p style="font-size:13px; margin-top:6px;">👤 <b>${ord.customerName}</b> | 📞 ${ord.phone}</p>
+                                <p style="font-size:13px; color:#555;">📍 ${ord.address}</p>
+                                <div class="items-box">${itemsHtml}</div>
+                                <div style="font-weight:800; color:var(--green);">Total Bill: ₹${ord.total} (COD)</div>
+                                <div class="btn-group">
+                                    <button class="act-btn btn-pack" onclick="updateOrderStatus('${child.key}', 'PACKING')">1. Start Packing</button>
+                                    <button class="act-btn btn-ready" onclick="updateOrderStatus('${child.key}', 'READY FOR PICKUP')">2. Ready for Rider</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                if (found === 0) {
+                    list.innerHTML = '<p style="text-align:center; color:#777; padding:30px;">Abhi is store par koi order nahi hai.</p>';
+                }
+            });
+
+            // 2. Load Store Inventory
+            db.ref('products').on('value', (snapshot) => {
+                const stockList = document.getElementById('store-stock-list');
+                stockList.innerHTML = '';
+
+                snapshot.forEach((child) => {
+                    const p = child.val();
+                    if (p.storeId === currentStore.id || p.storeId === "ALL") {
+                        stockList.innerHTML += `
+                            <div class="stock-card">
+                                <div>
+                                    <div style="font-weight:700; font-size:14px;">${p.name}</div>
+                                    <div style="font-size:12px; color:#666;">₹${p.price} • ${p.weight}</div>
+                                </div>
+                                <button onclick="toggleItemStock('${p.id}', ${p.inStock})" style="padding:7px 12px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; background:${p.inStock ? '#dcfce7' : '#fee2e2'}; color:${p.inStock ? '#166534' : '#991b1b'};">
+                                    ${p.inStock ? 'IN STOCK' : 'OUT OF STOCK'}
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+            });
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            db.ref('orders/' + orderId).update({
+                status: newStatus,
+                storeName: currentStore.name,
+                storeAddress: currentStore.address || currentStore.area
+            });
+        }
+
+        function toggleItemStock(prodId, currentStatus) {
+            db.ref('products/' + prodId).update({ inStock: !currentStatus });
+        }
+    </script>
 </body>
 </html>
