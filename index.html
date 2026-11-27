@@ -1,402 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jhatpat — 10 Min Delivery</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;}
-  body{background:#E5E7EB;display:flex;justify-content:center;}
-  .app{width:100%;max-width:480px;background:#F4F6FB;min-height:100vh;padding-bottom:95px;}
-  .top{background:linear-gradient(180deg,#F8CB46,#FCE596);padding:14px 16px;position:sticky;top:0;z-index:40;}
-  .search{width:100%;height:42px;border-radius:12px;border:none;padding:0 14px;margin-top:10px;font-size:14px;outline:none;}
-  .tracker{margin:10px 16px 0;background:#111827;color:#fff;padding:12px 14px;border-radius:14px;display:none;cursor:pointer;}
-  .cats{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;}
-  .cats::-webkit-scrollbar{display:none;}
-  .cat{background:#fff;padding:8px 14px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap;border:1.5px solid transparent;cursor:pointer;}
-  .cat.active{border-color:#0C831F;background:#E8F5E9;color:#0C831F;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
-  .card{background:#fff;border-radius:14px;padding:10px;border:1px solid #E5E7EB;display:flex;flex-direction:column;}
-  .card img{width:100%;height:112px;object-fit:cover;border-radius:10px;margin-bottom:8px;background:#F8FAFC;}
-  .btn-add{background:#F7FFF9;color:#0C831F;border:1.5px solid #0C831F;border-radius:8px;padding:6px 14px;font-weight:800;font-size:12px;cursor:pointer;}
-  .step{display:inline-flex;align-items:center;gap:8px;background:#0C831F;color:#fff;border-radius:8px;padding:4px 10px;font-weight:800;}
-  .step button{background:none;border:none;color:#fff;font-size:16px;font-weight:800;cursor:pointer;}
-  .cart-bar{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;background:#0C831F;color:#fff;padding:13px 16px;border-radius:14px;display:none;justify-content:space-between;align-items:center;font-weight:800;z-index:50;cursor:pointer;box-shadow:0 8px 20px rgba(12,131,31,0.3);}
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:none;align-items:flex-end;justify-content:center;z-index:99;}
-  .modal.open{display:flex;}
-  .sheet{background:#fff;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px 16px 28px;}
-  .inp{width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:10px;margin-bottom:10px;font-size:13px;}
-  .pay-btn{width:100%;background:#0C831F;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat - Instant Delivery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+    <!-- Firebase SDKs (Compat v9/v10 for zero-build direct browser execution) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        projectId: "jhatpat-22aa8",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        storageBucket: "jhatpat-22aa8.appspot.com"
+      };
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.database();
+    </script>
+
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
 </head>
-<body>
-<div class="app">
-  <div class="top">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
+<body class="pb-24">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-emerald-600 text-white shadow-md">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div>
-        <div style="font-size:11px;font-weight:800;">⚡ JHATPAT EXPRESS</div>
-        <div style="font-size:21px;font-weight:800;">Delivery in 10 mins</div>
-      </div>
-      <button onclick="openModal('ordersModal')" style="background:#fff;border:none;padding:8px 12px;border-radius:12px;font-weight:800;font-size:12px;cursor:pointer;">📦 My Orders</button>
-    </div>
-    <input type="text" id="searchInp" class="search" placeholder="Search vegetables, fruits, juices..." oninput="renderProducts()">
-  </div>
-
-  <div id="liveTracker" class="tracker" onclick="openModal('ordersModal')">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-size:10px;color:#9CA3AF;font-weight:700;">LIVE ORDER STATUS</div>
-        <div id="trkStatus" style="font-size:15px;font-weight:800;margin-top:2px;">Order Placed</div>
-      </div>
-      <span id="trkId" style="font-size:11px;background:#1F2937;padding:4px 8px;border-radius:6px;">#JHAT</span>
-    </div>
-  </div>
-
-  <div id="bannerBox" style="padding:12px 16px 0;"></div>
-  <div class="cats" id="catTabs"></div>
-
-  <div style="padding:4px 16px 10px;display:flex;justify-content:space-between;align-items:center;">
-    <h3 style="font-size:16px;font-weight:800;">Fresh Products</h3>
-    <span id="itemCount" style="font-size:12px;color:#0C831F;font-weight:700;">0 items</span>
-  </div>
-  <div class="grid" id="prodGrid"></div>
-</div>
-
-<div class="cart-bar" id="cartBar" onclick="openCart()">
-  <div>
-    <div id="barQty" style="font-size:11px;opacity:0.9;">0 ITEMS</div>
-    <div id="barTotal" style="font-size:16px;">₹0</div>
-  </div>
-  <div>View Cart ▸</div>
-</div>
-
-<div class="modal" id="cartModal">
-  <div class="sheet">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3>🛒 Your Cart</h3>
-      <button onclick="closeModal('cartModal')" style="border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;font-weight:800;">✕</button>
-    </div>
-    <div id="freeDelBanner" style="background:#ECFDF5;border:1px solid #A7F3D0;padding:9px 12px;border-radius:10px;font-size:12px;font-weight:700;color:#065F46;margin-bottom:12px;">
-      Free Delivery above ₹199
-    </div>
-    <div id="cartList"></div>
-    <div style="display:flex;gap:8px;margin:10px 0;">
-      <input type="text" id="cpInput" class="inp" style="margin:0;text-transform:uppercase;" placeholder="Promo Coupon Code">
-      <button onclick="applyCoupon()" style="background:#111;color:#fff;border:none;border-radius:10px;padding:0 16px;font-weight:800;font-size:12px;">APPLY</button>
-    </div>
-    <div id="cpMsg" style="font-size:12px;color:#0C831F;font-weight:700;margin-bottom:8px;"></div>
-    <div style="background:#F8FAFC;padding:12px;border-radius:12px;font-size:13px;margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span>Item Total</span><span id="bSub">₹0</span></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span>Delivery Fee</span><span id="bDel">₹7</span></div>
-      <div id="bDiscRow" style="display:none;justify-content:space-between;margin-bottom:5px;color:#0C831F;"><span>Discount</span><span id="bDisc">-₹0</span></div>
-      <div style="display:flex;justify-content:space-between;border-top:1px dashed #CBD5E1;padding-top:8px;font-weight:800;font-size:15px;"><span>Grand Total</span><span id="bGrand">₹0</span></div>
-    </div>
-    <h4 style="font-size:13px;margin-bottom:8px;">Delivery Address</h4>
-    <input type="text" id="cName" class="inp" placeholder="Your Full Name *">
-    <input type="tel" id="cPhone" class="inp" placeholder="10-Digit Mobile Number *" maxlength="10">
-    <input type="text" id="cAddr" class="inp" placeholder="Flat / House No., Building, Area *">
-    <h4 style="font-size:13px;margin:6px 0 8px;">Payment Method</h4>
-    <select id="payMode" class="inp" onchange="toggleUpiBox()">
-      <option value="COD">💵 Cash on Delivery (COD)</option>
-      <option value="UPI">⚡ Direct Kotak UPI (QR Code)</option>
-    </select>
-    <div id="upiBox" style="display:none;text-align:center;background:#F8FAFC;padding:12px;border-radius:12px;margin-bottom:12px;">
-      <div id="qrcode" style="display:inline-block;"></div>
-      <div style="font-size:12px;font-weight:700;margin-top:6px;">UPI: 8305530240@kotakbank</div>
-    </div>
-    <button class="pay-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order Now ▸</button>
-  </div>
-</div>
-
-<div class="modal" id="ordersModal">
-  <div class="sheet">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3>📦 My Orders</h3>
-      <button onclick="closeModal('ordersModal')" style="border:none;background:#F1F5F9;width:30px;height:30px;border-radius:50%;font-weight:800;">✕</button>
-    </div>
-    <div id="myOrdersList"></div>
-  </div>
-</div>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForRTDBAccess",
-  authDomain: "jhatpat-22aa8.firebaseapp.com",
-  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-  projectId: "jhatpat-22aa8",
-  storageBucket: "jhatpat-22aa8.appspot.com",
-  messagingSenderId: "100000000000",
-  appId: "1:100000000000:web:jhatpat22aa8"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let products = {};
-let coupons = {};
-let cart = JSON.parse(localStorage.getItem('jhatpat_cart') || '{}');
-let activeCat = 'ALL';
-let appliedCoupon = null;
-
-document.getElementById('cName').value = localStorage.getItem('jhatpat_cname') || '';
-document.getElementById('cPhone').value = localStorage.getItem('jhatpat_cphone') || '';
-document.getElementById('cAddr').value = localStorage.getItem('jhatpat_caddr') || '';
-
-db.ref('products').on('value', snap => {
-  products = snap.val() || {};
-  renderCategories();
-  renderProducts();
-  updateCartUI();
-});
-
-db.ref('coupons').on('value', snap => {
-  coupons = snap.val() || {};
-});
-
-db.ref('banners').on('value', snap => {
-  const bList = Object.values(snap.val() || {});
-  const box = document.getElementById('bannerBox');
-  if (!bList.length) { box.innerHTML = ''; return; }
-  const b = bList[bList.length - 1];
-  box.innerHTML = `<div style="background:${b.bg || 'linear-gradient(135deg,#0C831F,#16A34A)'};color:#fff;padding:16px;border-radius:16px;">
-    <div style="font-size:10px;font-weight:800;opacity:0.9;">${b.tag || 'SPECIAL OFFER'}</div>
-    <div style="font-size:18px;font-weight:800;margin-top:2px;">${b.emoji || '⚡'} ${b.title}</div>
-    <div style="font-size:12px;opacity:0.9;">${b.subtitle || ''}</div>
-  </div>`;
-});
-
-function renderCategories() {
-  const cats = ['ALL', ...new Set(Object.values(products).map(p => p.category).filter(Boolean))];
-  document.getElementById('catTabs').innerHTML = cats.map(c =>
-    `<div class="cat ${activeCat === c ? 'active' : ''}" onclick="activeCat='${c}';renderCategories();renderProducts();">${c === 'ALL' ? '✨ All Items' : c}</div>`
-  ).join('');
-}
-
-function renderProducts() {
-  const q = document.getElementById('searchInp').value.trim().toLowerCase();
-  const list = Object.entries(products).filter(([, p]) => {
-    if (!p || p.globalOutOfStock) return false;
-    if (activeCat !== 'ALL' && p.category !== activeCat) return false;
-    if (q && !(p.name || '').toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  document.getElementById('itemCount').textContent = `${list.length} items`;
-  document.getElementById('prodGrid').innerHTML = list.map(([id, p]) => {
-    const qty = cart[id] || 0;
-    const imgUrl = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
-    return `<div class="card">
-      <img src="${imgUrl}" alt="">
-      <div style="font-size:13px;font-weight:700;min-height:34px;">${p.name}</div>
-      <div style="font-size:11px;color:#64748B;margin:3px 0 8px;">${p.unit || ''}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
-        <div>
-          <strong style="font-size:14px;">₹${p.price}</strong>
-          ${p.mrp > p.price ? `<span style="font-size:11px;color:#94A3B8;text-decoration:line-through;margin-left:4px;">₹${p.mrp}</span>` : ''}
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-extrabold tracking-tight">⚡ Jhatpat</span>
+          <span class="text-xs bg-emerald-800 px-2 py-0.5 rounded-full font-semibold">10-15 Mins</span>
         </div>
-        ${qty === 0
-          ? `<button class="btn-add" onclick="changeQty('${id}',1)">ADD</button>`
-          : `<div class="step"><button onclick="changeQty('${id}',-1)">−</button><span>${qty}</span><button onclick="changeQty('${id}',1)">+</button></div>`
-        }
+        <p class="text-xs text-emerald-100 mt-0.5">Direct Instant Delivery • No Dark Store Restrictions</p>
       </div>
-    </div>`;
-  }).join('');
-}
+      <button onclick="toggleOrdersModal()" class="bg-white/20 hover:bg-white/30 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+        My Orders
+      </button>
+    </div>
+    <!-- Search Bar -->
+    <div class="max-w-4xl mx-auto px-4 pb-3">
+      <input id="searchInput" type="text" oninput="renderProducts()" placeholder="Search groceries, snacks, beverages..."
+        class="w-full px-4 py-2.5 rounded-xl text-gray-800 text-sm focus:outline-none shadow-inner" />
+    </div>
+  </header>
 
-function changeQty(id, delta) {
-  const next = (cart[id] || 0) + delta;
-  if (next <= 0) delete cart[id];
-  else cart[id] = next;
-  localStorage.setItem('jhatpat_cart', JSON.stringify(cart));
-  renderProducts();
-  updateCartUI();
-}
+  <!-- Category Filter Pills -->
+  <div class="max-w-4xl mx-auto px-4 pt-4">
+    <div id="categoryBar" class="flex gap-2 overflow-x-auto hide-scrollbar pb-2"></div>
+  </div>
 
-function getTotals() {
-  let sub = 0, count = 0;
-  Object.entries(cart).forEach(([id, qty]) => {
-    if (products[id]) {
-      sub += Number(products[id].price) * qty;
-      count += qty;
-    }
-  });
-  const del = sub >= 199 || sub === 0 ? 0 : 7;
-  let disc = 0;
-  if (appliedCoupon && sub >= (appliedCoupon.minOrder || 0)) {
-    disc = appliedCoupon.type === 'FLAT'
-      ? Number(appliedCoupon.value)
-      : Math.min(Math.round(sub * Number(appliedCoupon.value) / 100), Number(appliedCoupon.maxDiscount || 999));
-  }
-  const grand = Math.max(0, sub + del - disc);
-  return { sub, count, del, disc, grand };
-}
+  <!-- Product Grid -->
+  <main class="max-w-4xl mx-auto px-4 pt-3">
+    <div id="loadingState" class="text-center py-12 text-gray-500 font-medium">Loading fresh products...</div>
+    <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
+  </main>
 
-function updateCartUI() {
-  const { sub, count, del, disc, grand } = getTotals();
-  const bar = document.getElementById('cartBar');
-  if (count === 0) {
-    bar.style.display = 'none';
-    return;
-  }
-  bar.style.display = 'flex';
-  document.getElementById('barQty').textContent = `${count} ITEM${count > 1 ? 'S' : ''}`;
-  document.getElementById('barTotal').textContent = `₹${grand}`;
+  <!-- Floating Cart Bar -->
+  <div id="cartBar" class="hidden fixed bottom-4 left-4 right-4 max-w-4xl mx-auto bg-emerald-600 text-white rounded-2xl shadow-xl p-4 flex items-center justify-between z-40 cursor-pointer" onclick="openCheckoutModal()">
+    <div>
+      <p id="cartSummaryText" class="font-bold text-sm">0 Items | ₹0</p>
+      <p class="text-xs text-emerald-100">Tap to place direct order</p>
+    </div>
+    <span class="bg-white text-emerald-700 font-bold text-sm px-4 py-2 rounded-xl shadow">Proceed to Checkout →</span>
+  </div>
 
-  document.getElementById('freeDelBanner').textContent = sub >= 199
-    ? '🎉 You unlocked FREE Delivery!'
-    : `Add ₹${199 - sub} more for FREE Delivery`;
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h2 class="text-lg font-bold text-gray-800">Complete Your Order</h2>
+        <button onclick="closeCheckoutModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
 
-  document.getElementById('bSub').textContent = `₹${sub}`;
-  document.getElementById('bDel').textContent = del === 0 ? 'FREE' : `₹${del}`;
-  document.getElementById('bDiscRow').style.display = disc > 0 ? 'flex' : 'none';
-  document.getElementById('bDisc').textContent = `-₹${disc}`;
-  document.getElementById('bGrand').textContent = `₹${grand}`;
+      <!-- Cart Items Review -->
+      <div id="checkoutItemsList" class="space-y-2 mb-4 max-h-48 overflow-y-auto border-b pb-3"></div>
 
-  document.getElementById('cartList').innerHTML = Object.entries(cart).map(([id, qty]) => {
-    const p = products[id];
-    if (!p) return '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;">
-      <div><strong>${p.name}</strong><div style="font-size:11px;color:#64748B;">${p.unit} • ₹${p.price}</div></div>
-      <div class="step"><button onclick="changeQty('${id}',-1);openCart();">−</button><span>${qty}</span><button onclick="changeQty('${id}',1);openCart();">+</button></div>
-    </div>`;
-  }).join('');
-}
+      <!-- Bill Details -->
+      <div class="bg-gray-50 p-3 rounded-xl text-sm space-y-1 mb-4">
+        <div class="flex justify-between text-gray-600"><span>Item Total</span><span id="billItemTotal">₹0</span></div>
+        <div class="flex justify-between text-gray-600"><span>Delivery Fee</span><span class="text-emerald-600 font-semibold">FREE</span></div>
+        <div class="flex justify-between font-bold text-gray-900 text-base border-t pt-1 mt-1"><span>Grand Total</span><span id="billGrandTotal">₹0</span></div>
+      </div>
 
-function applyCoupon() {
-  const code = document.getElementById('cpInput').value.trim().toUpperCase();
-  if (!coupons[code]) {
-    appliedCoupon = null;
-    document.getElementById('cpMsg').textContent = '❌ Invalid Coupon Code';
-  } else {
-    appliedCoupon = coupons[code];
-    document.getElementById('cpMsg').textContent = `✅ Coupon ${code} Applied!`;
-  }
-  updateCartUI();
-}
+      <!-- Customer Details Form (Direct Order - No Dark Store check/block) -->
+      <form id="orderForm" onsubmit="placeDirectOrder(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Full Name *</label>
+          <input type="text" id="custName" required placeholder="Enter your name" class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Mobile Number *</label>
+          <input type="tel" id="custPhone" required pattern="[0-9]{10}" maxlength="10" placeholder="10-digit mobile number" class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Full Delivery Address *</label>
+          <textarea id="custAddress" required rows="2" placeholder="House/Flat No., Building, Street, Landmark" class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">Payment Mode</label>
+          <select id="paymentMode" class="w-full border rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+            <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
+            <option value="UPI on Delivery">UPI on Delivery</option>
+          </select>
+        </div>
+        <button type="submit" id="placeOrderBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition">
+          Place Order Now
+        </button>
+      </form>
+    </div>
+  </div>
 
-function toggleUpiBox() {
-  const mode = document.getElementById('payMode').value;
-  const box = document.getElementById('upiBox');
-  if (mode === 'UPI') {
-    box.style.display = 'block';
-    const { grand } = getTotals();
-    const qrDiv = document.getElementById('qrcode');
-    qrDiv.innerHTML = '';
-    new QRCode(qrDiv, { text: `upi://pay?pa=8305530240@kotakbank&pn=Jhatpat&am=${grand}&cu=INR`, width: 150, height: 150 });
-  } else {
-    box.style.display = 'none';
-  }
-}
+  <!-- Live Order Tracking Modal -->
+  <div id="ordersModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h2 class="text-lg font-bold text-gray-800">My Live Orders</h2>
+        <button onclick="toggleOrdersModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
+      <div id="myOrdersList" class="space-y-3 text-sm">
+        <p class="text-gray-500 text-center py-6">No recent orders placed from this device.</p>
+      </div>
+    </div>
+  </div>
 
-function openCart() {
-  updateCartUI();
-  toggleUpiBox();
-  openModal('cartModal');
-}
+  <script>
+    let products = [];
+    let cart = JSON.parse(localStorage.getItem('jhatpat_cart') || '{}');
+    let selectedCategory = 'All';
+    let myOrderIds = JSON.parse(localStorage.getItem('jhatpat_my_orders') || '[]');
 
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  if (id === 'ordersModal') loadMyOrders();
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    const FALLBACK_IMG = 'https://placehold.co/300x300/e2e8f0/475569?text=Jhatpat+Item';
 
-function placeOrder() {
-  const name = document.getElementById('cName').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const addr = document.getElementById('cAddr').value.trim();
-  const payMode = document.getElementById('payMode').value;
-  const { sub, count, del, disc, grand } = getTotals();
-
-  if (count === 0) return alert('Cart khaali hai!');
-  if (!name || phone.length < 10 || !addr) return alert('Apna Naam, 10-digit Mobile Number aur Poora Address dalein!');
-
-  localStorage.setItem('jhatpat_cname', name);
-  localStorage.setItem('jhatpat_cphone', phone);
-  localStorage.setItem('jhatpat_caddr', addr);
-
-  const btn = document.getElementById('placeOrderBtn');
-  btn.disabled = true;
-  btn.textContent = 'Placing Order...';
-
-  const items = Object.entries(cart).filter(([id]) => products[id]).map(([id, qty]) => ({
-    id, name: products[id].name, unit: products[id].unit || '', price: Number(products[id].price), qty
-  }));
-
-  const orderId = 'JHT' + Math.floor(100000 + Math.random() * 900000);
-  const orderData = {
-    orderId,
-    storeId: 'MAIN_STORE',
-    city: 'Dombivli',
-    customerName: name,
-    customerPhone: phone,
-    customerAddress: addr,
-    items,
-    itemTotal: sub,
-    deliveryFee: del,
-    discount: disc,
-    totalAmount: grand,
-    paymentMethod: payMode,
-    status: 'PLACED',
-    createdAt: Date.now()
-  };
-
-  db.ref('orders/' + orderId).set(orderData)
-    .then(() => {
-      cart = {};
-      localStorage.removeItem('jhatpat_cart');
-      localStorage.setItem('jhatpat_last_order', orderId);
-      btn.disabled = false;
-      btn.textContent = 'Place Order Now ▸';
-      closeModal('cartModal');
+    // Real-time Products Sync from Firebase
+    db.ref('products').on('value', (snapshot) => {
+      const data = snapshot.val() || {};
+      products = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+      document.getElementById('loadingState').style.display = 'none';
+      renderCategories();
       renderProducts();
       updateCartUI();
-      watchLiveOrder(orderId);
-      alert('🎉 Order Placed Successfully! Order ID: #' + orderId);
-    })
-    .catch(err => {
-      btn.disabled = false;
-      btn.textContent = 'Place Order Now ▸';
-      alert('Error: ' + err.message);
+    }, (err) => {
+      document.getElementById('loadingState').innerText = 'Error loading store: ' + err.message;
     });
-}
 
-function watchLiveOrder(orderId) {
-  if (!orderId) return;
-  db.ref('orders/' + orderId).on('value', snap => {
-    const o = snap.val();
-    if (!o) return;
-    document.getElementById('liveTracker').style.display = 'block';
-    document.getElementById('trkId').textContent = '#' + o.orderId;
-    document.getElementById('trkStatus').textContent = o.status.replace(/_/g, ' ');
-  });
-}
-
-const lastOrd = localStorage.getItem('jhatpat_last_order');
-if (lastOrd) watchLiveOrder(lastOrd);
-
-function loadMyOrders() {
-  const phone = localStorage.getItem('jhatpat_cphone') || '';
-  const box = document.getElementById('myOrdersList');
-  if (!phone) {
-    box.innerHTML = '<p style="color:#64748B;font-size:13px;">Abhi tak koi order place nahi kiya gaya hai.</p>';
-    return;
-  }
-  db.ref('orders').orderByChild('customerPhone').equalTo(phone).once('value', snap => {
-    const list = Object.values(snap.val() || {}).sort((a, b) => b.createdAt - a.createdAt);
-    if (!list.length) {
-      box.innerHTML = '<p style="color:#64748B;font-size:13px;">Koi order nahi mila.</p>';
-      return;
+    function renderCategories() {
+      const cats = ['All', ...new Set(products.map(p => p.category || 'General').filter(Boolean))];
+      const bar = document.getElementById('categoryBar');
+      bar.innerHTML = cats.map(c => `
+        <button onclick="selectCategory('${c.replace(/'/g, "\\'")}')"
+          class="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${selectedCategory === c ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-700 border hover:bg-gray-100'}">
+          ${c}
+        </button>
+      `).join('');
     }
-    box.innerHTML = list.map(o => `<div style="border:1px solid #E2E8F0;border-radius:12px;padding:12px;margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;"><strong>#${o.orderId}</strong><span style="color:#0C831F;font-weight:800;font-size:12px;">${o.status}</span></div>
-      <div style="font-size:12px;color:#64748B;margin:4px 0;">${(o.items || []).map(i => `${i.name} x${i.qty}`).join(', ')}</div>
-      <div style="font-size:13px;font-weight:800;">Total: ₹${o.totalAmount} (${o.paymentMethod})</div>
-    </div>`).join('');
-  });
-}
-</script>
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategories();
+      renderProducts();
+    }
+
+    function renderProducts() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const grid = document.getElementById('productGrid');
+      const filtered = products.filter(p => {
+        const matchCat = selectedCategory === 'All' || (p.category || 'General') === selectedCategory;
+        const matchQuery = !query || (p.name || '').toLowerCase().includes(query) || (p.category || '').toLowerCase().includes(query);
+        return matchCat && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-12 text-gray-500">No products found.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const qty = cart[p.id] || 0;
+        const inStock = p.inStock !== false && (p.stock === undefined || Number(p.stock) > 0);
+        const price = Number(p.price || 0);
+        const mrp = Number(p.mrp || price);
+        return `
+          <div class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 flex flex-col justify-between">
+            <div>
+              <div class="relative w-full h-32 bg-gray-50 rounded-xl overflow-hidden mb-2 flex items-center justify-center">
+                <img src="${p.image || FALLBACK_IMG}" onerror="this.src='${FALLBACK_IMG}'" alt="${p.name}" class="object-cover w-full h-full" />
+                ${!inStock ? '<span class="absolute inset-0 bg-white/80 flex items-center justify-center text-xs font-bold text-red-600">Out of Stock</span>' : ''}
+              </div>
+              <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">${p.category || 'Grocery'}</span>
+              <h3 class="font-bold text-gray-800 text-sm mt-1 line-clamp-2">${p.name}</h3>
+              <p class="text-xs text-gray-400">${p.unit || '1 Unit'}</p>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div>
+                <span class="font-extrabold text-gray-900 text-sm">₹${price}</span>
+                ${mrp > price ? `<span class="text-xs text-gray-400 line-through ml-1">₹${mrp}</span>` : ''}
+              </div>
+              ${!inStock ? `<button disabled class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 text-xs font-bold">Sold Out</button>` :
+                qty === 0 ? `<button onclick="updateQty('${p.id}', 1)" class="px-3.5 py-1.5 rounded-lg border border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white text-xs font-bold transition">ADD</button>` :
+                `<div class="flex items-center bg-emerald-600 text-white rounded-lg overflow-hidden">
+                  <button onclick="updateQty('${p.id}', -1)" class="px-2.5 py-1 font-bold text-sm">−</button>
+                  <span class="px-2 text-xs font-bold">${qty}</span>
+                  <button onclick="updateQty('${p.id}', 1)" class="px-2.5 py-1 font-bold text-sm">+</button>
+                </div>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateQty(id, delta) {
+      const next = (cart[id] || 0) + delta;
+      if (next <= 0) delete cart[id];
+      else cart[id] = next;
+      localStorage.setItem('jhatpat_cart', JSON.stringify(cart));
+      renderProducts();
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      let totalItems = 0;
+      let totalAmount = 0;
+      Object.keys(cart).forEach(id => {
+        const prod = products.find(p => p.id === id);
+        if (prod) {
+          totalItems += cart[id];
+          totalAmount += Number(prod.price || 0) * cart[id];
+        }
+      });
+
+      const bar = document.getElementById('cartBar');
+      if (totalItems > 0) {
+        bar.classList.remove('hidden');
+        document.getElementById('cartSummaryText').innerText = `${totalItems} Item${totalItems > 1 ? 's' : ''} | ₹${totalAmount}`;
+      } else {
+        bar.classList.add('hidden');
+      }
+    }
+
+    function openCheckoutModal() {
+      const list = document.getElementById('checkoutItemsList');
+      let html = '';
+      let total = 0;
+      Object.keys(cart).forEach(id => {
+        const prod = products.find(p => p.id === id);
+        if (prod) {
+          const sub = Number(prod.price || 0) * cart[id];
+          total += sub;
+          html += `<div class="flex justify-between items-center text-sm">
+            <span>${prod.name} <span class="text-gray-400">x${cart[id]}</span></span>
+            <span class="font-semibold">₹${sub}</span>
+          </div>`;
+        }
+      });
+      list.innerHTML = html;
+      document.getElementById('billItemTotal').innerText = '₹' + total;
+      document.getElementById('billGrandTotal').innerText = '₹' + total;
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    // Direct Order Placement — Zero Dark Store Checks or Blockers
+    async function placeDirectOrder(e) {
+      e.preventDefault();
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.innerText = 'Placing Order...';
+
+      const orderItems = [];
+      let totalAmount = 0;
+      Object.keys(cart).forEach(id => {
+        const prod = products.find(p => p.id === id);
+        if (prod) {
+          const qty = cart[id];
+          const price = Number(prod.price || 0);
+          totalAmount += price * qty;
+          orderItems.push({
+            id: prod.id,
+            name: prod.name,
+            unit: prod.unit || '',
+            price: price,
+            qty: qty
+          });
+        }
+      });
+
+      if (orderItems.length === 0) {
+        alert('Your cart is empty!');
+        btn.disabled = false;
+        btn.innerText = 'Place Order Now';
+        return;
+      }
+
+      const orderId = 'JHP' + Date.now().toString().slice(-6);
+      const orderPayload = {
+        orderId: orderId,
+        customerName: document.getElementById('custName').value.trim(),
+        customerPhone: document.getElementById('custPhone').value.trim(),
+        customerAddress: document.getElementById('custAddress').value.trim(),
+        paymentMode: document.getElementById('paymentMode').value,
+        items: orderItems,
+        totalAmount: totalAmount,
+        status: 'Pending',
+        createdAt: Date.now()
+      };
+
+      try {
+        await db.ref('orders/' + orderId).set(orderPayload);
+        myOrderIds.unshift(orderId);
+        localStorage.setItem('jhatpat_my_orders', JSON.stringify(myOrderIds));
+        cart = {};
+        localStorage.removeItem('jhatpat_cart');
+        updateCartUI();
+        renderProducts();
+        closeCheckoutModal();
+        alert('Order Placed Successfully! Order ID: ' + orderId);
+        toggleOrdersModal(true);
+      } catch (err) {
+        alert('Failed to place order: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Place Order Now';
+      }
+    }
+
+    function toggleOrdersModal(forceOpen = false) {
+      const modal = document.getElementById('ordersModal');
+      if (forceOpen) modal.classList.remove('hidden');
+      else modal.classList.toggle('hidden');
+
+      if (!modal.classList.contains('hidden')) {
+        loadMyOrders();
+      }
+    }
+
+    function loadMyOrders() {
+      const container = document.getElementById('myOrdersList');
+      if (myOrderIds.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-6">No recent orders placed from this device.</p>';
+        return;
+      }
+      db.ref('orders').once('value', snap => {
+        const allOrders = snap.val() || {};
+        const userOrders = myOrderIds.map(id => allOrders[id]).filter(Boolean);
+        if (userOrders.length === 0) {
+          container.innerHTML = '<p class="text-gray-500 text-center py-6">No active orders found.</p>';
+          return;
+        }
+        container.innerHTML = userOrders.map(o => `
+          <div class="border rounded-xl p-3 bg-gray-50">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-bold text-gray-800">#${o.orderId}</span>
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-700' :
+                o.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' :
+                o.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+              }">${o.status}</span>
+            </div>
+            <p class="text-xs text-gray-600 mb-1">${(o.items || []).map(i => `${i.name} x${i.qty}`).join(', ')}</p>
+            <div class="flex justify-between text-xs font-semibold text-gray-800 pt-1 border-t">
+              <span>Total: ₹${o.totalAmount}</span>
+              <span>${new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+          </div>
+        `).join('');
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,603 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jhatpat — Super Admin HQ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<style>
-  :root {
-    --bg: #F1F5F9;
-    --sidebar: #0F172A;
-    --card: #FFFFFF;
-    --primary: #0C831F;
-    --accent: #F8CB46;
-    --text: #0F172A;
-    --muted: #64748B;
-    --border: #E2E8F0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+    <!-- Firebase SDKs (Compat v9/v10 for zero-build direct browser execution) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        projectId: "jhatpat-22aa8",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        storageBucket: "jhatpat-22aa8.appspot.com"
+      };
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.database();
+    </script>
 
-  .lock-screen {
-    position: fixed; inset: 0; background: #0F172A; display: flex; align-items: center; justify-content: center; z-index: 999; padding: 16px;
-  }
-  .lock-card {
-    background: #1E293B; color: #fff; padding: 32px; border-radius: 20px; width: 100%; max-width: 390px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.4);
-  }
-  .lock-card input {
-    width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid #334155; background: #0F172A; color: #fff; font-size: 15px; margin: 16px 0 12px; outline: none;
-  }
-  .btn {
-    padding: 10px 16px; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-yellow { background: var(--accent); color: #111; }
-  .btn-danger { background: #DC2626; color: #fff; }
-  .btn-dark { background: #1E293B; color: #fff; }
-  .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
-
-  .topbar {
-    background: #0F172A; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 40;
-  }
-  .nav-tabs {
-    display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--border);
-  }
-  .nav-tab {
-    padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: #F8FAFC; font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap;
-  }
-  .nav-tab.active { background: #0F172A; color: #fff; border-color: #0F172A; }
-  .main-wrap { max-width: 1280px; margin: 0 auto; padding: 20px; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  .card {
-    background: #fff; border-radius: 16px; padding: 18px; border: 1px solid var(--border); margin-bottom: 18px;
-  }
-  .card-head {
-    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 14px;
-  }
-  .form-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;
-  }
-  input, select {
-    width: 100%; padding: 9px 12px; border: 1px solid #CBD5E1; border-radius: 9px; font-family: inherit; font-size: 13px;
-  }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  th { background: #F8FAFC; font-weight: 800; color: #475569; font-size: 12px; }
-  .table-wrap { overflow-x: auto; }
-
-  .modal-bg {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.65); display: none; align-items: center; justify-content: center; z-index: 200; padding: 16px;
-  }
-  .modal-bg.open { display: flex; }
-  .modal-box {
-    background: #fff; border-radius: 18px; padding: 22px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
-  }
-  .upload-label {
-    display: inline-flex; align-items: center; gap: 6px; background: #EFF6FF; color: #1D4ED8; border: 1px dashed #3B82F6; padding: 9px 14px; border-radius: 9px; font-weight: 700; font-size: 13px; cursor: pointer;
-  }
-</style>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f1f5f9; }
+  </style>
 </head>
 <body>
-
-<div class="lock-screen" id="lockScreen">
-  <div class="lock-card">
-    <div style="font-size:38px;">⚡</div>
-    <h2 style="margin-top:8px;">Jhatpat Super Admin HQ</h2>
-    <p style="font-size:13px;color:#94A3B8;margin-top:4px;">Enter Master Password to unlock command center</p>
-    <input type="password" id="adminPassInput" placeholder="Admin Password" onkeydown="if(event.key==='Enter') unlockAdmin()">
-    <button class="btn btn-yellow" style="width:100%;justify-content:center;padding:12px;" onclick="unlockAdmin()">Unlock Admin HQ ▸</button>
-  </div>
-</div>
-
-<header class="topbar">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span style="background:#F8CB46;color:#111;font-weight:800;padding:4px 10px;border-radius:8px;">⚡ JHATPAT</span>
-    <strong>Super Admin HQ</strong>
-  </div>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <span id="dbCountPill" style="font-size:12px;background:#1E293B;padding:5px 10px;border-radius:8px;">0 Items</span>
-    <button class="btn btn-danger" onclick="logoutAdmin()">Lock</button>
-  </div>
-</header>
-
-<nav class="nav-tabs">
-  <button class="nav-tab active" onclick="switchTab('catalogTab', this)">🥦 Catalog & Store Stock</button>
-  <button class="nav-tab" onclick="switchTab('ordersTab', this)">📦 Live Orders Override</button>
-  <button class="nav-tab" onclick="switchTab('crmTab', this)">👥 Customer CRM & WhatsApp</button>
-  <button class="nav-tab" onclick="switchTab('marketingTab', this)">🎟️ Coupons & Banners</button>
-</nav>
-
-<div class="main-wrap">
-
-  <!-- TAB 1: CATALOG & GALLERY PHOTO UPLOAD + FULL EDIT -->
-  <div class="tab-panel active" id="catalogTab">
-    <div class="card">
-      <div class="card-head">
+  <!-- Password Gate (MOHIT@001) -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4 bg-slate-900">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
+      <div class="text-center mb-6">
+        <span class="text-3xl font-extrabold text-emerald-600">⚡ Jhatpat Admin</span>
+        <p class="text-xs text-gray-500 mt-1">Master Inventory & Order Control</p>
+      </div>
+      <form onsubmit="verifyAdminLogin(event)" class="space-y-4">
         <div>
-          <h3>🥦 Add New Product (Phone Gallery Upload)</h3>
-          <p style="font-size:12px;color:var(--muted);">Apne phone ki gallery se photo upload karein aur price/unit set karein.</p>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Admin Password</label>
+          <input type="password" id="adminPassInput" required placeholder="Enter Admin Password"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
         </div>
-      </div>
+        <p id="loginError" class="text-red-600 text-xs font-semibold hidden">Invalid Admin Password!</p>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow transition">
+          Unlock Admin Panel
+        </button>
+      </form>
+    </div>
+  </div>
 
-      <div class="form-grid" style="align-items:center;">
-        <input type="text" id="prodNameInput" placeholder="Product Name (e.g. Fresh Onion) *">
-        <select id="prodCatInput">
-          <option value="Fresh Vegetables">Fresh Vegetables</option>
-          <option value="Fresh Fruits">Fresh Fruits</option>
-          <option value="Cold Pressed Juices">Cold Pressed Juices</option>
-          <option value="Leafy & Herbs">Leafy & Herbs</option>
-          <option value="Exotic & Organic">Exotic & Organic</option>
-        </select>
-        <input type="text" id="prodUnitInput" placeholder="Pack Size (e.g. 500 g, 1 kg) *">
-        <input type="number" id="prodPriceInput" placeholder="Selling Price ₹ *">
-        <input type="number" id="prodMrpInput" placeholder="MRP ₹ (Optional)">
+  <!-- Main Admin Dashboard -->
+  <div id="adminDashboard" class="hidden min-h-screen pb-12">
+    <header class="bg-slate-900 text-white shadow">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <label class="upload-label">
-            📷 Gallery se Photo Chunein
-            <input type="file" id="prodGalleryFile" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, 'prodPreviewImg', 'prodImgInput')">
-          </label>
-          <input type="hidden" id="prodImgInput">
+          <h1 class="text-xl font-extrabold">⚡ Jhatpat Admin Panel</h1>
+          <p class="text-xs text-slate-400">Firebase: jhatpat-22aa8 • Gallery Upload & Full Product Edit</p>
         </div>
-      </div>
-      <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <img id="prodPreviewImg" src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80" style="width:60px;height:60px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;">
-        <button class="btn btn-primary" onclick="addSingleProduct()">+ Add Product to Catalog</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <h3>Live Catalog (<span id="catalogTotalCount">0</span> Items)</h3>
-        <input type="text" id="catalogSearch" placeholder="Search product..." style="width:220px;" oninput="renderCatalogTable()">
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Photo</th>
-              <th>Product Details</th>
-              <th>Price / MRP</th>
-              <th>Stock Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="catalogTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 2: LIVE ORDERS OVERRIDE -->
-  <div class="tab-panel" id="ordersTab">
-    <div class="card">
-      <div class="card-head"><h3>📦 Live Orders Command & Status Override</h3></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status Override</th></tr>
-          </thead>
-          <tbody id="adminOrdersBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 3: CUSTOMER CRM & WHATSAPP -->
-  <div class="tab-panel" id="crmTab">
-    <div class="card">
-      <div class="card-head"><h3>👥 Customer CRM & 1-Click WhatsApp</h3></div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Total Spend</th><th>WhatsApp</th></tr>
-          </thead>
-          <tbody id="crmTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 4: COUPONS & BANNERS -->
-  <div class="tab-panel" id="marketingTab">
-    <div class="card">
-      <h3 style="margin-bottom:12px;">🎟️ Create Promo Coupon</h3>
-      <div class="form-grid">
-        <input type="text" id="cpCode" placeholder="Code (e.g. JHATPAT50)" style="text-transform:uppercase;">
-        <select id="cpType"><option value="FLAT">Flat Discount (₹)</option><option value="PERCENT">Percentage (%)</option></select>
-        <input type="number" id="cpValue" placeholder="Value (e.g. 50)">
-        <input type="number" id="cpMinOrder" placeholder="Min Order ₹">
-        <input type="number" id="cpMaxDisc" placeholder="Max Discount ₹">
-      </div>
-      <button class="btn btn-primary" style="margin-top:10px;" onclick="saveCoupon()">+ Save Coupon</button>
-      <div class="table-wrap" style="margin-top:14px;">
-        <table>
-          <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Min Order</th><th>Action</th></tr></thead>
-          <tbody id="couponsTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:12px;">🖼️ Add App Promo Banner</h3>
-      <div class="form-grid">
-        <input type="text" id="bnTag" placeholder="Tag (e.g. FLASH SALE)">
-        <input type="text" id="bnTitle" placeholder="Title">
-        <input type="text" id="bnSub" placeholder="Subtitle">
-        <input type="text" id="bnEmoji" placeholder="Emoji (e.g. 🥭)">
-        <select id="bnBg">
-          <option value="linear-gradient(135deg,#0C831F,#16A34A)">Blinkit Green</option>
-          <option value="linear-gradient(135deg,#EA580C,#F59E0B)">Mango Orange</option>
-          <option value="linear-gradient(135deg,#1D4ED8,#3B82F6)">Royal Blue</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" style="margin-top:10px;" onclick="saveBanner()">+ Publish Banner</button>
-      <div id="bannersListAdmin" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- FULL PRODUCT EDIT MODAL -->
-<div class="modal-bg" id="editProdModal">
-  <div class="modal-box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <h3>✏️ Edit Product Details</h3>
-      <button class="btn btn-outline" onclick="closeEditProdModal()">✕</button>
-    </div>
-    <input type="hidden" id="editProdId">
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <img id="editProdPreviewImg" src="" style="width:70px;height:70px;border-radius:12px;object-fit:cover;border:1px solid #CBD5E1;">
-        <label class="upload-label">
-          📷 Gallery se Nayi Photo Lagayein
-          <input type="file" accept="image/*" style="display:none;" onchange="handleGalleryUpload(event, 'editProdPreviewImg', 'editProdImgInput')">
-        </label>
-        <input type="hidden" id="editProdImgInput">
-      </div>
-
-      <label style="font-size:12px;font-weight:700;">Product Name *</label>
-      <input type="text" id="editProdName">
-
-      <label style="font-size:12px;font-weight:700;">Category *</label>
-      <select id="editProdCat">
-        <option value="Fresh Vegetables">Fresh Vegetables</option>
-        <option value="Fresh Fruits">Fresh Fruits</option>
-        <option value="Cold Pressed Juices">Cold Pressed Juices</option>
-        <option value="Leafy & Herbs">Leafy & Herbs</option>
-        <option value="Exotic & Organic">Exotic & Organic</option>
-      </select>
-
-      <label style="font-size:12px;font-weight:700;">Pack Size / Unit (e.g. 500 g, 1 kg) *</label>
-      <input type="text" id="editProdUnit">
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <label style="font-size:12px;font-weight:700;">Selling Price (₹) *</label>
-          <input type="number" id="editProdPrice">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:700;">MRP (₹)</label>
-          <input type="number" id="editProdMrp">
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:16px;display:flex;gap:10px;">
-      <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="saveEditedProduct()">💾 Save Changes</button>
-      <button class="btn btn-outline" onclick="closeEditProdModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForRTDBAccess",
-  authDomain: "jhatpat-22aa8.firebaseapp.com",
-  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-  projectId: "jhatpat-22aa8",
-  storageBucket: "jhatpat-22aa8.appspot.com",
-  messagingSenderId: "100000000000",
-  appId: "1:100000000000:web:jhatpat22aa8"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let allProducts = {};
-let allOrders = {};
-let allCoupons = {};
-let allBanners = {};
-
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function showToast(msg, type = 'dark') {
-  let box = document.getElementById('toastBox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:360px;';
-    document.body.appendChild(box);
-  }
-  const el = document.createElement('div');
-  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
-  el.textContent = msg;
-  box.appendChild(el);
-  setTimeout(() => el.remove(), 2800);
-}
-
-if (sessionStorage.getItem('jhatpat_admin_unlocked') === '1') {
-  document.getElementById('lockScreen').style.display = 'none';
-  bootAdmin();
-}
-
-function unlockAdmin() {
-  const pass = document.getElementById('adminPassInput').value.trim();
-  if (pass === 'MOHIT@001') {
-    sessionStorage.setItem('jhatpat_admin_unlocked', '1');
-    document.getElementById('lockScreen').style.display = 'none';
-    bootAdmin();
-  } else {
-    showToast('Wrong Admin Password!', 'error');
-  }
-}
-
-function logoutAdmin() {
-  sessionStorage.removeItem('jhatpat_admin_unlocked');
-  location.reload();
-}
-
-function switchTab(panelId, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById(panelId).classList.add('active');
-  btn.classList.add('active');
-}
-
-function handleGalleryUpload(event, previewImgId, hiddenInputId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      const MAX_SIZE = 320;
-      let w = img.width;
-      let h = img.height;
-      if (w > h) { if (w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; } }
-      else { if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; } }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
-      document.getElementById(previewImgId).src = compressedDataUrl;
-      document.getElementById(hiddenInputId).value = compressedDataUrl;
-      showToast('Gallery se photo select ho gayi!', 'success');
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function bootAdmin() {
-  db.ref('products').on('value', snap => {
-    allProducts = snap.val() || {};
-    document.getElementById('dbCountPill').textContent = `${Object.keys(allProducts).length} Items`;
-    renderCatalogTable();
-  });
-
-  db.ref('orders').on('value', snap => {
-    allOrders = snap.val() || {};
-    renderAdminOrders();
-    renderCRM();
-  });
-
-  db.ref('coupons').on('value', snap => {
-    allCoupons = snap.val() || {};
-    renderCoupons();
-  });
-
-  db.ref('banners').on('value', snap => {
-    allBanners = snap.val() || {};
-    renderBanners();
-  });
-}
-
-function addSingleProduct() {
-  const name = document.getElementById('prodNameInput').value.trim();
-  const category = document.getElementById('prodCatInput').value;
-  const unit = document.getElementById('prodUnitInput').value.trim();
-  const price = Number(document.getElementById('prodPriceInput').value);
-  const mrp = Number(document.getElementById('prodMrpInput').value) || price;
-  const img = document.getElementById('prodImgInput').value || document.getElementById('prodPreviewImg').src;
-
-  if (!name || !unit || !price) {
-    return showToast('Product Name, Unit aur Selling Price zaroori hai!', 'error');
-  }
-
-  const id = 'PROD_' + Date.now();
-  db.ref('products/' + id).set({
-    id, name, category, unit, price, mrp, image: img, img: img, createdAt: Date.now()
-  }).then(() => {
-    document.getElementById('prodNameInput').value = '';
-    document.getElementById('prodUnitInput').value = '';
-    document.getElementById('prodPriceInput').value = '';
-    document.getElementById('prodMrpInput').value = '';
-    document.getElementById('prodImgInput').value = '';
-    document.getElementById('prodGalleryFile').value = '';
-    showToast('✅ Product add ho gaya!', 'success');
-  });
-}
-
-function openEditProdModal(id) {
-  const p = allProducts[id];
-  if (!p) return;
-  document.getElementById('editProdId').value = id;
-  document.getElementById('editProdName').value = p.name || '';
-  document.getElementById('editProdCat').value = p.category || 'Fresh Vegetables';
-  document.getElementById('editProdUnit').value = p.unit || '';
-  document.getElementById('editProdPrice').value = p.price || '';
-  document.getElementById('editProdMrp').value = p.mrp || p.price || '';
-  const currentImg = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
-  document.getElementById('editProdPreviewImg').src = currentImg;
-  document.getElementById('editProdImgInput').value = currentImg;
-  document.getElementById('editProdModal').classList.add('open');
-}
-
-function closeEditProdModal() {
-  document.getElementById('editProdModal').classList.remove('open');
-}
-
-function saveEditedProduct() {
-  const id = document.getElementById('editProdId').value;
-  const name = document.getElementById('editProdName').value.trim();
-  const category = document.getElementById('editProdCat').value;
-  const unit = document.getElementById('editProdUnit').value.trim();
-  const price = Number(document.getElementById('editProdPrice').value);
-  const mrp = Number(document.getElementById('editProdMrp').value) || price;
-  const img = document.getElementById('editProdImgInput').value;
-
-  if (!name || !unit || !price) {
-    return showToast('Naam, Unit aur Price khaali nahi chhod sakte!', 'error');
-  }
-
-  db.ref('products/' + id).update({
-    name, category, unit, price, mrp, image: img, img: img
-  }).then(() => {
-    closeEditProdModal();
-    showToast('✅ Product update ho gaya!', 'success');
-  });
-}
-
-function deleteProduct(id) {
-  if (confirm('Kya aap is item ko delete karna chahte hain?')) {
-    db.ref('products/' + id).remove().then(() => showToast('Item deleted', 'dark'));
-  }
-}
-
-function renderCatalogTable() {
-  const q = document.getElementById('catalogSearch').value.trim().toLowerCase();
-  const entries = Object.entries(allProducts).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q)));
-  document.getElementById('catalogTotalCount').textContent = entries.length;
-
-  const tbody = document.getElementById('catalogTableBody');
-  tbody.innerHTML = entries.map(([id, p]) => {
-    const imgUrl = p.image || p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80';
-    const isOos = p.globalOutOfStock === true;
-    return `
-      <tr>
-        <td><img src="${escapeHtml(imgUrl)}" style="width:46px;height:46px;border-radius:10px;object-fit:cover;border:1px solid #E2E8F0;"></td>
-        <td>
-          <strong>${escapeHtml(p.name)}</strong><br>
-          <span style="font-size:11px;color:#64748B;">${escapeHtml(p.category)} • ${escapeHtml(p.unit)}</span>
-        </td>
-        <td>
-          <strong>₹${p.price}</strong>
-          ${p.mrp > p.price ? `<span style="text-decoration:line-through;color:#94A3B8;font-size:11px;margin-left:4px;">₹${p.mrp}</span>` : ''}
-        </td>
-        <td>
-          <button class="btn ${isOos ? 'btn-danger' : 'btn-primary'}" style="padding:5px 10px;font-size:11px;" onclick="db.ref('products/${id}').update({globalOutOfStock: ${!isOos}})">
-            ${isOos ? 'Out of Stock' : 'In Stock'}
+        <div class="flex gap-2">
+          <button onclick="openProductModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+            + Add New Product
           </button>
-        </td>
-        <td>
-          <div style="display:flex;gap:6px;">
-            <button class="btn btn-yellow" style="padding:6px 10px;font-size:12px;" onclick="openEditProdModal('${id}')">✏️ Edit</button>
-            <button class="btn btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteProduct('${id}')">🗑️</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-}
+          <button onclick="logoutAdmin()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-3 py-2.5 rounded-xl">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
 
-function renderAdminOrders() {
-  const list = Object.values(allOrders).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  document.getElementById('adminOrdersBody').innerHTML = list.map(o => `
-    <tr>
-      <td><strong>#${escapeHtml(o.orderId)}</strong></td>
-      <td>${escapeHtml(o.customerName)}<br><span style="font-size:11px;">${escapeHtml(o.customerPhone)}</span></td>
-      <td style="font-size:12px;">${(o.items || []).map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ')}</td>
-      <td><strong>₹${o.totalAmount}</strong></td>
-      <td>
-        <select style="width:155px;" onchange="db.ref('orders/${o.orderId}').update({status: this.value})">
-          ${['PLACED','PACKING','OUT_FOR_DELIVERY','DELIVERED','CANCELLED'].map(st => `<option value="${st}" ${o.status === st ? 'selected' : ''}>${st}</option>`).join('')}
+    <main class="max-w-6xl mx-auto px-4 pt-6">
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+          <p class="text-xs text-gray-500 font-semibold">Total Products</p>
+          <p id="statTotalProducts" class="text-2xl font-extrabold text-gray-800 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+          <p class="text-xs text-gray-500 font-semibold">In Stock</p>
+          <p id="statInStock" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+          <p class="text-xs text-gray-500 font-semibold">Out of Stock</p>
+          <p id="statOutOfStock" class="text-2xl font-extrabold text-red-600 mt-1">0</p>
+        </div>
+        <div class="bg-white p-4 rounded-2xl shadow-sm border">
+          <p class="text-xs text-gray-500 font-semibold">Live Orders</p>
+          <p id="statTotalOrders" class="text-2xl font-extrabold text-blue-600 mt-1">0</p>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border mb-6 flex flex-col sm:flex-row gap-3">
+        <input type="text" id="adminSearch" oninput="renderAdminProducts()" placeholder="Search product by name or category..."
+          class="flex-1 border rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+        <select id="adminCatFilter" onchange="renderAdminProducts()" class="border rounded-xl px-4 py-2 text-sm bg-white">
+          <option value="All">All Categories</option>
         </select>
-      </td>
-    </tr>
-  `).join('');
-}
+      </div>
 
-function renderCRM() {
-  const map = {};
-  Object.values(allOrders).forEach(o => {
-    if (!o.customerPhone) return;
-    if (!map[o.customerPhone]) map[o.customerPhone] = { name: o.customerName, phone: o.customerPhone, address: o.customerAddress, count: 0, spend: 0 };
-    map[o.customerPhone].count++;
-    if (o.status !== 'CANCELLED') map[o.customerPhone].spend += Number(o.totalAmount) || 0;
-  });
-  document.getElementById('crmTableBody').innerHTML = Object.values(map).map(c => `
-    <tr>
-      <td><strong>${escapeHtml(c.name)}</strong></td>
-      <td>${escapeHtml(c.phone)}</td>
-      <td style="font-size:12px;">${escapeHtml(c.address)}</td>
-      <td>${c.count}</td>
-      <td><strong>₹${c.spend}</strong></td>
-      <td><a class="btn btn-primary" style="text-decoration:none;padding:5px 10px;font-size:11px;" target="_blank" href="https://wa.me/91${c.phone}?text=Hello%20${encodeURIComponent(c.name)},%20thank%20you%20for%20ordering%20from%20Jhatpat!">WhatsApp</a></td>
-    </tr>
-  `).join('');
-}
+      <!-- Product Table / Cards -->
+      <div id="adminProductList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </main>
+  </div>
 
-function saveCoupon() {
-  const code = document.getElementById('cpCode').value.trim().toUpperCase();
-  const type = document.getElementById('cpType').value;
-  const value = Number(document.getElementById('cpValue').value);
-  const minOrder = Number(document.getElementById('cpMinOrder').value) || 0;
-  const maxDiscount = Number(document.getElementById('cpMaxDisc').value) || value;
-  if (!code || !value) return showToast('Code aur Value dalein!', 'error');
-  db.ref('coupons/' + code).set({ code, type, value, minOrder, maxDiscount }).then(() => showToast('Coupon saved!', 'success'));
-}
+  <!-- Add / Full Edit Product Modal -->
+  <div id="productModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl p-6 max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h2 id="modalTitle" class="text-lg font-bold text-gray-800">Add New Product</h2>
+        <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
 
-function renderCoupons() {
-  document.getElementById('couponsTableBody').innerHTML = Object.values(allCoupons).map(c => `
-    <tr>
-      <td><strong>${escapeHtml(c.code)}</strong></td>
-      <td>${escapeHtml(c.type)}</td>
-      <td>${c.type === 'FLAT' ? '₹' + c.value : c.value + '%'}</td>
-      <td>₹${c.minOrder}</td>
-      <td><button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="db.ref('coupons/${c.code}').remove()">Delete</button></td>
-    </tr>
-  `).join('');
-}
+      <form id="productForm" onsubmit="saveProduct(event)" class="space-y-3">
+        <input type="hidden" id="editProdId" />
 
-function saveBanner() {
-  const tag = document.getElementById('bnTag').value.trim();
-  const title = document.getElementById('bnTitle').value.trim();
-  const subtitle = document.getElementById('bnSub').value.trim();
-  const emoji = document.getElementById('bnEmoji').value.trim() || '⚡';
-  const bg = document.getElementById('bnBg').value;
-  if (!title) return showToast('Banner Title dalein!', 'error');
-  const id = 'BN_' + Date.now();
-  db.ref('banners/' + id).set({ id, tag, title, subtitle, emoji, bg }).then(() => showToast('Banner published!', 'success'));
-}
+        <!-- Gallery Image Upload + Live Preview -->
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Product Photo (Gallery Upload or URL)</label>
+          <div class="flex items-center gap-4">
+            <img id="imagePreview" src="https://placehold.co/200x200/e2e8f0/475569?text=Preview"
+              class="w-20 h-20 rounded-xl object-cover border bg-gray-50 shrink-0" />
+            <div class="flex-1 space-y-2">
+              <input type="file" id="galleryInput" accept="image/*" onchange="handleGalleryUpload(event)"
+                class="block w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
+              <input type="text" id="imageUrlInput" oninput="updatePreviewFromUrl()" placeholder="Or paste image URL here..."
+                class="w-full border rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none" />
+            </div>
+          </div>
+          <p id="uploadStatus" class="text-[11px] text-emerald-600 mt-1 hidden">Image compressed & ready!</p>
+        </div>
 
-function renderBanners() {
-  document.getElementById('bannersListAdmin').innerHTML = Object.values(allBanners).map(b => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #E2E8F0;border-radius:10px;">
-      <span>${escapeHtml(b.emoji)} <strong>${escapeHtml(b.title)}</strong> — ${escapeHtml(b.subtitle)}</span>
-      <button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="db.ref('banners/${b.id}').remove()">Remove</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Product Name *</label>
+            <input type="text" id="prodName" required placeholder="e.g., Amul Taaza Milk"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Category *</label>
+            <input type="text" id="prodCategory" required placeholder="e.g., Dairy, Snacks, Fruits"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Selling Price (₹) *</label>
+            <input type="number" id="prodPrice" required min="1" step="any" placeholder="50"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">MRP (₹)</label>
+            <input type="number" id="prodMrp" min="1" step="any" placeholder="60"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Unit / Weight *</label>
+            <input type="text" id="prodUnit" required placeholder="500 ml / 1 kg"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Stock Quantity</label>
+            <input type="number" id="prodStock" min="0" value="50"
+              class="w-full border rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Availability Status</label>
+            <select id="prodInStock" class="w-full border rounded-xl px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="true">In Stock (Active)</option>
+              <option value="false">Out of Stock (Hidden/Disabled)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="saveProdBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition mt-2">
+          Save Product
+        </button>
+      </form>
     </div>
-  `).join('');
-}
-</script>
+  </div>
+
+  <script>
+    const ADMIN_PASS = 'MOHIT@001';
+    const PLACEHOLDER_IMG = 'https://placehold.co/200x200/e2e8f0/475569?text=No+Photo';
+    let allProducts = [];
+    let currentImageBase64 = '';
+
+    // Check Session
+    if (sessionStorage.getItem('jhatpat_admin_auth') === 'true') {
+      showDashboard();
+    }
+
+    function verifyAdminLogin(e) {
+      e.preventDefault();
+      const val = document.getElementById('adminPassInput').value.trim();
+      if (val === ADMIN_PASS) {
+        sessionStorage.setItem('jhatpat_admin_auth', 'true');
+        document.getElementById('loginError').classList.add('hidden');
+        showDashboard();
+      } else {
+        document.getElementById('loginError').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('jhatpat_admin_auth');
+      location.reload();
+    }
+
+    function showDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      initFirebaseListeners();
+    }
+
+    function initFirebaseListeners() {
+      db.ref('products').on('value', (snap) => {
+        const data = snap.val() || {};
+        allProducts = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        updateStats();
+        populateCategoryDropdown();
+        renderAdminProducts();
+      });
+
+      db.ref('orders').on('value', (snap) => {
+        const orders = snap.val() || {};
+        document.getElementById('statTotalOrders').innerText = Object.keys(orders).length;
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('statTotalProducts').innerText = allProducts.length;
+      const inStockCount = allProducts.filter(p => p.inStock !== false && Number(p.stock ?? 1) > 0).length;
+      document.getElementById('statInStock').innerText = inStockCount;
+      document.getElementById('statOutOfStock').innerText = allProducts.length - inStockCount;
+    }
+
+    function populateCategoryDropdown() {
+      const select = document.getElementById('adminCatFilter');
+      const current = select.value;
+      const cats = ['All', ...new Set(allProducts.map(p => p.category || 'General').filter(Boolean))];
+      select.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (cats.includes(current)) select.value = current;
+    }
+
+    function renderAdminProducts() {
+      const q = document.getElementById('adminSearch').value.toLowerCase().trim();
+      const cat = document.getElementById('adminCatFilter').value;
+      const list = document.getElementById('adminProductList');
+
+      const filtered = allProducts.filter(p => {
+        const matchCat = cat === 'All' || (p.category || 'General') === cat;
+        const matchQ = !q || (p.name || '').toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q);
+        return matchCat && matchQ;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="col-span-full text-center py-12 bg-white rounded-2xl text-gray-500">No products found. Click "+ Add New Product" to start.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(p => {
+        const isAvailable = p.inStock !== false && Number(p.stock ?? 1) > 0;
+        return `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border flex gap-3 items-start">
+            <img src="${p.image || PLACEHOLDER_IMG}" onerror="this.src='${PLACEHOLDER_IMG}'"
+              class="w-20 h-20 rounded-xl object-cover border bg-gray-50 shrink-0" />
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start gap-2">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600">${p.category || 'General'}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                  ${isAvailable ? 'In Stock' : 'Out of Stock'}
+                </span>
+              </div>
+              <h3 class="font-bold text-gray-900 text-sm mt-1 truncate">${p.name}</h3>
+              <p class="text-xs text-gray-500">${p.unit || ''} • Stock: ${p.stock ?? 'N/A'}</p>
+              <div class="mt-1">
+                <span class="font-extrabold text-emerald-700 text-sm">₹${p.price}</span>
+                ${p.mrp > p.price ? `<span class="text-xs text-gray-400 line-through ml-1">₹${p.mrp}</span>` : ''}
+              </div>
+              <div class="flex gap-2 mt-3">
+                <button onclick="openEditModal('${p.id}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1.5 rounded-lg transition">
+                  Edit Full Details
+                </button>
+                <button onclick="deleteProduct('${p.id}', '${(p.name || '').replace(/'/g, "\\'")}')" class="px-3 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold py-1.5 rounded-lg transition">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Compress & Convert Gallery Image to Base64 so Firebase Realtime DB stores it cleanly without Storage CORS errors
+    function handleGalleryUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 480;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) {
+              height *= MAX_SIZE / width;
+              width = MAX_SIZE;
+            }
+          } else {
+            if (height > MAX_SIZE) {
+              width *= MAX_SIZE / height;
+              height = MAX_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          currentImageBase64 = canvas.toDataURL('image/jpeg', 0.78);
+          document.getElementById('imagePreview').src = currentImageBase64;
+          document.getElementById('imageUrlInput').value = '';
+          const statusEl = document.getElementById('uploadStatus');
+          statusEl.innerText = 'Gallery photo loaded & optimized!';
+          statusEl.classList.remove('hidden');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updatePreviewFromUrl() {
+      const url = document.getElementById('imageUrlInput').value.trim();
+      if (url) {
+        currentImageBase64 = url;
+        document.getElementById('imagePreview').src = url;
+        document.getElementById('uploadStatus').classList.add('hidden');
+      }
+    }
+
+    function openProductModal() {
+      document.getElementById('modalTitle').innerText = 'Add New Product';
+      document.getElementById('productForm').reset();
+      document.getElementById('editProdId').value = '';
+      currentImageBase64 = '';
+      document.getElementById('imagePreview').src = PLACEHOLDER_IMG;
+      document.getElementById('uploadStatus').classList.add('hidden');
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      const prod = allProducts.find(p => p.id === id);
+      if (!prod) return;
+
+      document.getElementById('modalTitle').innerText = 'Edit Product: ' + prod.name;
+      document.getElementById('editProdId').value = prod.id;
+      document.getElementById('prodName').value = prod.name || '';
+      document.getElementById('prodCategory').value = prod.category || '';
+      document.getElementById('prodPrice').value = prod.price || '';
+      document.getElementById('prodMrp').value = prod.mrp || '';
+      document.getElementById('prodUnit').value = prod.unit || '';
+      document.getElementById('prodStock').value = prod.stock !== undefined ? prod.stock : 50;
+      document.getElementById('prodInStock').value = prod.inStock === false ? 'false' : 'true';
+      document.getElementById('galleryInput').value = '';
+
+      currentImageBase64 = prod.image || '';
+      document.getElementById('imagePreview').src = currentImageBase64 || PLACEHOLDER_IMG;
+      document.getElementById('imageUrlInput').value = (currentImageBase64 && !currentImageBase64.startsWith('data:')) ? currentImageBase64 : '';
+      document.getElementById('uploadStatus').classList.add('hidden');
+
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveProdBtn');
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+
+      const id = document.getElementById('editProdId').value || ('prod_' + Date.now());
+      const price = Number(document.getElementById('prodPrice').value);
+      const mrpVal = document.getElementById('prodMrp').value;
+      const mrp = mrpVal ? Number(mrpVal) : price;
+      const stock = Number(document.getElementById('prodStock').value || 0);
+      const inStock = document.getElementById('prodInStock').value === 'true' && stock > 0;
+
+      const payload = {
+        name: document.getElementById('prodName').value.trim(),
+        category: document.getElementById('prodCategory').value.trim(),
+        price: price,
+        mrp: mrp,
+        unit: document.getElementById('prodUnit').value.trim(),
+        stock: stock,
+        inStock: inStock,
+        image: currentImageBase64 || document.getElementById('imageUrlInput').value.trim() || PLACEHOLDER_IMG,
+        updatedAt: Date.now()
+      };
+
+      try {
+        await db.ref('products/' + id).update(payload);
+        closeProductModal();
+      } catch (err) {
+        alert('Error saving product: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Save Product';
+      }
+    }
+
+    async function deleteProduct(id, name) {
+      if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+      try {
+        await db.ref('products/' + id).remove();
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
+    }
+  </script>
 </body>
 </html>

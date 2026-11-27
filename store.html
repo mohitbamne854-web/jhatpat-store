@@ -1,308 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jhatpat — Dark Store Terminal</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<style>
-  :root {
-    --bg: #F1F5F9;
-    --dark: #0F172A;
-    --green: #0C831F;
-    --yellow: #F8CB46;
-    --border: #E2E8F0;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #0F172A; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Store Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+    <!-- Firebase SDKs (Compat v9/v10 for zero-build direct browser execution) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        projectId: "jhatpat-22aa8",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        storageBucket: "jhatpat-22aa8.appspot.com"
+      };
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.database();
+    </script>
 
-  .auth-wrap {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; background: linear-gradient(135deg, #0F172A, #1E293B);
-  }
-  .auth-card {
-    background: #fff; width: 100%; max-width: 400px; border-radius: 22px; padding: 28px; box-shadow: 0 25px 50px rgba(0,0,0,0.35);
-  }
-  input, select {
-    width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1; border-radius: 10px; font-family: inherit; font-size: 14px; margin-bottom: 12px;
-  }
-  .btn {
-    padding: 12px 16px; border-radius: 10px; border: none; font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer;
-  }
-  .btn-green { background: var(--green); color: #fff; }
-  .btn-yellow { background: var(--yellow); color: #111; }
-  .btn-red { background: #DC2626; color: #fff; }
-
-  .topbar {
-    background: #0F172A; color: #fff; padding: 14px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;
-  }
-  .container { max-width: 1150px; margin: 0 auto; padding: 18px; }
-  .stats-row {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 18px;
-  }
-  .stat-card {
-    background: #fff; border-radius: 14px; padding: 15px; border: 1px solid var(--border);
-  }
-  .panel-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-  .p-tab {
-    padding: 9px 16px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-weight: 800; font-size: 13px; cursor: pointer;
-  }
-  .p-tab.active { background: #0F172A; color: #fff; }
-  .order-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px;
-  }
-  .order-card {
-    background: #fff; border-radius: 16px; padding: 16px; border: 2px solid var(--border);
-  }
-  .order-card.new-alert { border-color: #F59E0B; box-shadow: 0 0 0 4px rgba(245,158,11,0.18); }
-  .stock-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px;
-  }
-  .stock-item {
-    background: #fff; border-radius: 12px; padding: 10px 12px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px;
-  }
-</style>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+  </style>
 </head>
 <body>
-
-<div class="auth-wrap" id="authScreen">
-  <div class="auth-card">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-      <span style="background:#F8CB46;padding:4px 10px;border-radius:8px;font-weight:800;">⚡ JHATPAT</span>
-      <strong>Dark Store Terminal</strong>
-    </div>
-    <p style="font-size:13px;color:#64748B;margin-bottom:14px;">Enter Store Password to open live packing terminal.</p>
-    <input type="password" id="loginStorePass" placeholder="Enter Store Password" onkeydown="if(event.key==='Enter') loginDarkStore()">
-    <button class="btn btn-green" style="width:100%;" onclick="loginDarkStore()">Login to Dark Store Terminal ▸</button>
-  </div>
-</div>
-
-<div id="terminalApp" style="display:none;">
-  <header class="topbar">
-    <div>
-      <div style="font-size:11px;color:#94A3B8;font-weight:700;">DARK STORE COMMAND TERMINAL</div>
-      <div style="font-size:17px;font-weight:800;" id="termStoreTitle">All Dark Stores • Live Orders</div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="btn btn-yellow" onclick="testChime()">🔔 Test Chime</button>
-      <button class="btn btn-red" onclick="logoutStore()">Logout</button>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="stats-row">
-      <div class="stat-card">
-        <div style="font-size:12px;color:#64748B;font-weight:700;">ACTIVE QUEUE</div>
-        <div style="font-size:24px;font-weight:800;margin-top:4px;" id="stActiveCount">0</div>
+  <!-- Password Gate (KING@001) -->
+  <div id="storeLoginScreen" class="min-h-screen flex items-center justify-center p-4 bg-indigo-950">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
+      <div class="text-center mb-6">
+        <span class="text-3xl font-extrabold text-indigo-600">🏪 Jhatpat Store</span>
+        <p class="text-xs text-gray-500 mt-1">Store Operations & Order Packing Portal</p>
       </div>
-      <div class="stat-card">
-        <div style="font-size:12px;color:#64748B;font-weight:700;">STORE GROSS SALES</div>
-        <div style="font-size:24px;font-weight:800;margin-top:4px;" id="stGrossSales">₹0</div>
-      </div>
-      <div class="stat-card">
-        <div style="font-size:12px;color:#64748B;font-weight:700;">YOUR 88% NET PAYOUT</div>
-        <div style="font-size:24px;font-weight:800;margin-top:4px;color:#0C831F;" id="stNetPayout">₹0</div>
-      </div>
-    </div>
-
-    <div class="panel-tabs">
-      <button class="p-tab active" onclick="switchTermTab('queueView', this)">📦 Live Packing Queue</button>
-      <button class="p-tab" onclick="switchTermTab('stockView', this)">🥦 Catalog Stock View</button>
-    </div>
-
-    <div id="queueView">
-      <div class="order-grid" id="storeOrdersGrid"></div>
-    </div>
-
-    <div id="stockView" style="display:none;">
-      <input type="text" id="storeStockSearch" placeholder="Search item..." style="max-width:340px;background:#fff;" oninput="renderStoreStock()">
-      <div class="stock-grid" id="storeStockGrid"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForRTDBAccess",
-  authDomain: "jhatpat-22aa8.firebaseapp.com",
-  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-  projectId: "jhatpat-22aa8",
-  storageBucket: "jhatpat-22aa8.appspot.com",
-  messagingSenderId: "100000000000",
-  appId: "1:100000000000:web:jhatpat22aa8"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-let storeOrders = {};
-let allProducts = {};
-let knownOrderIds = new Set();
-let initialLoadDone = false;
-
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function showToast(msg, type = 'dark') {
-  let box = document.getElementById('toastBox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:85px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:380px;';
-    document.body.appendChild(box);
-  }
-  const el = document.createElement('div');
-  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
-  el.textContent = msg;
-  box.appendChild(el);
-  setTimeout(() => el.remove(), 2800);
-}
-
-if (sessionStorage.getItem('jhatpat_store_unlocked') === '1') {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('terminalApp').style.display = 'block';
-  bootTerminalListeners();
-}
-
-function loginDarkStore() {
-  const pass = document.getElementById('loginStorePass').value.trim();
-  if (pass === 'KING@001') {
-    sessionStorage.setItem('jhatpat_store_unlocked', '1');
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('terminalApp').style.display = 'block';
-    bootTerminalListeners();
-  } else {
-    showToast('❌ Wrong Password!', 'error');
-  }
-}
-
-function logoutStore() {
-  sessionStorage.removeItem('jhatpat_store_unlocked');
-  location.reload();
-}
-
-function playOrderChime() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [587.33, 880, 1174.66].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
-      gain.gain.setValueAtTime(0.22, ctx.currentTime + idx * 0.14);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + idx * 0.14);
-      osc.stop(ctx.currentTime + idx * 0.14 + 0.36);
-    });
-  } catch (e) {}
-}
-
-function testChime() {
-  playOrderChime();
-  showToast('🔔 Audio Chime Active!', 'success');
-}
-
-function bootTerminalListeners() {
-  db.ref('orders').on('value', snap => {
-    storeOrders = snap.val() || {};
-    const ids = Object.keys(storeOrders);
-    if (initialLoadDone) {
-      const hasNew = ids.some(id => !knownOrderIds.has(id) && storeOrders[id].status === 'PLACED');
-      if (hasNew) {
-        playOrderChime();
-        showToast('🚨 NEW 10-MIN ORDER RECEIVED!', 'success');
-      }
-    }
-    knownOrderIds = new Set(ids);
-    initialLoadDone = true;
-    renderStoreOrders();
-  });
-
-  db.ref('products').on('value', snap => {
-    allProducts = snap.val() || {};
-    renderStoreStock();
-  });
-}
-
-function switchTermTab(viewId, btn) {
-  document.getElementById('queueView').style.display = viewId === 'queueView' ? 'block' : 'none';
-  document.getElementById('stockView').style.display = viewId === 'stockView' ? 'block' : 'none';
-  document.querySelectorAll('.p-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function renderStoreOrders() {
-  const list = Object.values(storeOrders).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const validOrders = list.filter(o => o.status !== 'CANCELLED');
-  const activeOrders = list.filter(o => o.status === 'PLACED' || o.status === 'PACKING');
-
-  const gross = validOrders.reduce((s, o) => s + (Number(o.totalAmount) || 0), 0);
-  const net88 = Math.round(gross * 0.88);
-
-  document.getElementById('stActiveCount').textContent = activeOrders.length;
-  document.getElementById('stGrossSales').textContent = `₹${gross.toLocaleString('en-IN')}`;
-  document.getElementById('stNetPayout').textContent = `₹${net88.toLocaleString('en-IN')}`;
-
-  const grid = document.getElementById('storeOrdersGrid');
-  if (list.length === 0) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">No orders yet. Keep terminal open for live audio alerts!</div>';
-    return;
-  }
-
-  grid.innerHTML = list.map(o => `
-    <div class="order-card ${o.status === 'PLACED' ? 'new-alert' : ''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong>#${escapeHtml(o.orderId)} (${escapeHtml(o.storeId || 'STORE')})</strong>
-        <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:#FEF3C7;color:#92400E;">${escapeHtml(o.status)}</span>
-      </div>
-      <div style="font-size:12px;color:#64748B;margin:4px 0;">${escapeHtml(o.customerName)} • ${escapeHtml(o.customerPhone)}</div>
-      <div style="font-size:12px;color:#334155;margin-bottom:8px;">📍 ${escapeHtml(o.customerAddress)}</div>
-      <div style="background:#F8FAFC;border-radius:10px;padding:8px 10px;font-size:12px;margin-bottom:10px;">
-        ${(o.items || []).map(i => `<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>${escapeHtml(i.name)} (${escapeHtml(i.unit)})</span><strong>x${i.qty}</strong></div>`).join('')}
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-size:12px;">${escapeHtml(o.paymentMethod)}</span>
-        <strong style="font-size:15px;">₹${o.totalAmount}</strong>
-      </div>
-      <div style="display:flex;gap:8px;">
-        ${o.status === 'PLACED' ? `<button class="btn btn-yellow" style="flex:1;" onclick="setOrderStep('${o.orderId}','PACKING')">📦 Start Packing</button>` : ''}
-        ${o.status === 'PACKING' ? `<button class="btn btn-green" style="flex:1;" onclick="setOrderStep('${o.orderId}','OUT_FOR_DELIVERY')">🛵 Ready for Rider</button>` : ''}
-        ${o.status === 'OUT_FOR_DELIVERY' ? `<span style="font-size:12px;color:#0C831F;font-weight:800;">🛵 Dispatched with Rider</span>` : ''}
-        ${o.status === 'DELIVERED' ? `<span style="font-size:12px;color:#166534;font-weight:800;">✅ Delivered</span>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function setOrderStep(orderId, status) {
-  db.ref('orders/' + orderId).update({ status })
-    .then(() => showToast(`Order #${orderId} → ${status}`, 'success'));
-}
-
-function renderStoreStock() {
-  const q = document.getElementById('storeStockSearch').value.trim().toLowerCase();
-  const grid = document.getElementById('storeStockGrid');
-  const items = Object.entries(allProducts).filter(([, p]) => p && (!q || (p.name || '').toLowerCase().includes(q)));
-
-  grid.innerHTML = items.map(([id, p]) => {
-    const isOos = p.globalOutOfStock === true;
-    return `
-      <div class="stock-item">
+      <form onsubmit="verifyStoreLogin(event)" class="space-y-4">
         <div>
-          <div style="font-size:13px;font-weight:700;">${escapeHtml(p.name)}</div>
-          <div style="font-size:11px;color:#64748B;">${escapeHtml(p.unit)} • ₹${p.price}</div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Store Access Password</label>
+          <input type="password" id="storePassInput" required placeholder="Enter Store Password"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
         </div>
-        <button class="btn ${isOos ? 'btn-red' : 'btn-green'}" style="padding:6px 10px;font-size:11px;" onclick="db.ref('products/${id}').update({globalOutOfStock: ${!isOos}})">
-          ${isOos ? 'Out of Stock' : 'In Stock'}
+        <p id="storeLoginError" class="text-red-600 text-xs font-semibold hidden">Invalid Store Password!</p>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow transition">
+          Enter Store Portal
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Store Dashboard -->
+  <div id="storeDashboard" class="hidden min-h-screen pb-12">
+    <header class="bg-indigo-700 text-white shadow">
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-extrabold">🏪 Jhatpat Store Portal</h1>
+          <p class="text-xs text-indigo-200">Live Order Acceptance, Packing & Rider Handover</p>
+        </div>
+        <button onclick="logoutStore()" class="bg-indigo-900 hover:bg-indigo-800 text-xs font-semibold px-3 py-2 rounded-xl">
+          Logout
         </button>
       </div>
-    `;
-  }).join('');
-}
-</script>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 pt-6">
+      <!-- Filter Tabs -->
+      <div class="flex gap-2 overflow-x-auto pb-4">
+        <button onclick="setStoreFilter('Active')" id="tabActive" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow">
+          Active Orders
+        </button>
+        <button onclick="setStoreFilter('Delivered')" id="tabDelivered" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border">
+          Completed / Delivered
+        </button>
+        <button onclick="setStoreFilter('Cancelled')" id="tabCancelled" class="px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border">
+          Cancelled
+        </button>
+      </div>
+
+      <div id="storeOrdersContainer" class="space-y-4"></div>
+    </main>
+  </div>
+
+  <script>
+    const STORE_PASS = 'KING@001';
+    let allOrders = [];
+    let currentFilter = 'Active';
+
+    if (sessionStorage.getItem('jhatpat_store_auth') === 'true') {
+      unlockStore();
+    }
+
+    function verifyStoreLogin(e) {
+      e.preventDefault();
+      const val = document.getElementById('storePassInput').value.trim();
+      if (val === STORE_PASS) {
+        sessionStorage.setItem('jhatpat_store_auth', 'true');
+        document.getElementById('storeLoginError').classList.add('hidden');
+        unlockStore();
+      } else {
+        document.getElementById('storeLoginError').classList.remove('hidden');
+      }
+    }
+
+    function logoutStore() {
+      sessionStorage.removeItem('jhatpat_store_auth');
+      location.reload();
+    }
+
+    function unlockStore() {
+      document.getElementById('storeLoginScreen').classList.add('hidden');
+      document.getElementById('storeDashboard').classList.remove('hidden');
+      listenStoreOrders();
+    }
+
+    function listenStoreOrders() {
+      db.ref('orders').on('value', (snap) => {
+        const data = snap.val() || {};
+        allOrders = Object.keys(data)
+          .map(key => ({ id: key, ...data[key] }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        renderStoreOrders();
+      });
+    }
+
+    function setStoreFilter(filter) {
+      currentFilter = filter;
+      ['Active', 'Delivered', 'Cancelled'].forEach(t => {
+        const btn = document.getElementById('tab' + t);
+        if (t === filter) {
+          btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow';
+        } else {
+          btn.className = 'px-4 py-2 rounded-xl text-xs font-bold bg-white text-gray-700 border';
+        }
+      });
+      renderStoreOrders();
+    }
+
+    function renderStoreOrders() {
+      const container = document.getElementById('storeOrdersContainer');
+      const filtered = allOrders.filter(o => {
+        if (currentFilter === 'Active') return o.status !== 'Delivered' && o.status !== 'Cancelled';
+        return o.status === currentFilter;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="bg-white rounded-2xl p-10 text-center text-gray-500 border">No ${currentFilter.toLowerCase()} orders right now.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(o => `
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+          <div class="flex flex-wrap justify-between items-start gap-2 border-b pb-3 mb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-gray-900 text-base">#${o.orderId}</span>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                  o.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                  o.status === 'Packing' ? 'bg-purple-100 text-purple-800' :
+                  o.status === 'Ready for Pickup' ? 'bg-blue-100 text-blue-800' :
+                  o.status === 'Out for Delivery' ? 'bg-cyan-100 text-cyan-800' :
+                  o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                }">${o.status}</span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">Customer: <strong>${o.customerName}</strong> (${o.customerPhone})</p>
+              <p class="text-xs text-gray-600">Address: ${o.customerAddress}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-lg font-extrabold text-indigo-700">₹${o.totalAmount}</p>
+              <p class="text-xs text-gray-500">${o.paymentMode || 'COD'}</p>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-3 mb-4 space-y-1">
+            ${(o.items || []).map(item => `
+              <div class="flex justify-between text-xs text-gray-800">
+                <span><strong>${item.qty}x</strong> ${item.name} (${item.unit || ''})</span>
+                <span>₹${item.price * item.qty}</span>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            ${o.status === 'Pending' ? `
+              <button onclick="updateOrderStatus('${o.orderId}', 'Packing')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-xl">
+                Accept & Start Packing
+              </button>
+            ` : ''}
+            ${o.status === 'Packing' ? `
+              <button onclick="updateOrderStatus('${o.orderId}', 'Ready for Pickup')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl">
+                Mark Ready for Rider Pickup
+              </button>
+            ` : ''}
+            ${(o.status === 'Pending' || o.status === 'Packing' || o.status === 'Ready for Pickup') ? `
+              <button onclick="updateOrderStatus('${o.orderId}', 'Cancelled')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold px-4 py-2 rounded-xl ml-auto">
+                Cancel Order
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        await db.ref('orders/' + orderId).update({
+          status: newStatus,
+          updatedAt: Date.now()
+        });
+      } catch (err) {
+        alert('Status update failed: ' + err.message);
+      }
+    }
+  </script>
 </body>
 </html>

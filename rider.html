@@ -1,332 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jhatpat — Rider Fleet Partner</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<style>
-  :root {
-    --bg: #090D16;
-    --card: #111827;
-    --card2: #1F2937;
-    --green: #22C55E;
-    --yellow: #FACC15;
-    --text: #F9FAFB;
-    --muted: #9CA3AF;
-    --border: #1F2937;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #030712;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-  }
-  .shell {
-    width: 100%;
-    max-width: 480px;
-    background: var(--bg);
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
-  .lock-screen {
-    position: fixed;
-    inset: 0;
-    background: #030712;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    z-index: 999;
-  }
-  .lock-card {
-    background: var(--card);
-    border: 1px solid #374151;
-    border-radius: 20px;
-    padding: 28px 22px;
-    width: 100%;
-    max-width: 390px;
-  }
-  .header {
-    background: var(--card);
-    padding: 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 30;
-  }
-  .wallet-card {
-    margin: 14px 16px;
-    background: linear-gradient(135deg, #065F46, #047857);
-    border-radius: 18px;
-    padding: 16px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  input {
-    width: 100%;
-    background: var(--card2);
-    color: #fff;
-    border: 1px solid #374151;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-family: inherit;
-    font-size: 14px;
-    margin-top: 10px;
-    outline: none;
-  }
-  .task-card {
-    margin: 0 16px 12px;
-    background: var(--card);
-    border: 1px solid #374151;
-    border-radius: 16px;
-    padding: 15px;
-  }
-  .btn {
-    padding: 11px 14px;
-    border-radius: 11px;
-    border: none;
-    font-family: inherit;
-    font-weight: 800;
-    font-size: 13px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    text-decoration: none;
-  }
-  .btn-green { background: var(--green); color: #052E16; }
-  .btn-yellow { background: var(--yellow); color: #111; }
-  .btn-blue { background: #2563EB; color: #fff; }
-  .btn-dark { background: #1F2937; color: #fff; border: 1px solid #374151; }
-  .btn-red { background: #DC2626; color: #fff; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jhatpat Rider App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+    <!-- Firebase SDKs (Compat v9/v10 for zero-build direct browser execution) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        projectId: "jhatpat-22aa8",
+        databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
+        authDomain: "jhatpat-22aa8.firebaseapp.com",
+        storageBucket: "jhatpat-22aa8.appspot.com"
+      };
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+      const db = firebase.database();
+    </script>
+
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+  </style>
 </head>
 <body>
-
-<div class="lock-screen" id="riderLockScreen">
-  <div class="lock-card">
-    <div style="font-size:12px;color:var(--yellow);font-weight:800;">⚡ JHATPAT FLEET</div>
-    <h2 style="font-size:22px;margin-top:4px;">Rider Partner Login</h2>
-    <p style="font-size:12px;color:var(--muted);margin-top:4px;">Apna naam aur rider password daal kar duty start karein.</p>
-    <input type="text" id="loginRiderName" placeholder="Your Rider Name (e.g. Rahul)">
-    <input type="password" id="loginRiderPass" placeholder="Rider Password (RIDER@001)" onkeydown="if(event.key==='Enter') unlockRider()">
-    <button class="btn btn-green" style="width:100%;margin-top:14px;padding:13px;" onclick="unlockRider()">Start Duty ▸</button>
-  </div>
-</div>
-
-<div class="shell" id="riderMainApp" style="display:none;">
-  <header class="header">
-    <div>
-      <div style="font-size:11px;color:var(--yellow);font-weight:800;">⚡ JHATPAT FLEET</div>
-      <div style="font-size:16px;font-weight:800;" id="headerRiderName">Rider Partner</div>
+  <!-- Password-Only Gate (RIDER@001 — No Zone Dropdown) -->
+  <div id="riderLoginScreen" class="min-h-screen flex items-center justify-center p-4 bg-orange-950">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm">
+      <div class="text-center mb-6">
+        <span class="text-3xl font-extrabold text-orange-600">🛵 Jhatpat Rider</span>
+        <p class="text-xs text-gray-500 mt-1">Direct Delivery Partner Login</p>
+      </div>
+      <form onsubmit="verifyRiderLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Rider Password</label>
+          <input type="password" id="riderPassInput" required placeholder="Enter Rider Password"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none" />
+        </div>
+        <p id="riderLoginError" class="text-red-600 text-xs font-semibold hidden">Invalid Rider Password!</p>
+        <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow transition">
+          Start Riding
+        </button>
+      </form>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="btn btn-yellow" style="padding:6px 10px;font-size:11px;" onclick="testRiderBeep()">🔔 Ring</button>
-      <button class="btn btn-red" style="padding:6px 10px;font-size:11px;" onclick="logoutRider()">Lock</button>
-    </div>
-  </header>
-
-  <div class="wallet-card">
-    <div>
-      <div style="font-size:11px;opacity:0.85;font-weight:700;">RIDER EARNINGS WALLET</div>
-      <div style="font-size:26px;font-weight:800;margin-top:2px;" id="riderWalletAmt">₹0</div>
-      <div style="font-size:11px;opacity:0.85;margin-top:2px;" id="riderTripCount">0 Completed Drops (₹35/drop)</div>
-    </div>
-    <div style="font-size:36px;">🛵</div>
   </div>
 
-  <div style="padding:4px 16px 10px;display:flex;justify-content:space-between;align-items:center;">
-    <h3 style="font-size:15px;">Live Dispatch & Drops</h3>
-    <span style="font-size:12px;color:var(--green);font-weight:700;" id="activeDropCount">0 tasks</span>
+  <!-- Rider Dashboard -->
+  <div id="riderDashboard" class="hidden min-h-screen pb-12">
+    <header class="bg-orange-600 text-white shadow">
+      <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div>
+          <h1 class="text-xl font-extrabold">🛵 Jhatpat Delivery Partner</h1>
+          <p class="text-xs text-orange-100">All Live Deliveries • Direct Access</p>
+        </div>
+        <button onclick="logoutRider()" class="bg-orange-800 hover:bg-orange-900 text-xs font-semibold px-3 py-2 rounded-xl">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 pt-6">
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-4">
+        <button onclick="setRiderTab('Available')" id="rTabAvailable" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-orange-600 text-white shadow">
+          Active / Ready Deliveries
+        </button>
+        <button onclick="setRiderTab('Completed')" id="rTabCompleted" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-700 border">
+          Delivered History
+        </button>
+      </div>
+
+      <div id="riderOrdersList" class="space-y-4"></div>
+    </main>
   </div>
 
-  <div id="riderTasksList"></div>
-</div>
+  <script>
+    const RIDER_PASS = 'RIDER@001';
+    let riderOrders = [];
+    let activeTab = 'Available';
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForRTDBAccess",
-  authDomain: "jhatpat-22aa8.firebaseapp.com",
-  databaseURL: "https://jhatpat-22aa8-default-rtdb.firebaseio.com",
-  projectId: "jhatpat-22aa8",
-  storageBucket: "jhatpat-22aa8.appspot.com",
-  messagingSenderId: "100000000000",
-  appId: "1:100000000000:web:jhatpat22aa8"
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+    if (sessionStorage.getItem('jhatpat_rider_auth') === 'true') {
+      unlockRider();
+    }
 
-let ordersMap = {};
-let knownReadyIds = new Set();
-let initialLoadDone = false;
-const PER_DROP_PAY = 35;
-
-function escapeHtml(str) {
-  if (str === null || str === undefined) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function showToast(msg, type = 'dark') {
-  let box = document.getElementById('toastBox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'toastBox';
-    box.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;width:90%;max-width:360px;';
-    document.body.appendChild(box);
-  }
-  const el = document.createElement('div');
-  const bg = type === 'error' ? '#dc2626' : (type === 'success' ? '#15803d' : '#18181b');
-  el.style.cssText = `background:${bg};color:#fff;padding:11px 16px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,0.25);text-align:center;`;
-  el.textContent = msg;
-  box.appendChild(el);
-  setTimeout(() => el.remove(), 2800);
-}
-
-function playRiderBeep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [660, 880, 1100].forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
-      gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.14);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.35);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + idx * 0.14);
-      osc.stop(ctx.currentTime + idx * 0.14 + 0.36);
-    });
-  } catch (e) {}
-}
-
-function testRiderBeep() {
-  playRiderBeep();
-  showToast('🔔 Rider Alert Sound Active!', 'success');
-}
-
-if (sessionStorage.getItem('jhatpat_rider_unlocked') === '1') {
-  bootRiderApp();
-}
-
-function unlockRider() {
-  const name = document.getElementById('loginRiderName').value.trim();
-  const pass = document.getElementById('loginRiderPass').value.trim();
-  if (!name) return showToast('Apna Rider Name dalein!', 'error');
-  if (pass !== 'RIDER@001') return showToast('❌ Galat Rider Password!', 'error');
-
-  localStorage.setItem('jhatpat_rider_name', name);
-  sessionStorage.setItem('jhatpat_rider_unlocked', '1');
-  bootRiderApp();
-}
-
-function logoutRider() {
-  sessionStorage.removeItem('jhatpat_rider_unlocked');
-  location.reload();
-}
-
-function bootRiderApp() {
-  const rName = localStorage.getItem('jhatpat_rider_name') || 'Rider Partner';
-  document.getElementById('headerRiderName').textContent = `🛵 ${rName}`;
-  document.getElementById('riderLockScreen').style.display = 'none';
-  document.getElementById('riderMainApp').style.display = 'block';
-
-  db.ref('orders').on('value', snap => {
-    ordersMap = snap.val() || {};
-    const readyOrders = Object.values(ordersMap).filter(o => o && (o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY'));
-    if (initialLoadDone) {
-      const hasNewReady = readyOrders.some(o => !knownReadyIds.has(o.orderId));
-      if (hasNewReady) {
-        playRiderBeep();
-        showToast('🚨 NAYA ORDER PICKUP KE LIYE READY HAI!', 'success');
+    function verifyRiderLogin(e) {
+      e.preventDefault();
+      const val = document.getElementById('riderPassInput').value.trim();
+      if (val === RIDER_PASS) {
+        sessionStorage.setItem('jhatpat_rider_auth', 'true');
+        document.getElementById('riderLoginError').classList.add('hidden');
+        unlockRider();
+      } else {
+        document.getElementById('riderLoginError').classList.remove('hidden');
       }
     }
-    knownReadyIds = new Set(readyOrders.map(o => o.orderId));
-    initialLoadDone = true;
-    renderRiderTasks();
-  });
-}
 
-function renderRiderTasks() {
-  const listEl = document.getElementById('riderTasksList');
-  const allOrders = Object.values(ordersMap).filter(Boolean);
-  const myName = (localStorage.getItem('jhatpat_rider_name') || '').toLowerCase();
+    function logoutRider() {
+      sessionStorage.removeItem('jhatpat_rider_auth');
+      location.reload();
+    }
 
-  const delivered = allOrders.filter(o => o.status === 'DELIVERED' && (!o.riderName || o.riderName.toLowerCase() === myName));
-  document.getElementById('riderTripCount').textContent = `${delivered.length} Completed Drops (₹${PER_DROP_PAY}/drop)`;
-  document.getElementById('riderWalletAmt').textContent = `₹${(delivered.length * PER_DROP_PAY).toLocaleString('en-IN')}`;
+    function unlockRider() {
+      document.getElementById('riderLoginScreen').classList.add('hidden');
+      document.getElementById('riderDashboard').classList.remove('hidden');
+      listenRiderOrders();
+    }
 
-  const activeTasks = allOrders
-    .filter(o => o.status === 'PACKING' || o.status === 'OUT_FOR_DELIVERY')
-    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    function listenRiderOrders() {
+      db.ref('orders').on('value', (snap) => {
+        const data = snap.val() || {};
+        riderOrders = Object.keys(data)
+          .map(key => ({ id: key, ...data[key] }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        renderRiderOrders();
+      });
+    }
 
-  document.getElementById('activeDropCount').textContent = `${activeTasks.length} tasks`;
+    function setRiderTab(tab) {
+      activeTab = tab;
+      document.getElementById('rTabAvailable').className = tab === 'Available'
+        ? 'flex-1 py-2.5 rounded-xl text-xs font-bold bg-orange-600 text-white shadow'
+        : 'flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-700 border';
+      document.getElementById('rTabCompleted').className = tab === 'Completed'
+        ? 'flex-1 py-2.5 rounded-xl text-xs font-bold bg-orange-600 text-white shadow'
+        : 'flex-1 py-2.5 rounded-xl text-xs font-bold bg-white text-gray-700 border';
+      renderRiderOrders();
+    }
 
-  if (activeTasks.length === 0) {
-    listEl.innerHTML = '<div style="text-align:center;padding:36px 20px;color:#9CA3AF;">Abhi koi active delivery nahi hai. Naye order ka intezaar karein...</div>';
-    return;
-  }
+    function renderRiderOrders() {
+      const list = document.getElementById('riderOrdersList');
+      const filtered = riderOrders.filter(o => {
+        if (activeTab === 'Available') {
+          return o.status !== 'Delivered' && o.status !== 'Cancelled';
+        }
+        return o.status === 'Delivered';
+      });
 
-  listEl.innerHTML = activeTasks.map(o => {
-    const mapsQuery = encodeURIComponent(`${o.customerAddress}, ${o.city || ''}`);
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
-    const isOut = o.status === 'OUT_FOR_DELIVERY';
-    const isCod = (o.paymentMethod || '').toUpperCase().includes('COD') || (o.paymentMethod || '').toUpperCase().includes('CASH');
-    return `
-      <div class="task-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-weight:800;font-size:15px;">#${escapeHtml(o.orderId)}</span>
-          <span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px;background:${isOut ? '#1E3A8A' : '#78350F'};color:#fff;">
-            ${isOut ? '🛵 OUT FOR DELIVERY' : '📦 READY AT STORE'}
-          </span>
-        </div>
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="bg-white rounded-2xl p-10 text-center text-gray-500 border">No ${activeTab.toLowerCase()} deliveries found.</div>`;
+        return;
+      }
 
-        <div style="margin-top:10px;font-size:13px;line-height:1.5;">
-          <div><strong>Customer:</strong> ${escapeHtml(o.customerName)}</div>
-          <div style="color:#D1D5DB;margin-top:3px;">📍 ${escapeHtml(o.customerAddress)}</div>
-          <div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:${isCod ? '#450A0A' : '#064E3B'};color:${isCod ? '#FCA5A5' : '#6EE7B7'};font-weight:800;font-size:12px;">
-            ${isCod ? `💵 CASH LENA HAI: ₹${o.totalAmount}` : `✅ PAID ONLINE (₹${o.totalAmount})`}
+      list.innerHTML = filtered.map(o => `
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+          <div class="flex justify-between items-start border-b pb-3 mb-3">
+            <div>
+              <span class="font-extrabold text-gray-900 text-base">#${o.orderId}</span>
+              <span class="ml-2 text-xs font-bold px-2.5 py-0.5 rounded-full ${
+                o.status === 'Out for Delivery' ? 'bg-blue-100 text-blue-700' :
+                o.status === 'Ready for Pickup' ? 'bg-emerald-100 text-emerald-700' :
+                o.status === 'Delivered' ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-700'
+              }">${o.status}</span>
+              <h3 class="font-bold text-gray-800 text-sm mt-2">${o.customerName}</h3>
+              <p class="text-xs text-gray-600 mt-0.5">${o.customerAddress}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-extrabold text-orange-600 text-lg">₹${o.totalAmount}</p>
+              <p class="text-[11px] font-semibold text-gray-500">${o.paymentMode || 'COD'}</p>
+            </div>
+          </div>
+
+          <div class="text-xs text-gray-600 mb-4">
+            <strong>Items:</strong> ${(o.items || []).map(i => `${i.name} (x${i.qty})`).join(', ')}
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="tel:${o.customerPhone}" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-4 py-2.5 rounded-xl">
+              📞 Call Customer
+            </a>
+            ${o.status !== 'Out for Delivery' && o.status !== 'Delivered' ? `
+              <button onclick="riderUpdateStatus('${o.orderId}', 'Out for Delivery')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+                Pick Up & Start Delivery
+              </button>
+            ` : ''}
+            ${o.status === 'Out for Delivery' ? `
+              <button onclick="riderUpdateStatus('${o.orderId}', 'Delivered')" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow">
+                ✓ Mark as Delivered
+              </button>
+            ` : ''}
           </div>
         </div>
+      `).join('');
+    }
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
-          <a href="tel:${escapeHtml(o.customerPhone)}" class="btn btn-dark">📞 Call Customer</a>
-          <a href="${mapsUrl}" target="_blank" class="btn btn-blue">🗺️ Google Maps</a>
-        </div>
-
-        <div style="margin-top:8px;">
-          ${!isOut
-            ? `<button class="btn btn-yellow" style="width:100%;" onclick="riderUpdateOrder('${o.orderId}','OUT_FOR_DELIVERY')">📦 Order Picked Up</button>`
-            : `<button class="btn btn-green" style="width:100%;" onclick="riderUpdateOrder('${o.orderId}','DELIVERED')">✅ Mark Delivered (+₹35)</button>`
-          }
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function riderUpdateOrder(orderId, status) {
-  const riderName = localStorage.getItem('jhatpat_rider_name') || 'Jhatpat Rider';
-  db.ref('orders/' + orderId).update({
-    status,
-    riderName,
-    updatedAt: Date.now()
-  }).then(() => {
-    showToast(status === 'DELIVERED' ? '🎉 Drop Completed! +₹35 wallet mein jud gaye' : '🛵 Order Picked Up! Customer ke address par jaayein', 'success');
-  });
-}
-</script>
+    async function riderUpdateStatus(orderId, status) {
+      try {
+        await db.ref('orders/' + orderId).update({
+          status: status,
+          updatedAt: Date.now()
+        });
+      } catch (err) {
+        alert('Failed to update delivery status: ' + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
